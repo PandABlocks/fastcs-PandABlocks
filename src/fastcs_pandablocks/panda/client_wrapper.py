@@ -14,39 +14,12 @@ from pandablocks.commands import (
     GetFieldInfo,
 )
 from pandablocks.responses import (
-    BitMuxFieldInfo,
-    BitOutFieldInfo,
     BlockInfo,
     Changes,
-    EnumFieldInfo,
-    ExtOutBitsFieldInfo,
-    ExtOutFieldInfo,
-    FieldInfo,
-    PosMuxFieldInfo,
-    PosOutFieldInfo,
-    ScalarFieldInfo,
-    SubtypeTimeFieldInfo,
-    TableFieldInfo,
-    TimeFieldInfo,
-    UintFieldInfo,
 )
-from typing import Union
 
-ResponseType = Union[
-    BitMuxFieldInfo,
-    BitOutFieldInfo,
-    EnumFieldInfo,
-    ExtOutBitsFieldInfo,
-    ExtOutFieldInfo,
-    FieldInfo,
-    PosMuxFieldInfo,
-    PosOutFieldInfo,
-    ScalarFieldInfo,
-    SubtypeTimeFieldInfo,
-    TableFieldInfo,
-    TimeFieldInfo,
-    UintFieldInfo, 
-]
+from fastcs_pandablocks.types import ResponseType
+
 
 class RawPanda:
     _blocks: dict[str, BlockInfo] | None = None
@@ -96,4 +69,3 @@ class RawPanda:
     async def __anext__(self):
         await self._ensure_connected()
         return await self.get_changes()
-

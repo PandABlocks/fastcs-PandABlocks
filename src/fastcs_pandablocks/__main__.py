@@ -2,8 +2,11 @@
 
 import argparse
 import logging
+import asyncio
 
-from fastcs_pandablocks.fastcs import ioc
+#from fastcs_pandablocks.fastcs import ioc
+from fastcs_pandablocks.panda.panda import Panda
+
 
 from . import __version__
 
@@ -49,12 +52,19 @@ def main():
     level = getattr(logging, parsed_args.log_level.upper(), None)
     logging.basicConfig(format="%(levelname)s:%(message)s", level=level)
 
+    async def meh():
+        await Panda(parsed_args.host).connect()
+    asyncio.run(meh())
+    
+
+    """
     ioc(
         parsed_args.host,
         parsed_args.prefix,
         parsed_args.screens_dir,
         parsed_args.clear_bobfiles,
     )
+    """
 
 
 if __name__ == "__main__":

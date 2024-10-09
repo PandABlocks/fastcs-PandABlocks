@@ -12,7 +12,13 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
 ]
 description = "A softioc to control a PandABlocks-FPGA."
-dependencies = [] # Add project dependencies here, e.g. ["click", "numpy"]
+dependencies = [
+    "fastcs~=0.6.0",
+    "pandablocks~=0.10.0",
+    "numpy<2",    # until https://github.com/mdavidsaver/p4p/issues/145 is fixed
+    "pydantic>2",
+    "h5py",
+] 
 dynamic = ["version"]
 license.file = "LICENSE"
 readme = "README.md"
@@ -37,7 +43,7 @@ dev = [
 ]
 
 [project.scripts]
-fastcs-PandABlocks = "fastcs_pandablocks.__main__:main"
+fastcs-pandablocks = "fastcs_pandablocks.__main__:main"
 
 [project.urls]
 GitHub = "https://github.com/PandABlocks-ioc/fastcs-PandABlocks"

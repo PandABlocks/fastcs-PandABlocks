@@ -1,142 +1,146 @@
 import itertools
 from pprint import pprint
 from typing import Type
-from fastcs_pandablocks.types import EpicsName, ResponseType
+from fastcs_pandablocks.types import EpicsName, PandaName, ResponseType
+
+panda_name_to_field = {}
 
 class Field:
-        def __init__(self, name: EpicsName, field_info: ResponseType):
-                self.name = name
-                self.field_info = field_info
+    def __init__(self, epics_name: EpicsName, panda_name: PandaName, field_info: ResponseType):
+        self.epics_name = epics_name
+        self.panda_name = panda_name
+        self.field_info = field_info
+        self.value = None
+        panda_name_to_field[panda_name] = self
 
-def change_value(self, new_field_value):
-        print("setting value", new_field_value)
-        self.value = new_field_value
+    def update_value(self, value):
+        self.value = value
 
 class TableField(Field):
-        ...
+    ...
 
 class TimeField(Field):
-        ...
+    ...
 
 class BitOutField(Field):
-        ...
+    ...
 
 class PosOutField(Field):
-        ...
+    ...
 
 class ExtOutField(Field):
-        ...
+    ...
 
 class ExtOutBitsField(ExtOutField):
-        ...
+    ...
 
 class BitMuxField(Field):
-        ...
+    ...
 
 class PosMuxField(Field):
-        ...
+    ...
 
 class UintParamField(Field):
-        ...
+    ...
 
 class UintReadField(Field):
-        ...
+    ...
 
 class UintWriteField(Field):
-        ...
+    ...
 
 class IntParamField(Field):
-        ...
+    ...
 
 class IntReadField(Field):
-        ...
+    ...
 
 class IntWriteField(Field):
-        ...
+    ...
 
 class ScalarParamField(Field):
-        ...
+    ...
 
 class ScalarReadField(Field):
-        ...
+    ...
 
 class ScalarWriteField(Field):
-        ...
+    ...
 
 class BitParamField(Field):
-        ...
-
-class BitWriteField(Field):
-        ...
+    ...
 
 class BitReadField(Field):
-        ...
+    ...
 
-class ActionWriteField(Field):
-        ...
+class BitWriteField(Field):
+    ...
 
 class ActionReadField(Field):
-        ...
+    ...
+
+class ActionWriteField(Field):
+    ...
 
 class LutParamField(Field):
-        ...
-
-class LutWriteField(Field):
-        ...
+    ...
 
 class LutReadField(Field):
-        ...
+    ...
+
+class LutWriteField(Field):
+    ...
 
 class EnumParamField(Field):
-        ...
-
-class EnumWriteField(Field):
-        ...
+    ...
 
 class EnumReadField(Field):
-        ...
+    ...
 
-class TimeSubTypeParamField(Field):
-        ...
+class EnumWriteField(Field):
+    ...
 
-class TimeSubTypeReadField(Field):
-        ...
+class TimeSubTypeParamField(TimeField):
+    ...
 
-class TimeSubTypeWriteField(Field):
-        ...
+class TimeSubTypeReadField(TimeField):
+    ...
+
+class TimeSubTypeWriteField(TimeField):
+    ...
 
 FieldType = (
-    TableField
-    | BitParamField
-    | BitWriteField
-    | BitReadField
-    | ActionWriteField
-    | ActionReadField
-    | LutParamField
-    | LutWriteField
-    | LutReadField
-    | EnumParamField
-    | EnumWriteField
-    | EnumReadField
-    | TimeSubTypeParamField
-    | TimeSubTypeReadField
-    | TimeSubTypeWriteField
-    | TimeField
-    | BitOutField
-    | PosOutField
-    | ExtOutField
-    | ExtOutBitsField
-    | BitMuxField
-    | PosMuxField
-    | UintParamField
-    | UintReadField
-    | UintWriteField
-    | IntParamField
-    | IntReadField
-    | IntWriteField
-    | ScalarParamField
-    | ScalarReadField
-    | ScalarWriteField
+    TableField |
+    TimeField |
+    BitOutField |
+    PosOutField |
+    ExtOutField |
+    ExtOutBitsField |
+    BitMuxField |
+    PosMuxField |
+    UintParamField |
+    UintReadField |
+    UintWriteField |
+    IntParamField |
+    IntReadField |
+    IntWriteField |
+    ScalarParamField |
+    ScalarReadField |
+    ScalarWriteField |
+    BitParamField |
+    BitReadField |
+    BitWriteField |
+    ActionReadField |
+    ActionWriteField |
+    LutParamField |
+    LutReadField |
+    LutWriteField |
+    EnumParamField |
+    EnumReadField |
+    EnumWriteField |
+    TimeSubTypeParamField |
+    TimeSubTypeReadField |
+    TimeSubTypeWriteField
 )
 
 FIELD_TYPE_TO_FASTCS_TYPE: dict[str, dict[str | None, Type[FieldType]]] = {
@@ -198,30 +202,38 @@ FIELD_TYPE_TO_FASTCS_TYPE: dict[str, dict[str | None, Type[FieldType]]] = {
     },
 }
 
-
 class Block:
-    _sub_blocks: dict[int, dict[EpicsName, FieldType]]
+    _fields: dict[int | None, dict[str, FieldType]]
 
-    def __init__(self, name: EpicsName, number: int, description: str | None, raw_fields: dict[str, ResponseType]):
-        self.name = name
+    def __init__(
+        self,
+        epics_name: EpicsName,
+        number: int,
+        description: str | None,
+        raw_fields: dict[str, ResponseType]
+    ):
+        self.epics_name = epics_name
         self.number = number
         self.description = description
-        self._sub_blocks = {}
+        self._fields = {}
 
         for number in range(1, number + 1):
-            numbered_block = name + EpicsName(str(number))
-            single_block = self._sub_blocks[number] = {}
+            numbered_block_name = epics_name + EpicsName(block_number=number)
+            self._fields[number] = {}
 
-            for field_suffix, field_info in (
+            for field_raw_name, field_info in (
                 raw_fields.items()
             ):
-                field_name = (
-                       numbered_block + EpicsName(field_suffix)
+                field_epics_name_without_block = field_panda_name.to_epics_name()
+                print("part", field_epics_name_without_block)
+                field_epics_name = (
+                    numbered_block_name + field_epics_name_without_block
                 )
-                single_block[EpicsName(field_suffix)] = (
-                    FIELD_TYPE_TO_FASTCS_TYPE[field_info.type][field_info.subtype](
-                        field_name, field_info
-                    )
+                print("WHOE", field_epics_name)
+                field = FIELD_TYPE_TO_FASTCS_TYPE[field_info.type][field_info.subtype](
+                    field_epics_name, field_panda_name, field_info
                 )
-    def change_value(self, new_field_value, block_number, field_name):
-        self._sub_blocks[block_number][field_name].change_value(new_field_value)
+                self._fields[number][field_name] = field
+
+    def update_value(self, number: int | None, field_name: str, value):
+        self._fields[number][field_name].update_value(value)

@@ -12,9 +12,9 @@ classifiers = [
 ]
 description = "A softioc to control a PandABlocks-FPGA."
 dependencies = [
-    "fastcs~=0.6.0",
+    "fastcs~=0.7.0",
     "pandablocks~=0.10.0",
-    "numpy<2",    # until https://github.com/mdavidsaver/p4p/issues/145 is fixed
+    "numpy<3",    # until https://github.com/mdavidsaver/p4p/issues/145 is fixed
     "pydantic>2",
     "h5py",
 ] 

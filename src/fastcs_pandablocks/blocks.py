@@ -1,9 +1,7 @@
 from pandablocks.responses import BlockInfo
 
-from fastcs_pandablocks.types.string_types import EpicsName, PandaName
-
 from .block import Block
-from .types import ResponseType
+from .types import ResponseType, EpicsName, PandaName
 
 
 class Blocks:

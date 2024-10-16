@@ -2,48 +2,37 @@
 
 from pathlib import Path
 
-from fastcs.backends.epics.backend import EpicsBackend
-from fastcs.backends.epics.gui import EpicsGUIFormat
+from fastcs import FastCS
+from fastcs.launch import EpicsPVAOptions
+from fastcs.transport import EpicsGUIOptions, EpicsIOCOptions
 
 from ._version import __version__
-from .gui import PandaGUIOptions
-from .panda.controller import PandaController
-from .types import EpicsName
+from .panda.panda_controller import PandaController
 
 DEFAULT_POLL_PERIOD = 0.1
 
 
 def ioc(
-    prefix: EpicsName,
+    pv_prefix: str,
     hostname: str,
     screens_directory: Path | None = None,
     poll_period: float = DEFAULT_POLL_PERIOD,
-    clear_bobfiles: bool = False,
 ):
-    controller = PandaController(hostname, poll_period)
-    backend = EpicsBackend(controller, pv_prefix=str(prefix))
-
-    if clear_bobfiles and not screens_directory:
-        raise ValueError("`clear_bobfiles` is True with no `screens_directory`")
-
+    p4p_ioc_options = EpicsPVAOptions(ioc=EpicsIOCOptions(pv_prefix=pv_prefix))
     if screens_directory:
         if not screens_directory.is_dir():
             raise ValueError(
                 f"`screens_directory` {screens_directory} is not a directory"
             )
-        if not clear_bobfiles:
-            if list(screens_directory.iterdir()):
-                raise RuntimeError("`screens_directory` is not empty.")
 
-        backend.create_gui(
-            PandaGUIOptions(
-                output_path=screens_directory / "output.bob",
-                file_format=EpicsGUIFormat.bob,
-                title="PandA",
-            )
+        gui_options = EpicsGUIOptions(
+            output_path=screens_directory / "out.bob", title=pv_prefix
         )
+        p4p_ioc_options.gui = gui_options
 
-    backend.run()
+    controller = PandaController(hostname, poll_period)
+    transport = FastCS(controller, [p4p_ioc_options])
+    transport.run()
 
 
 __all__ = ["__version__", "ioc", "DEFAULT_POLL_PERIOD"]

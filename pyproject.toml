@@ -5,19 +5,19 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "fastcs-pandablocks"
 classifiers = [
-    "Development Status :: 3 - Alpha",
-    "License :: OSI Approved :: Apache Software License",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
+  "Development Status :: 3 - Alpha",
+  "License :: OSI Approved :: Apache Software License",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
 ]
 description = "A softioc to control a PandABlocks-FPGA."
 dependencies = [
-    "fastcs~=0.6.0",
-    "pandablocks~=0.10.0",
-    "numpy<2",    # until https://github.com/mdavidsaver/p4p/issues/145 is fixed
-    "pydantic>2",
-    "h5py",
-] 
+  "fastcs@git+https://github.com/DiamondLightSource/FastCS@127-allow-multiple-update-callbacks",
+  "pandablocks~=0.10.0",
+  "numpy<2",                                                                                     # until https://github.com/mdavidsaver/p4p/issues/145 is fixed
+  "pydantic>2",
+  "h5py",
+]
 dynamic = ["version"]
 license.file = "LICENSE"
 readme = "README.md"
@@ -25,20 +25,20 @@ requires-python = ">=3.11"
 
 [project.optional-dependencies]
 dev = [
-    "copier",
-    "myst-parser",
-    "pipdeptree",
-    "pre-commit",
-    "pydata-sphinx-theme>=0.12",
-    "pyright",
-    "pytest",
-    "pytest-cov",
-    "ruff",
-    "sphinx-autobuild",
-    "sphinx-copybutton",
-    "sphinx-design",
-    "tox-direct",
-    "types-mock",
+  "copier",
+  "myst-parser",
+  "pipdeptree",
+  "pre-commit",
+  "pydata-sphinx-theme>=0.12",
+  "pyright",
+  "pytest",
+  "pytest-cov",
+  "ruff",
+  "sphinx-autobuild",
+  "sphinx-copybutton",
+  "sphinx-design",
+  "tox-direct",
+  "types-mock",
 ]
 
 [project.scripts]
@@ -57,7 +57,7 @@ version_file = "src/fastcs_pandablocks/_version.py"
 
 [tool.pyright]
 typeCheckingMode = "standard"
-reportMissingImports = false # Ignore missing stubs in imported modules
+reportMissingImports = false  # Ignore missing stubs in imported modules
 
 [tool.pytest.ini_options]
 # Run pytest with all our checkers, and don't spam us with massive tracebacks on error
@@ -104,14 +104,14 @@ commands =
 src = ["src", "tests"]
 line-length = 88
 lint.select = [
-    "B",   # flake8-bugbear - https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
-    "C4",  # flake8-comprehensions - https://docs.astral.sh/ruff/rules/#flake8-comprehensions-c4
-    "E",   # pycodestyle errors - https://docs.astral.sh/ruff/rules/#error-e
-    "F",   # pyflakes rules - https://docs.astral.sh/ruff/rules/#pyflakes-f
-    "W",   # pycodestyle warnings - https://docs.astral.sh/ruff/rules/#warning-w
-    "I",   # isort - https://docs.astral.sh/ruff/rules/#isort-i
-    "UP",  # pyupgrade - https://docs.astral.sh/ruff/rules/#pyupgrade-up
-    "SLF", # self - https://docs.astral.sh/ruff/settings/#lintflake8-self
+  "B",   # flake8-bugbear - https://docs.astral.sh/ruff/rules/#flake8-bugbear-b
+  "C4",  # flake8-comprehensions - https://docs.astral.sh/ruff/rules/#flake8-comprehensions-c4
+  "E",   # pycodestyle errors - https://docs.astral.sh/ruff/rules/#error-e
+  "F",   # pyflakes rules - https://docs.astral.sh/ruff/rules/#pyflakes-f
+  "W",   # pycodestyle warnings - https://docs.astral.sh/ruff/rules/#warning-w
+  "I",   # isort - https://docs.astral.sh/ruff/rules/#isort-i
+  "UP",  # pyupgrade - https://docs.astral.sh/ruff/rules/#pyupgrade-up
+  "SLF", # self - https://docs.astral.sh/ruff/settings/#lintflake8-self
 ]
 
 [tool.ruff.lint.per-file-ignores]
@@ -119,3 +119,6 @@ lint.select = [
 # See https://github.com/DiamondLightSource/python-copier-template/issues/154
 # Remove this line to forbid private member access in tests
 "tests/**/*" = ["SLF001"]
+# Ruff wants us to use `(|)` instead of `Union[,]` in types, but pyright warns against
+# it. For now we'll use `Union` and turn the ruff error off.
+"**" = ["UP007"]

@@ -1,15 +1,32 @@
-from .annotations import ResponseType
-from .string_types import (
-    EPICS_SEPERATOR,
-    PANDA_SEPERATOR,
-    EpicsName,
+from enum import Enum
+
+from ._annotations import (
+    RawBlocksType,
+    RawFieldsType,
+    RawInitialValuesType,
+    ResponseType,
+)
+from ._string_types import (
+    PANDA_SEPARATOR,
     PandaName,
 )
 
+
+class WidgetGroup(Enum):
+    NONE = None
+    PARAMETERS = "Parameters"
+    OUTPUTS = "Outputs"
+    INPUTS = "Inputs"
+    READBACKS = "Readbacks"
+    CAPTURE = "Capture"
+
+
 __all__ = [
-    "EPICS_SEPERATOR",
-    "EpicsName",
-    "PANDA_SEPERATOR",
+    "PANDA_SEPARATOR",
     "PandaName",
     "ResponseType",
+    "RawBlocksType",
+    "RawFieldsType",
+    "RawInitialValuesType",
+    "WidgetGroup",
 ]

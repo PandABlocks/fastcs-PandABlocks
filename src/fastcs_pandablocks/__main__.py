@@ -5,7 +5,6 @@ import logging
 from pathlib import Path
 
 from fastcs_pandablocks import DEFAULT_POLL_PERIOD, ioc
-from fastcs_pandablocks.types import EpicsName
 
 from . import __version__
 
@@ -38,14 +37,6 @@ def main():
             "directory is provided then bobfiles will not be generated."
         ),
     )
-    run_parser.add_argument(
-        "--clear-bobfiles",
-        action="store_true",
-        help=(
-            "Overwrite existing bobfiles from the given `screens-dir` "
-            "before generating new ones."
-        ),
-    )
 
     run_parser.add_argument(
         "--log-level",
@@ -57,7 +48,7 @@ def main():
         "--poll-period",
         default=DEFAULT_POLL_PERIOD,
         type=float,
-        help="Period to poll",
+        help="Period in seconds with which to poll the panda.",
     )
 
     parsed_args = parser.parse_args()
@@ -68,12 +59,15 @@ def main():
     level = getattr(logging, parsed_args.log_level.upper(), None)
     logging.basicConfig(format="%(levelname)s:%(message)s", level=level)
 
+    screens_directory = (
+        Path(parsed_args.screens_dir) if parsed_args.screens_dir else None
+    )
+
     ioc(
-        EpicsName(prefix=parsed_args.prefix),
+        parsed_args.prefix,
         parsed_args.hostname,
-        screens_directory=Path(parsed_args.screens_dir),
+        screens_directory=screens_directory,
         poll_period=parsed_args.poll_period,
-        clear_bobfiles=parsed_args.clear_bobfiles,
     )
 
 

@@ -4,6 +4,7 @@ from pathlib import Path
 
 from fastcs.backends.epics.backend import EpicsBackend
 from fastcs.backends.epics.gui import EpicsGUIFormat
+from fastcs.backends.epics.ioc import EpicsIOCOptions, PvNamingConvention
 
 from ._version import __version__
 from .gui import PandaGUIOptions
@@ -21,7 +22,10 @@ def ioc(
     clear_bobfiles: bool = False,
 ):
     controller = PandaController(hostname, poll_period)
-    backend = EpicsBackend(controller, pv_prefix=str(prefix))
+    epics_ioc_options = EpicsIOCOptions(
+        terminal=True, pv_naming_convention=PvNamingConvention.CAPITALIZED
+    )
+    backend = EpicsBackend(controller, pv_prefix=str(prefix), options=epics_ioc_options)
 
     if clear_bobfiles and not screens_directory:
         raise ValueError("`clear_bobfiles` is True with no `screens_directory`")

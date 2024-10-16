@@ -12,7 +12,7 @@ classifiers = [
 ]
 description = "A softioc to control a PandABlocks-FPGA."
 dependencies = [
-    "fastcs~=0.6.0",
+    "fastcs@git+https://github.com/DiamondLightSource/FastCS@panda-conversion-improvements",
     "pandablocks~=0.10.0",
     "numpy<2",    # until https://github.com/mdavidsaver/p4p/issues/145 is fixed
     "pydantic>2",

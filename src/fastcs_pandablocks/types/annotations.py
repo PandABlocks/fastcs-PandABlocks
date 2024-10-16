@@ -1,3 +1,4 @@
+from fastcs.attributes import AttrR, AttrRW, AttrW
 from pandablocks.responses import (
     BitMuxFieldInfo,
     BitOutFieldInfo,
@@ -29,3 +30,5 @@ ResponseType = (
     | TimeFieldInfo
     | UintFieldInfo
 )
+
+AttrType = AttrRW | AttrR | AttrW

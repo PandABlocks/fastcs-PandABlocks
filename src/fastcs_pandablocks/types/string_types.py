@@ -37,7 +37,24 @@ def _format_with_seperator(
 
 
 def _to_python_attribute_name(string: str):
-    return string.replace("-", "_").lower()
+    return string.replace("-", "_")
+
+
+def _choose_sub_pv(sub_pv_1: T, sub_pv_2: T) -> T:
+    if sub_pv_1 is not None and sub_pv_2 is not None:
+        if sub_pv_1 != sub_pv_2:
+            raise TypeError(
+                "Ambiguous pv elements on add " f"{sub_pv_1} and {sub_pv_2}"
+            )
+    return sub_pv_2 or sub_pv_1
+
+
+def _check_eq(sub_pv_1: T, sub_pv_2: T) -> bool:
+    if sub_pv_1 is not None and sub_pv_2 is not None:
+        return sub_pv_1 == sub_pv_2
+    elif sub_pv_1 and sub_pv_2 is None:
+        return False
+    return True
 
 
 @dataclass(frozen=True)
@@ -77,6 +94,14 @@ class PandaName:
             sub_field=self.sub_field,
         )
 
+    def __add__(self, other: PandaName) -> PandaName:
+        return PandaName(
+            block=_choose_sub_pv(self.block, other.block),
+            block_number=_choose_sub_pv(self.block_number, other.block_number),
+            field=_choose_sub_pv(self.field, other.field),
+            sub_field=_choose_sub_pv(self.sub_field, other.sub_field),
+        )
+
     @cached_property
     def attribute_name(self) -> str:
         if self.sub_field:
@@ -85,7 +110,7 @@ class PandaName:
             return _to_python_attribute_name(self.field)
         if self.block:
             return _to_python_attribute_name(self.block) + (
-                f"_{self.block_number}" if self.block_number is not None else ""
+                f"{self.block_number}" if self.block_number is not None else ""
             )
         return ""
 
@@ -150,15 +175,6 @@ class EpicsName:
         == EpicsName.from_string("PREFIX:BLOCK:FIELD")
         """
 
-        def _choose_sub_pv(sub_pv_1: T, sub_pv_2: T) -> T:
-            if sub_pv_1 is not None and sub_pv_2 is not None:
-                if sub_pv_1 != sub_pv_2:
-                    raise TypeError(
-                        "Ambiguous pv elements on `EpicsName` add "
-                        f"{sub_pv_1} and {sub_pv_2}"
-                    )
-            return sub_pv_2 or sub_pv_1
-
         return EpicsName(
             prefix=_choose_sub_pv(self.prefix, other.prefix),
             block=_choose_sub_pv(self.block, other.block),
@@ -176,13 +192,6 @@ class EpicsName:
         (EpicsName(block="field1") in EpicsName("prefix:block1:field1")) == True
         (EpicsName(block="field1") in EpicsName("prefix:block1:field2")) == False
         """
-
-        def _check_eq(sub_pv_1: T, sub_pv_2: T) -> bool:
-            if sub_pv_1 is not None and sub_pv_2 is not None:
-                return sub_pv_1 == sub_pv_2
-            elif sub_pv_1 and sub_pv_2 is None:
-                return False
-            return True
 
         return (
             _check_eq(self.prefix, other.prefix)

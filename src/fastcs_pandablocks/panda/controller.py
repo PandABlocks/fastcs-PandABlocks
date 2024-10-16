@@ -3,7 +3,6 @@ import asyncio
 from fastcs.controller import Controller
 from fastcs.wrappers import scan
 
-from fastcs_pandablocks import DEFAULT_POLL_PERIOD
 from fastcs_pandablocks.types import PandaName
 
 from .blocks import Blocks
@@ -12,16 +11,16 @@ from .client_wrapper import RawPanda
 
 class PandaController(Controller):
     def __init__(self, hostname: str, poll_period: float) -> None:
-        super().__init__()
         self._raw_panda = RawPanda(hostname)
         self._blocks = Blocks()
+        self.is_connected = False
 
-        # TODO https://github.com/DiamondLightSource/FastCS/issues/62
-        #self.fastcs_method = Scan(self.update(), poll_period)
-
-    async def initialise(self) -> None: ...
+        super().__init__()
 
     async def connect(self) -> None:
+        if self.is_connected:
+            return
+
         await self._raw_panda.connect()
 
         assert self._raw_panda.blocks
@@ -32,7 +31,17 @@ class PandaController(Controller):
         for attr_name, controller in self._blocks.flattened_attribute_tree():
             self.register_sub_controller(attr_name, controller)
 
-    @scan(DEFAULT_POLL_PERIOD) # TODO https://github.com/DiamondLightSource/FastCS/issues/62
+        self.is_connected = True
+
+    async def initialise(self) -> None:
+        """
+        We connect in initialise since FastCS doesn't connect until
+        it's already parsed sub controllers.
+        """
+        await self.connect()
+
+    # TODO https://github.com/DiamondLightSource/FastCS/issues/62
+    @scan(0.1)
     async def update(self):
         await self._raw_panda.get_changes()
         assert self._raw_panda.changes

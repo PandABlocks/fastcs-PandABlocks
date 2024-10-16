@@ -4,7 +4,7 @@ import argparse
 import logging
 from pathlib import Path
 
-from fastcs_pandablocks import ioc
+from fastcs_pandablocks import DEFAULT_POLL_PERIOD, ioc
 from fastcs_pandablocks.types import EpicsName
 
 from . import __version__
@@ -41,7 +41,10 @@ def main():
     run_parser.add_argument(
         "--clear-bobfiles",
         action="store_true",
-        help="Clear bobfiles from the given `screens-dir` before generating new ones.",
+        help=(
+            "Overwrite existing bobfiles from the given `screens-dir` "
+            "before generating new ones."
+        ),
     )
 
     run_parser.add_argument(
@@ -49,6 +52,12 @@ def main():
         default="INFO",
         choices=["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"],
         help="Set the logging level.",
+    )
+    run_parser.add_argument(
+        "--poll-period",
+        default=DEFAULT_POLL_PERIOD,
+        type=float,
+        help="Period to poll",
     )
 
     parsed_args = parser.parse_args()
@@ -62,8 +71,9 @@ def main():
     ioc(
         EpicsName(prefix=parsed_args.prefix),
         parsed_args.hostname,
-        Path(parsed_args.screens_dir),
-        parsed_args.clear_bobfiles,
+        screens_directory=Path(parsed_args.screens_dir),
+        poll_period=parsed_args.poll_period,
+        clear_bobfiles=parsed_args.clear_bobfiles,
     )
 
 

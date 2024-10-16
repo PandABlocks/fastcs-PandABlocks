@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
+from functools import cached_property
 from typing import TypeVar
 
 T = TypeVar("T")
@@ -35,35 +36,25 @@ def _format_with_seperator(
     return result.lstrip(seperator)
 
 
+def _to_python_attribute_name(string: str):
+    return string.replace("-", "_").lower()
+
+
 @dataclass(frozen=True)
-class _Name:
-    _name: str
+class PandaName:
+    block: str | None = None
+    block_number: int | None = None
+    field: str | None = None
+    sub_field: str | None = None
 
-    def __str__(self):
-        return str(self._name)
-
-    def __repr__(self):
-        return str(self)
-
-
-class PandaName(_Name):
-    def __init__(
-        self,
-        block: str | None = None,
-        block_number: int | None = None,
-        field: str | None = None,
-        sub_field: str | None = None,
-    ):
-        self.block = block
-        self.block_number = block_number
-        self.field = field
-        self.sub_field = sub_field
-
-        super().__init__(
-            _format_with_seperator(
-                PANDA_SEPERATOR, (block, block_number), field, sub_field
-            )
+    @cached_property
+    def _string_form(self) -> str:
+        return _format_with_seperator(
+            PANDA_SEPERATOR, (self.block, self.block_number), self.field, self.sub_field
         )
+
+    def __str__(self) -> str:
+        return self._string_form
 
     @classmethod
     def from_string(cls, name: str):
@@ -77,7 +68,8 @@ class PandaName(_Name):
             block=block, block_number=block_number, field=field, sub_field=sub_field
         )
 
-    def to_epics_name(self):
+    @cached_property
+    def epics_name(self):
         return EpicsName(
             block=self.block,
             block_number=self.block_number,
@@ -85,30 +77,39 @@ class PandaName(_Name):
             sub_field=self.sub_field,
         )
 
-
-class EpicsName(_Name):
-    def __init__(
-        self,
-        *,
-        prefix: str | None = None,
-        block: str | None = None,
-        block_number: int | None = None,
-        field: str | None = None,
-        sub_field: str | None = None,
-    ):
-        assert block_number != 0
-
-        self.prefix = prefix
-        self.block = block
-        self.block_number = block_number
-        self.field = field
-        self.sub_field = sub_field
-
-        super().__init__(
-            _format_with_seperator(
-                EPICS_SEPERATOR, prefix, (block, block_number), field
+    @cached_property
+    def attribute_name(self) -> str:
+        if self.sub_field:
+            return _to_python_attribute_name(self.sub_field)
+        if self.field:
+            return _to_python_attribute_name(self.field)
+        if self.block:
+            return _to_python_attribute_name(self.block) + (
+                f"_{self.block_number}" if self.block_number is not None else ""
             )
+        return ""
+
+
+@dataclass(frozen=True)
+class EpicsName:
+    prefix: str | None = None
+    block: str | None = None
+    block_number: int | None = None
+    field: str | None = None
+    sub_field: str | None = None
+
+    @cached_property
+    def _string_form(self) -> str:
+        return _format_with_seperator(
+            EPICS_SEPERATOR,
+            self.prefix,
+            (self.block, self.block_number),
+            self.field,
+            self.sub_field,
         )
+
+    def __str__(self) -> str:
+        return self._string_form
 
     @classmethod
     def from_string(cls, name: str) -> EpicsName:
@@ -132,24 +133,14 @@ class EpicsName(_Name):
             sub_field=sub_field,
         )
 
-    def to_panda_name(self) -> PandaName:
+    @cached_property
+    def panda_name(self) -> PandaName:
         return PandaName(
             block=self.block,
             block_number=self.block_number,
             field=self.field,
             sub_field=self.sub_field,
         )
-
-    def to_pvi_name(self) -> PviName:
-        assert self.field
-        words = self.field.replace("-", "_").split("_")
-        capitalised_word = "".join(word.capitalize() for word in words)
-
-        # We don't want to allow any non-alphanumeric characters.
-        formatted_word = re.search(r"[A-Za-z0-9]+", capitalised_word)
-        assert formatted_word
-
-        return PviName(formatted_word.group())
 
     def __add__(self, other: EpicsName) -> EpicsName:
         """
@@ -189,6 +180,8 @@ class EpicsName(_Name):
         def _check_eq(sub_pv_1: T, sub_pv_2: T) -> bool:
             if sub_pv_1 is not None and sub_pv_2 is not None:
                 return sub_pv_1 == sub_pv_2
+            elif sub_pv_1 and sub_pv_2 is None:
+                return False
             return True
 
         return (
@@ -198,7 +191,3 @@ class EpicsName(_Name):
             and _check_eq(self.field, other.field)
             and _check_eq(self.sub_field, other.sub_field)
         )
-
-
-class PviName(_Name):
-    pass

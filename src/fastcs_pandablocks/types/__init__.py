@@ -4,7 +4,6 @@ from .string_types import (
     PANDA_SEPERATOR,
     EpicsName,
     PandaName,
-    PviName,
 )
 
 __all__ = [
@@ -12,6 +11,5 @@ __all__ = [
     "EpicsName",
     "PANDA_SEPERATOR",
     "PandaName",
-    "PviName",
     "ResponseType",
 ]

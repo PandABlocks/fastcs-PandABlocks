@@ -2,12 +2,10 @@ from typing import Any
 
 from fastcs.attributes import AttrW, Sender
 
-from fastcs_pandablocks.types.string_types import PandaName
-
-# from fastcs_pandablocks.controller import PandaController
+from fastcs_pandablocks.types import PandaName
 
 
-class FieldSender(Sender):
+class DefaultFieldSender(Sender):
     def __init__(self, panda_name: PandaName):
         self.panda_name = panda_name
 

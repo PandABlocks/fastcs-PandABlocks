@@ -6,20 +6,21 @@ from fastcs.backends.epics.backend import EpicsBackend
 from fastcs.backends.epics.gui import EpicsGUIFormat
 
 from ._version import __version__
-from .controller import PandaController
 from .gui import PandaGUIOptions
+from .panda.controller import PandaController
 from .types import EpicsName
 
-__all__ = ["__version__"]
+DEFAULT_POLL_PERIOD = 0.1
 
 
 def ioc(
     prefix: EpicsName,
     hostname: str,
-    screens_directory: Path | None,
+    screens_directory: Path | None = None,
+    poll_period: float = DEFAULT_POLL_PERIOD,
     clear_bobfiles: bool = False,
 ):
-    controller = PandaController(prefix, hostname)
+    controller = PandaController(hostname, poll_period)
     backend = EpicsBackend(controller, pv_prefix=str(prefix))
 
     if clear_bobfiles and not screens_directory:
@@ -43,3 +44,6 @@ def ioc(
         )
 
     backend.run()
+
+
+__all__ = ["__version__", "ioc", "DEFAULT_POLL_PERIOD"]

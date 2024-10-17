@@ -7,8 +7,8 @@ from typing import TypeVar
 
 T = TypeVar("T")
 
-EPICS_SEPERATOR = ":"
-PANDA_SEPERATOR = "."
+EPICS_SEPARATOR = ":"
+PANDA_SEPARATOR = "."
 
 
 def _extract_number_at_of_string(string: str) -> tuple[str, int | None]:
@@ -19,25 +19,25 @@ def _extract_number_at_of_string(string: str) -> tuple[str, int | None]:
     return string, None
 
 
-def _format_with_seperator(
-    seperator: str, *sections: tuple[str | None, int | None] | str | None
+def _format_with_separator(
+    separator: str, *sections: tuple[str | None, int | None] | str | None
 ) -> str:
     result = ""
     for section in sections:
         if isinstance(section, tuple):
             section_string, section_number = section
             if section_string is not None:
-                result += f"{seperator}{section_string}"
+                result += f"{separator}{section_string}"
             if section_number is not None:
                 result += f"{section_number}"
         elif section is not None:
-            result += f"{seperator}{section}"
+            result += f"{separator}{section}"
 
-    return result.lstrip(seperator)
+    return result.lstrip(separator)
 
 
 def _to_python_attribute_name(string: str):
-    return string.replace("-", "_")
+    return string.replace("-", "_").lower()
 
 
 def _choose_sub_pv(sub_pv_1: T, sub_pv_2: T) -> T:
@@ -66,8 +66,8 @@ class PandaName:
 
     @cached_property
     def _string_form(self) -> str:
-        return _format_with_seperator(
-            PANDA_SEPERATOR, (self.block, self.block_number), self.field, self.sub_field
+        return _format_with_separator(
+            PANDA_SEPARATOR, (self.block, self.block_number), self.field, self.sub_field
         )
 
     def __str__(self) -> str:
@@ -75,7 +75,7 @@ class PandaName:
 
     @classmethod
     def from_string(cls, name: str):
-        split_name = name.split(PANDA_SEPERATOR)
+        split_name = name.split(PANDA_SEPARATOR)
 
         block, block_number = _extract_number_at_of_string(split_name[0])
         field = split_name[1]
@@ -125,8 +125,8 @@ class EpicsName:
 
     @cached_property
     def _string_form(self) -> str:
-        return _format_with_seperator(
-            EPICS_SEPERATOR,
+        return _format_with_separator(
+            EPICS_SEPARATOR,
             self.prefix,
             (self.block, self.block_number),
             self.field,
@@ -139,13 +139,13 @@ class EpicsName:
     @classmethod
     def from_string(cls, name: str) -> EpicsName:
         """Converts a string to an EPICS name, must contain a prefix."""
-        split_name = name.split(EPICS_SEPERATOR)
+        split_name = name.split(EPICS_SEPARATOR)
         if len(split_name) < 3:
             raise ValueError(
                 f"Received a a pv string `{name}` which isn't of the form "
                 "`PREFIX:BLOCK:FIELD` or `PREFIX:BLOCK:FIELD:SUB_FIELD`."
             )
-        split_name = name.split(EPICS_SEPERATOR)
+        split_name = name.split(EPICS_SEPARATOR)
         prefix, block_with_number, field = split_name[:3]
         block, block_number = _extract_number_at_of_string(block_with_number)
         sub_field = split_name[3] if len(split_name) == 4 else None

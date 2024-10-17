@@ -1,15 +1,15 @@
 from .annotations import AttrType, ResponseType
 from .string_types import (
-    EPICS_SEPERATOR,
-    PANDA_SEPERATOR,
+    EPICS_SEPARATOR,
+    PANDA_SEPARATOR,
     EpicsName,
     PandaName,
 )
 
 __all__ = [
-    "EPICS_SEPERATOR",
+    "EPICS_SEPARATOR",
     "EpicsName",
-    "PANDA_SEPERATOR",
+    "PANDA_SEPARATOR",
     "PandaName",
     "AttrType",
     "ResponseType",

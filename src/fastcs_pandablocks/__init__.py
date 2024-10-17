@@ -4,7 +4,8 @@ from pathlib import Path
 
 from fastcs.backends.epics.backend import EpicsBackend
 from fastcs.backends.epics.gui import EpicsGUIFormat
-from fastcs.backends.epics.ioc import EpicsIOCOptions, PvNamingConvention
+from fastcs.backends.epics.ioc import EpicsIOCOptions
+from fastcs.backends.epics.util import EpicsNameOptions, PvNamingConvention
 
 from ._version import __version__
 from .gui import PandaGUIOptions
@@ -15,17 +16,23 @@ DEFAULT_POLL_PERIOD = 0.1
 
 
 def ioc(
-    prefix: EpicsName,
+    epics_prefix: EpicsName,
     hostname: str,
     screens_directory: Path | None = None,
-    poll_period: float = DEFAULT_POLL_PERIOD,
     clear_bobfiles: bool = False,
+    poll_period: float = DEFAULT_POLL_PERIOD,
+    naming_convention: PvNamingConvention = PvNamingConvention.CAPITALIZED,
+    pv_separator: str = ":",
 ):
-    controller = PandaController(hostname, poll_period)
-    epics_ioc_options = EpicsIOCOptions(
-        terminal=True, pv_naming_convention=PvNamingConvention.CAPITALIZED
+    name_options = EpicsNameOptions(
+        pv_naming_convention=naming_convention, pv_separator=pv_separator
     )
-    backend = EpicsBackend(controller, pv_prefix=str(prefix), options=epics_ioc_options)
+    epics_ioc_options = EpicsIOCOptions(terminal=True, name_options=name_options)
+
+    controller = PandaController(hostname, poll_period)
+    backend = EpicsBackend(
+        controller, pv_prefix=str(epics_prefix), ioc_options=epics_ioc_options
+    )
 
     if clear_bobfiles and not screens_directory:
         raise ValueError("`clear_bobfiles` is True with no `screens_directory`")

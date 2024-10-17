@@ -34,11 +34,14 @@ class BlockController(SubController):
                 field_info,  # type: ignore
             )
             self.fields[field_raw_name] = field
-            if field.block_attribute:
-                setattr(self, *field.block_attribute)
+
+    def initialise(self):
+        for field_name, field in self.fields.items():
+            if field.named_attribute:
+                setattr(self, *field.named_attribute)
             if field.sub_field_controller:
                 self.register_sub_controller(
-                    field_panda_name.attribute_name, field.sub_field_controller
+                    field_name, sub_controller=field.sub_field_controller
                 )
 
 
@@ -106,8 +109,8 @@ class Blocks:
             return block
         field = block.fields[name.field]
         if not name.sub_field:
-            assert field.block_attribute
-            return field.block_attribute.attribute
+            assert field.named_attribute
+            return field.named_attribute.attribute
 
         sub_field = getattr(field.sub_field_controller, name.sub_field)
         return sub_field

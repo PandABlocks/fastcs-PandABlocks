@@ -28,17 +28,14 @@ class PandaController(Controller):
         self._blocks.parse_introspected_data(
             self._raw_panda.blocks, self._raw_panda.fields
         )
-        for attr_name, controller in self._blocks.flattened_attribute_tree():
-            self.register_sub_controller(attr_name, controller)
-
         self.is_connected = True
 
     async def initialise(self) -> None:
-        """
-        We connect in initialise since FastCS doesn't connect until
-        it's already parsed sub controllers.
-        """
         await self.connect()
+
+        for attr_name, controller in self._blocks.flattened_attribute_tree():
+            self.register_sub_controller(attr_name, controller)
+            controller.initialise()
 
     # TODO https://github.com/DiamondLightSource/FastCS/issues/62
     @scan(0.1)

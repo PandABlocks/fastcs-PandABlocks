@@ -4,6 +4,8 @@ import argparse
 import logging
 from pathlib import Path
 
+from fastcs.backends.epics.ioc import PvNamingConvention
+
 from fastcs_pandablocks import DEFAULT_POLL_PERIOD, ioc
 from fastcs_pandablocks.types import EpicsName
 
@@ -57,7 +59,19 @@ def main():
         "--poll-period",
         default=DEFAULT_POLL_PERIOD,
         type=float,
-        help="Period to poll",
+        help="Period in seconds with which to poll the panda.",
+    )
+    run_parser.add_argument(
+        "--pv-naming-convention",
+        default=PvNamingConvention.CAPITALIZED.name,
+        choices=[choice.name for choice in PvNamingConvention],
+        help="Naming convention of the EPICS PVs.",
+    )
+    run_parser.add_argument(
+        "--pv-separator",
+        default=":",
+        type=str,
+        help="Separator to use between EPICS PV sections.",
     )
 
     parsed_args = parser.parse_args()
@@ -72,8 +86,10 @@ def main():
         EpicsName(prefix=parsed_args.prefix),
         parsed_args.hostname,
         screens_directory=Path(parsed_args.screens_dir),
-        poll_period=parsed_args.poll_period,
         clear_bobfiles=parsed_args.clear_bobfiles,
+        poll_period=parsed_args.poll_period,
+        naming_convention=PvNamingConvention(parsed_args.pv_naming_convention),
+        pv_separator=parsed_args.pv_separator,
     )
 
 

@@ -1,16 +1,16 @@
 from collections.abc import Generator
 
-from fastcs.attributes import AttrR, AttrRW, AttrW
+from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.controller import SubController
 from pandablocks.responses import BlockInfo
 
-from fastcs_pandablocks.types import AttrType, EpicsName, PandaName, ResponseType
+from fastcs_pandablocks.types import EpicsName, PandaName, ResponseType
 
-from .fields import FIELD_TYPE_TO_FASTCS_TYPE, FieldType
+from .fields import FieldControllerType, get_field_controller_from_field_info
 
 
 class BlockController(SubController):
-    fields: dict[str, FieldType]
+    fields: dict[str, FieldControllerType]
 
     def __init__(
         self,
@@ -19,30 +19,31 @@ class BlockController(SubController):
         description: str | None | None,
         raw_fields: dict[str, ResponseType],
     ):
-        super().__init__()
+        self._additional_attributes: dict[str, Attribute] = {}
         self.panda_name = panda_name
         self.number = number
         self.description = description
         self.fields = {}
 
         for field_raw_name, field_info in raw_fields.items():
-            field_panda_name = self.panda_name + PandaName(field=field_raw_name)
+            field_panda_name = PandaName(field=field_raw_name)
+            field = get_field_controller_from_field_info(field_info)
+            self.fields[field_panda_name.attribute_name] = field
 
-            field = FIELD_TYPE_TO_FASTCS_TYPE[field_info.type][field_info.subtype](
-                # TODO make type safe after match statment
-                field_panda_name,
-                field_info,  # type: ignore
-            )
-            self.fields[field_raw_name] = field
+        super().__init__()
 
     def initialise(self):
         for field_name, field in self.fields.items():
-            if field.named_attribute:
-                setattr(self, *field.named_attribute)
-            if field.sub_field_controller:
-                self.register_sub_controller(
-                    field_name, sub_controller=field.sub_field_controller
-                )
+            if field.additional_attributes:
+                self.register_sub_controller(field_name, sub_controller=field)
+            if field.top_level_attribute:
+                self._additional_attributes[field_name] = field.top_level_attribute
+
+            field.initialise()
+
+    @property
+    def additional_attributes(self) -> dict[str, Attribute]:
+        return self._additional_attributes
 
 
 class Blocks:
@@ -97,8 +98,8 @@ class Blocks:
                 yield (block.panda_name.attribute_name, block)
 
     def __getitem__(
-        self, name: EpicsName | PandaName
-    ) -> dict[int | None, BlockController] | BlockController | AttrType:
+        self, name: PandaName
+    ) -> dict[int | None, BlockController] | BlockController | Attribute:
         if name.block is None:
             raise ValueError(f"Cannot find block for name {name}.")
         blocks = self._blocks[name.block]
@@ -109,8 +110,7 @@ class Blocks:
             return block
         field = block.fields[name.field]
         if not name.sub_field:
-            assert field.named_attribute
-            return field.named_attribute.attribute
+            assert field.top_level_attribute
+            return field.top_level_attribute
 
-        sub_field = getattr(field.sub_field_controller, name.sub_field)
-        return sub_field
+        return field.additional_attributes[name.sub_field]

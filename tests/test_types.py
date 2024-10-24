@@ -48,7 +48,7 @@ def test_epics_name_add():
         _ = EpicsName(block="block", block_number=1, field="field") + EpicsName(
             block="block", block_number=2, field="field"
         )
-    assert str(error.value) == "Ambiguous pv elements on `EpicsName` add 1 and 2"
+    assert str(error.value) == "Ambiguous pv elements on add 1 and 2"
 
 
 def test_epics_name_contains():

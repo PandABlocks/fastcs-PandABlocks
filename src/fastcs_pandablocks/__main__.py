@@ -4,7 +4,7 @@ import argparse
 import logging
 from pathlib import Path
 
-from fastcs.backends.epics.ioc import PvNamingConvention
+from fastcs.backends.epics.util import PvNamingConvention
 
 from fastcs_pandablocks import DEFAULT_POLL_PERIOD, ioc
 from fastcs_pandablocks.types import EpicsName

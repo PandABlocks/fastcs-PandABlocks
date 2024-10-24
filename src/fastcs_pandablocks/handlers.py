@@ -1,8 +1,8 @@
 from typing import Any
 
-from fastcs.attributes import AttrW, Handler, Sender
+from fastcs.attributes import Attribute, AttrW, Sender
 
-from fastcs_pandablocks.types import AttrType, PandaName
+from fastcs_pandablocks.types import PandaName
 
 
 class DefaultFieldSender(Sender):
@@ -14,7 +14,7 @@ class DefaultFieldSender(Sender):
 
 
 class UpdateEguSender(Sender):
-    def __init__(self, attr_to_update: AttrType):
+    def __init__(self, attr_to_update: Attribute):
         """Update the attr"""
         self.attr_to_update = attr_to_update
 

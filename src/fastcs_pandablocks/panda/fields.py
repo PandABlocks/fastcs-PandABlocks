@@ -21,8 +21,16 @@ from pandablocks.responses import (
     UintFieldInfo,
 )
 
-from fastcs_pandablocks.handlers import UpdateEguSender
+from fastcs_pandablocks.handlers import (
+    CaptureHandler,
+    DatasetHandler,
+    DefaultFieldHandler,
+    DefaultFieldSender,
+    DefaultFieldUpdater,
+    EguSender,
+)
 from fastcs_pandablocks.types.annotations import ResponseType
+from fastcs_pandablocks.types.string_types import PandaName
 
 
 class WidgetGroup(Enum):
@@ -33,6 +41,17 @@ class WidgetGroup(Enum):
     OUTPUTS = "Outputs"
     INPUTS = "Inputs"
     READBACKS = "Readbacks"
+    CAPTURE = "Capture"
+
+
+# EPICS hardcoded. TODO: remove once we switch to pvxs.
+MAXIMUM_DESCRIPTION_LENGTH = 40
+
+
+def _strip_description(description: str | None) -> str:
+    if description is None:
+        return ""
+    return description[:MAXIMUM_DESCRIPTION_LENGTH]
 
 
 class FieldController(SubController):
@@ -57,110 +76,205 @@ class FieldController(SubController):
 
 
 class TableFieldController(FieldController):
-    def __init__(self, table_field_info: TableFieldInfo):
+    def __init__(self, panda_name: PandaName, field_info: TableFieldInfo):
         super().__init__()
+
         self.top_level_attribute = AttrR(
             Float(),
-            # To be added once we have a pvxs backend
-            # description=table_field_info.description,
+            description=_strip_description(field_info.description),
             group=WidgetGroup.OUTPUTS.value,
         )
 
 
-class TimeFieldController(FieldController):
-    def __init__(self, time_field_info: TimeFieldInfo):
+class TimeParamFieldController(FieldController):
+    # TODO: these `FieldInfo` are the exact same in pandablocks-client.
+    def __init__(
+        self,
+        panda_name: PandaName,
+        field_info: SubtypeTimeFieldInfo | TimeFieldInfo,
+    ):
         super().__init__()
         self.top_level_attribute = AttrRW(
             Float(),
-            # To be added once we have a pvxs backend
-            # description=time_field_info.description,
+            handler=DefaultFieldHandler(panda_name),
+            description=_strip_description(field_info.description),
             group=WidgetGroup.PARAMETERS.value,
         )
         self._additional_attributes["units"] = AttrW(
             String(),
-            handler=UpdateEguSender(self.top_level_attribute),
+            handler=EguSender(self.top_level_attribute),
             group=WidgetGroup.PARAMETERS.value,
+            allowed_values=field_info.units_labels,
         )
 
 
-class TimeSubTypeParamFieldController(FieldController):
+class TimeReadFieldController(FieldController):
     def __init__(
         self,
-        time_subtype_param_field_info: SubtypeTimeFieldInfo,
-    ):
-        super().__init__()
-        self.top_level_attribute = AttrRW(
-            Float(),
-            group=WidgetGroup.PARAMETERS.value,
-        )
-
-
-class TimeSubTypeReadFieldController(FieldController):
-    def __init__(
-        self,
-        time_subtype_read_field_info: SubtypeTimeFieldInfo,
+        panda_name: PandaName,
+        field_info: SubtypeTimeFieldInfo,
     ):
         super().__init__()
         self.top_level_attribute = AttrR(
             Float(),
-            group=WidgetGroup.READBACKS.value,
+            handler=DefaultFieldUpdater(
+                panda_name=panda_name,
+            ),
+            description=_strip_description(field_info.description),
+            group=WidgetGroup.OUTPUTS.value,
+        )
+        self._additional_attributes["units"] = AttrW(
+            String(),
+            handler=EguSender(self.top_level_attribute),
+            group=WidgetGroup.OUTPUTS.value,
+            allowed_values=field_info.units_labels,
         )
 
 
-class TimeSubTypeWriteFieldController(FieldController):
+class TimeWriteFieldController(FieldController):
     def __init__(
         self,
-        time_subtype_write_field_info: SubtypeTimeFieldInfo,
+        panda_name: PandaName,
+        field_info: SubtypeTimeFieldInfo,
     ):
         super().__init__()
         self.top_level_attribute = AttrW(
             Float(),
+            handler=DefaultFieldSender(panda_name),
+            description=_strip_description(field_info.description),
             group=WidgetGroup.OUTPUTS.value,
+        )
+        self._additional_attributes["units"] = AttrW(
+            String(),
+            handler=EguSender(self.top_level_attribute),
+            group=WidgetGroup.READBACKS.value,
+            allowed_values=field_info.units_labels,
         )
 
 
 class BitOutFieldController(FieldController):
-    def __init__(self, bit_out_field_info: BitOutFieldInfo):
+    def __init__(self, field_info: BitOutFieldInfo):
         super().__init__()
-        self.top_level_attribute = AttrRW(
+        self.top_level_attribute = AttrR(
             Bool(znam="0", onam="1"),
+            description=_strip_description(field_info.description),
             group=WidgetGroup.OUTPUTS.value,
         )
 
 
 class PosOutFieldController(FieldController):
-    def __init__(self, pos_out_field_info: PosOutFieldInfo):
+    def __init__(self, panda_name: PandaName, field_info: PosOutFieldInfo):
         super().__init__()
-        self.top_level_attribute = AttrR(
+        top_level_attribute = AttrR(
             Float(),
+            description=_strip_description(field_info.description),
             group=WidgetGroup.OUTPUTS.value,
+        )
+
+        scaled = AttrR(
+            Float(),
+            group=WidgetGroup.CAPTURE.value,
+            description="Value with scaling applied.",
+        )
+
+        scale = AttrRW(
+            Float(),
+            group=WidgetGroup.CAPTURE.value,
+            handler=DefaultFieldHandler(panda_name),
+        )
+        offset = AttrRW(
+            Float(),
+            group=WidgetGroup.CAPTURE.value,
+            handler=DefaultFieldHandler(panda_name),
+        )
+
+        async def updated_scaled_on_offset_change(*_):
+            await scaled.set(scale.get() * top_level_attribute.get() + offset.get())
+
+        offset.set_update_callback(updated_scaled_on_offset_change)
+
+        self._additional_attributes.update(
+            {"scaled": scaled, "scale": scale, "offset": offset}
+        )
+
+        self.top_level_attribute = top_level_attribute
+        self._additional_attributes["capture"] = AttrRW(
+            String(),
+            group=WidgetGroup.CAPTURE.value,
+            handler=CaptureHandler(),
+            allowed_values=field_info.capture_labels,
+        )
+        self._additional_attributes["dataset"] = AttrRW(
+            String(),
+            group=WidgetGroup.CAPTURE.value,
+            handler=DatasetHandler(),
+            allowed_values=field_info.capture_labels,
         )
 
 
 class ExtOutFieldController(FieldController):
-    def __init__(self, ext_out_field_info: ExtOutFieldInfo):
+    def __init__(self, field_info: ExtOutFieldInfo):
         super().__init__()
         self.top_level_attribute = AttrR(
             Float(),
+            description=_strip_description(field_info.description),
             group=WidgetGroup.OUTPUTS.value,
+        )
+        self._additional_attributes["capture"] = AttrRW(
+            String(),
+            group=WidgetGroup.CAPTURE.value,
+            handler=CaptureHandler(),
+            allowed_values=field_info.capture_labels,
+        )
+        self._additional_attributes["dataset"] = AttrRW(
+            String(),
+            group=WidgetGroup.CAPTURE.value,
+            handler=DatasetHandler(),
+            allowed_values=field_info.capture_labels,
         )
 
 
 class ExtOutBitsFieldController(ExtOutFieldController):
     def __init__(
         self,
-        ext_out_bits_field_info: ExtOutBitsFieldInfo,
+        field_info: ExtOutBitsFieldInfo,
     ):
-        super().__init__(ext_out_bits_field_info)
+        super().__init__(field_info)
+
+        for bit_number, label in enumerate(field_info.bits, start=1):
+            if label == "":
+                continue  # Some rows are empty, do not create records.
+
+            self._additional_attributes[f"val{bit_number}"] = AttrR(
+                Bool(znam="0", onam="1"),
+                description="Value of the field connected to this bit.",
+                group=WidgetGroup.OUTPUTS.value,
+            )
+            self._additional_attributes[f"name{bit_number}"] = AttrR(
+                Bool(znam="0", onam="1"),
+                description="Value of the field connected to this bit.",
+                group=WidgetGroup.OUTPUTS.value,
+            )
 
 
 class BitMuxFieldController(FieldController):
-    def __init__(self, bit_mux_field_info: BitMuxFieldInfo):
+    def __init__(self, panda_name: PandaName, bit_mux_field_info: BitMuxFieldInfo):
         super().__init__()
         self.top_level_attribute = AttrRW(
             String(),
+            description=_strip_description(bit_mux_field_info.description),
+            handler=DefaultFieldHandler(panda_name),
             group=WidgetGroup.INPUTS.value,
         )
+
+        self._additional_attributes["delay"] = AttrRW(
+            Float(),
+            description="Clock delay on input.",
+            handler=DefaultFieldHandler(panda_name),
+            group=WidgetGroup.INPUTS.value,
+        )
+
+        # TODO: Add DRVL DRVH to `delay`.
 
 
 class PosMuxFieldController(FieldController):
@@ -357,7 +471,6 @@ class EnumWriteFieldController(FieldController):
 
 FieldControllerType = (
     TableFieldController
-    | TimeFieldController
     | BitOutFieldController
     | PosOutFieldController
     | ExtOutFieldController
@@ -384,27 +497,28 @@ FieldControllerType = (
     | EnumParamFieldController
     | EnumReadFieldController
     | EnumWriteFieldController
-    | TimeSubTypeParamFieldController
-    | TimeSubTypeReadFieldController
-    | TimeSubTypeWriteFieldController
+    | TimeParamFieldController
+    | TimeReadFieldController
+    | TimeWriteFieldController
 )
 
 
 def get_field_controller_from_field_info(
+    panda_name: PandaName,
     field_info: ResponseType,
 ) -> FieldControllerType:
     match field_info:
         case TableFieldInfo():
-            return TableFieldController(field_info)
+            return TableFieldController(panda_name, field_info)
         # Time types
         case TimeFieldInfo(subtype=None):
-            return TimeFieldController(field_info)
+            return TimeParamFieldController(panda_name, field_info)
         case SubtypeTimeFieldInfo(type="param"):
-            return TimeSubTypeParamFieldController(field_info)
+            return TimeParamFieldController(panda_name, field_info)
         case SubtypeTimeFieldInfo(subtype="read"):
-            return TimeSubTypeReadFieldController(field_info)
+            return TimeReadFieldController(panda_name, field_info)
         case SubtypeTimeFieldInfo(subtype="write"):
-            return TimeSubTypeWriteFieldController(field_info)
+            return TimeWriteFieldController(panda_name, field_info)
 
         # Bit types
         case BitOutFieldInfo():
@@ -426,7 +540,7 @@ def get_field_controller_from_field_info(
 
         # Pos types
         case PosOutFieldInfo():
-            return PosOutFieldController(field_info)
+            return PosOutFieldController(panda_name, field_info)
         case PosMuxFieldInfo():
             return PosMuxFieldController(field_info)
 

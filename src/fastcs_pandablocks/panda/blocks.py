@@ -26,8 +26,8 @@ class BlockController(SubController):
         self.fields = {}
 
         for field_raw_name, field_info in raw_fields.items():
-            field_panda_name = PandaName(field=field_raw_name)
-            field = get_field_controller_from_field_info(field_info)
+            field_panda_name = self.panda_name + PandaName(field=field_raw_name)
+            field = get_field_controller_from_field_info(field_panda_name, field_info)
             self.fields[field_panda_name.attribute_name] = field
 
         super().__init__()

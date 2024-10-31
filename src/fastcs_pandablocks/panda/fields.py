@@ -1,7 +1,5 @@
 from __future__ import annotations
 
-from enum import Enum
-
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.controller import SubController
 from fastcs.datatypes import Bool, Float, Int, String
@@ -29,61 +27,83 @@ from fastcs_pandablocks.handlers import (
     DefaultFieldUpdater,
     EguSender,
 )
-from fastcs_pandablocks.types.annotations import RawInitialValuesType, ResponseType
-from fastcs_pandablocks.types.string_types import PandaName
-
-
-class WidgetGroup(Enum):
-    """Purposely not an enum since we only ever want the string."""
-
-    NONE = None
-    PARAMETERS = "Parameters"
-    OUTPUTS = "Outputs"
-    INPUTS = "Inputs"
-    READBACKS = "Readbacks"
-    CAPTURE = "Capture"
-
+from fastcs_pandablocks.types import (
+    PandaName,
+    RawInitialValuesType,
+    ResponseType,
+    WidgetGroup,
+)
 
 # EPICS hardcoded. TODO: remove once we switch to pvxs.
 MAXIMUM_DESCRIPTION_LENGTH = 40
 
 
-def _strip_description(description: str | None) -> str:
+def _strip_description(description: str | None) -> str | None:
     if description is None:
-        return ""
+        return description
     return description[:MAXIMUM_DESCRIPTION_LENGTH]
 
 
 class FieldController(SubController):
-    def __init__(self):
-        """
-        Since fields contain an attribute for the field itself
-        `PREFIX:BLOCK:FIELD`, but also subfields, `PREFIX:BLOCK:FIELD:SUB_FIELD`,
-        have a top level attribute set in the `BlockController`, and
-        further attributes which are used in the field as a `SubController`.
-        """
-
+    def __init__(
+        self,
+        panda_name: PandaName,
+        label: str | None = None,
+    ):
+        self.panda_name = panda_name
         self.top_level_attribute: Attribute | None = None
-        self._additional_attributes = {}
-        self.sub_controllers: dict[str, FieldController] = {}
+
+        # Sub fields eg `PGEN.OUT` and `PGEN.TRIGGER`
+        self.sub_fields: dict[PandaName, FieldController] = {}
+
+        self._additional_attributes: dict[str, Attribute] = {}
+
         super().__init__(search_device_for_attributes=False)
+
+    def make_sub_fields(
+        self,
+        field_infos: dict[PandaName, ResponseType],
+        initial_values: RawInitialValuesType,
+    ):
+        for sub_field_name, field_info in field_infos.items():
+            full_sub_field_name = self.panda_name + sub_field_name
+            field_initial_values = {
+                key: value
+                for key, value in initial_values.items()
+                if key in sub_field_name
+            }
+            self.sub_fields[full_sub_field_name] = get_field_controller_from_field_info(
+                full_sub_field_name, field_info, field_initial_values
+            )
+
+    async def initialise(self):
+        for field_name, field in self.sub_fields.items():
+            self.register_sub_controller(
+                field_name.attribute_name, sub_controller=field
+            )
+            await field.initialise()
+            if field.top_level_attribute:
+                self._additional_attributes[field_name.attribute_name] = (
+                    field.top_level_attribute
+                )
 
     @property
     def additional_attributes(self) -> dict[str, Attribute]:
+        """
+        Used by the FastCS mapping parser to get attributes since
+        we're not searching for device attributes.
+        """
         return self._additional_attributes
-
-    def initialise(self):
-        for sub_field_name, sub_field_controller in self.sub_controllers.items():
-            self.register_sub_controller(sub_field_name, sub_field_controller)
-            sub_field_controller.initialise()
-            self._additional_attributes[sub_field_name] = (
-                sub_field_controller.top_level_attribute
-            )
 
 
 class TableFieldController(FieldController):
-    def __init__(self, panda_name: PandaName, field_info: TableFieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        field_info: TableFieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name, field_info.description)
 
         self.top_level_attribute = AttrR(
             Float(),
@@ -98,8 +118,9 @@ class TimeParamFieldController(FieldController):
         self,
         panda_name: PandaName,
         field_info: SubtypeTimeFieldInfo | TimeFieldInfo,
+        initial_values: RawInitialValuesType,
     ):
-        super().__init__()
+        super().__init__(panda_name)
         self.top_level_attribute = AttrRW(
             Float(),
             handler=DefaultFieldHandler(panda_name),
@@ -120,7 +141,7 @@ class TimeReadFieldController(FieldController):
         panda_name: PandaName,
         field_info: SubtypeTimeFieldInfo,
     ):
-        super().__init__()
+        super().__init__(panda_name)
         self.top_level_attribute = AttrR(
             Float(),
             handler=DefaultFieldUpdater(
@@ -143,7 +164,7 @@ class TimeWriteFieldController(FieldController):
         panda_name: PandaName,
         field_info: SubtypeTimeFieldInfo,
     ):
-        super().__init__()
+        super().__init__(panda_name)
         self.top_level_attribute = AttrW(
             Float(),
             handler=DefaultFieldSender(panda_name),
@@ -159,8 +180,13 @@ class TimeWriteFieldController(FieldController):
 
 
 class BitOutFieldController(FieldController):
-    def __init__(self, field_info: BitOutFieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        field_info: BitOutFieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.top_level_attribute = AttrR(
             Bool(znam="0", onam="1"),
             description=_strip_description(field_info.description),
@@ -169,8 +195,13 @@ class BitOutFieldController(FieldController):
 
 
 class PosOutFieldController(FieldController):
-    def __init__(self, panda_name: PandaName, field_info: PosOutFieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        field_info: PosOutFieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         top_level_attribute = AttrR(
             Float(),
             description=_strip_description(field_info.description),
@@ -219,8 +250,14 @@ class PosOutFieldController(FieldController):
 
 
 class ExtOutFieldController(FieldController):
-    def __init__(self, field_info: ExtOutFieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        field_info: ExtOutFieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
+
         self.top_level_attribute = AttrR(
             Float(),
             description=_strip_description(field_info.description),
@@ -241,8 +278,8 @@ class ExtOutFieldController(FieldController):
 
 
 class _BitsSubFieldController(FieldController):
-    def __init__(self, label: str):
-        super().__init__()
+    def __init__(self, panda_name: PandaName, label: str):
+        super().__init__(panda_name, label=label)
 
         self.top_level_attribute = AttrR(
             Bool(znam="0", onam="1"),
@@ -259,20 +296,30 @@ class _BitsSubFieldController(FieldController):
 class ExtOutBitsFieldController(ExtOutFieldController):
     def __init__(
         self,
+        panda_name: PandaName,
         field_info: ExtOutBitsFieldInfo,
+        initial_values: RawInitialValuesType,
     ):
-        super().__init__(field_info)
+        super().__init__(panda_name, field_info, initial_values)
 
         for bit_number, label in enumerate(field_info.bits, start=1):
             if label == "":
                 continue  # Some rows are empty, do not create records.
 
-            self.sub_controllers[f"BIT{bit_number}"] = _BitsSubFieldController(label)
+            sub_field_panda_name = panda_name + PandaName(sub_field=f"bit{bit_number}")
+            self.sub_fields[sub_field_panda_name] = _BitsSubFieldController(
+                sub_field_panda_name, label=label
+            )
 
 
 class BitMuxFieldController(FieldController):
-    def __init__(self, panda_name: PandaName, bit_mux_field_info: BitMuxFieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        bit_mux_field_info: BitMuxFieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.top_level_attribute = AttrRW(
             String(),
             description=_strip_description(bit_mux_field_info.description),
@@ -291,8 +338,13 @@ class BitMuxFieldController(FieldController):
 
 
 class PosMuxFieldController(FieldController):
-    def __init__(self, pos_mux_field_info: PosMuxFieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        pos_mux_field_info: PosMuxFieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.top_level_attribute = AttrRW(
             String(),
             group=WidgetGroup.INPUTS.value,
@@ -300,8 +352,13 @@ class PosMuxFieldController(FieldController):
 
 
 class UintParamFieldController(FieldController):
-    def __init__(self, uint_param_field_info: UintFieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        uint_param_field_info: UintFieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.top_level_attribute = AttrR(
             Float(prec=0),
             group=WidgetGroup.PARAMETERS.value,
@@ -309,8 +366,13 @@ class UintParamFieldController(FieldController):
 
 
 class UintReadFieldController(FieldController):
-    def __init__(self, uint_read_field_info: UintFieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        uint_read_field_info: UintFieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.top_level_attribute = AttrR(
             Float(prec=0),
             group=WidgetGroup.READBACKS.value,
@@ -320,8 +382,13 @@ class UintReadFieldController(FieldController):
 
 
 class UintWriteFieldController(FieldController):
-    def __init__(self, uint_write_field_info: UintFieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        uint_write_field_info: UintFieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.top_level_attribute = AttrW(
             Float(prec=0),
             group=WidgetGroup.OUTPUTS.value,
@@ -329,8 +396,13 @@ class UintWriteFieldController(FieldController):
 
 
 class IntParamFieldController(FieldController):
-    def __init__(self, int_param_field_info: FieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        int_param_field_info: FieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.top_level_attribute = AttrRW(
             Float(prec=0),
             group=WidgetGroup.PARAMETERS.value,
@@ -338,8 +410,13 @@ class IntParamFieldController(FieldController):
 
 
 class IntReadFieldController(FieldController):
-    def __init__(self, int_read_field_info: FieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        int_read_field_info: FieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.top_level_attribute = AttrR(
             Int(),
             group=WidgetGroup.READBACKS.value,
@@ -347,8 +424,13 @@ class IntReadFieldController(FieldController):
 
 
 class IntWriteFieldController(FieldController):
-    def __init__(self, int_write_field_info: FieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        int_write_field_info: FieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.top_level_attribute = AttrW(
             Int(),
             group=WidgetGroup.PARAMETERS.value,
@@ -356,8 +438,13 @@ class IntWriteFieldController(FieldController):
 
 
 class ScalarParamFieldController(FieldController):
-    def __init__(self, scalar_param_field_info: ScalarFieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        scalar_param_field_info: ScalarFieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.top_level_attribute = AttrRW(
             Float(),
             group=WidgetGroup.PARAMETERS.value,
@@ -365,8 +452,13 @@ class ScalarParamFieldController(FieldController):
 
 
 class ScalarReadFieldController(FieldController):
-    def __init__(self, scalar_read_field_info: ScalarFieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        scalar_read_field_info: ScalarFieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.top_level_attribute = AttrR(
             Float(),
             group=WidgetGroup.READBACKS.value,
@@ -374,8 +466,13 @@ class ScalarReadFieldController(FieldController):
 
 
 class ScalarWriteFieldController(FieldController):
-    def __init__(self, scalar_write_field_info: ScalarFieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        scalar_write_field_info: ScalarFieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.top_level_attribute = AttrR(
             Float(),
             group=WidgetGroup.PARAMETERS.value,
@@ -383,8 +480,13 @@ class ScalarWriteFieldController(FieldController):
 
 
 class BitParamFieldController(FieldController):
-    def __init__(self, bit_param_field_info: FieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        bit_param_field_info: FieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.top_level_attribute = AttrRW(
             Bool(znam="0", onam="1"),
             group=WidgetGroup.PARAMETERS.value,
@@ -392,8 +494,13 @@ class BitParamFieldController(FieldController):
 
 
 class BitReadFieldController(FieldController):
-    def __init__(self, bit_read_field_info: FieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        bit_read_field_info: FieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.top_level_attribute = AttrR(
             Bool(znam="0", onam="1"),
             group=WidgetGroup.READBACKS.value,
@@ -401,8 +508,13 @@ class BitReadFieldController(FieldController):
 
 
 class BitWriteFieldController(FieldController):
-    def __init__(self, bit_write_field_info: FieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        bit_write_field_info: FieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.top_level_attribute = AttrW(
             Bool(znam="0", onam="1"),
             group=WidgetGroup.OUTPUTS.value,
@@ -410,8 +522,13 @@ class BitWriteFieldController(FieldController):
 
 
 class ActionReadFieldController(FieldController):
-    def __init__(self, action_read_field_info: FieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        action_read_field_info: FieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.top_level_attribute = AttrR(
             Bool(znam="0", onam="1"),
             group=WidgetGroup.READBACKS.value,
@@ -419,8 +536,13 @@ class ActionReadFieldController(FieldController):
 
 
 class ActionWriteFieldController(FieldController):
-    def __init__(self, action_write_field_info: FieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        action_write_field_info: FieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.top_level_attribute = AttrW(
             Bool(znam="0", onam="1"),
             group=WidgetGroup.OUTPUTS.value,
@@ -428,8 +550,13 @@ class ActionWriteFieldController(FieldController):
 
 
 class LutParamFieldController(FieldController):
-    def __init__(self, lut_param_field_info: FieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        lut_param_field_info: FieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.top_level_attribute = AttrRW(
             String(),
             group=WidgetGroup.PARAMETERS.value,
@@ -437,8 +564,13 @@ class LutParamFieldController(FieldController):
 
 
 class LutReadFieldController(FieldController):
-    def __init__(self, lut_read_field_info: FieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        lut_read_field_info: FieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.top_level_attribute = AttrR(
             String(),
             group=WidgetGroup.READBACKS.value,
@@ -446,8 +578,13 @@ class LutReadFieldController(FieldController):
 
 
 class LutWriteFieldController(FieldController):
-    def __init__(self, lut_read_field_info: FieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        lut_read_field_info: FieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.top_level_attribute = AttrR(
             String(),
             group=WidgetGroup.OUTPUTS.value,
@@ -455,8 +592,13 @@ class LutWriteFieldController(FieldController):
 
 
 class EnumParamFieldController(FieldController):
-    def __init__(self, enum_param_field_info: EnumFieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        enum_param_field_info: EnumFieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.allowed_values = enum_param_field_info.labels
         self.top_level_attribute = AttrRW(
             String(),
@@ -465,8 +607,13 @@ class EnumParamFieldController(FieldController):
 
 
 class EnumReadFieldController(FieldController):
-    def __init__(self, enum_read_field_info: EnumFieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        enum_read_field_info: EnumFieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.top_level_attribute = AttrR(
             String(),
             group=WidgetGroup.READBACKS.value,
@@ -474,8 +621,13 @@ class EnumReadFieldController(FieldController):
 
 
 class EnumWriteFieldController(FieldController):
-    def __init__(self, enum_write_field_info: EnumFieldInfo):
-        super().__init__()
+    def __init__(
+        self,
+        panda_name: PandaName,
+        enum_write_field_info: EnumFieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        super().__init__(panda_name)
         self.top_level_attribute = AttrW(
             String(),
             group=WidgetGroup.OUTPUTS.value,
@@ -520,96 +672,94 @@ def get_field_controller_from_field_info(
     panda_name: PandaName,
     field_info: ResponseType,
     initial_values: RawInitialValuesType,
-    label: str | None,
 ) -> FieldControllerType:
     match field_info:
         case TableFieldInfo():
-            return TableFieldController(panda_name, field_info)
+            return TableFieldController(panda_name, field_info, initial_values)
         # Time types
         case TimeFieldInfo(subtype=None):
-            return TimeParamFieldController(panda_name, field_info)
+            return TimeParamFieldController(panda_name, field_info, initial_values)
         case SubtypeTimeFieldInfo(type="param"):
-            return TimeParamFieldController(panda_name, field_info)
+            return TimeParamFieldController(panda_name, field_info, initial_values)
         case SubtypeTimeFieldInfo(subtype="read"):
-            return TimeReadFieldController(panda_name, field_info)
+            return TimeReadFieldController(panda_name, field_info, initial_values)
         case SubtypeTimeFieldInfo(subtype="write"):
-            return TimeWriteFieldController(panda_name, field_info)
+            return TimeWriteFieldController(panda_name, field_info, initial_values)
 
         # Bit types
         case BitOutFieldInfo():
-            return BitOutFieldController(field_info)
+            return BitOutFieldController(panda_name, field_info, initial_values)
         case ExtOutBitsFieldInfo(subtype="timestamp"):
-            return ExtOutFieldController(field_info)
+            return ExtOutFieldController(panda_name, field_info, initial_values)
         case ExtOutBitsFieldInfo():
-            return ExtOutBitsFieldController(field_info)
+            return ExtOutBitsFieldController(panda_name, field_info, initial_values)
         case ExtOutFieldInfo():
-            return ExtOutFieldController(field_info)
+            return ExtOutFieldController(panda_name, field_info, initial_values)
         case BitMuxFieldInfo():
-            return BitMuxFieldController(panda_name, field_info)
+            return BitMuxFieldController(panda_name, field_info, initial_values)
         case FieldInfo(type="param", subtype="bit"):
-            return BitParamFieldController(field_info)
+            return BitParamFieldController(panda_name, field_info, initial_values)
         case FieldInfo(type="read", subtype="bit"):
-            return BitReadFieldController(field_info)
+            return BitReadFieldController(panda_name, field_info, initial_values)
         case FieldInfo(type="write", subtype="bit"):
-            return BitWriteFieldController(field_info)
+            return BitWriteFieldController(panda_name, field_info, initial_values)
 
         # Pos types
         case PosOutFieldInfo():
-            return PosOutFieldController(panda_name, field_info)
+            return PosOutFieldController(panda_name, field_info, initial_values)
         case PosMuxFieldInfo():
-            return PosMuxFieldController(field_info)
+            return PosMuxFieldController(panda_name, field_info, initial_values)
 
         # Uint types
         case UintFieldInfo(type="param"):
-            return UintParamFieldController(field_info)
+            return UintParamFieldController(panda_name, field_info, initial_values)
         case UintFieldInfo(type="read"):
-            return UintReadFieldController(field_info)
+            return UintReadFieldController(panda_name, field_info, initial_values)
         case UintFieldInfo(type="write"):
-            return UintWriteFieldController(field_info)
+            return UintWriteFieldController(panda_name, field_info, initial_values)
 
         # Scalar types
         case ScalarFieldInfo(subtype="param"):
-            return ScalarParamFieldController(field_info)
+            return ScalarParamFieldController(panda_name, field_info, initial_values)
         case ScalarFieldInfo(type="read"):
-            return ScalarReadFieldController(field_info)
+            return ScalarReadFieldController(panda_name, field_info, initial_values)
         case ScalarFieldInfo(type="write"):
-            return ScalarWriteFieldController(field_info)
+            return ScalarWriteFieldController(panda_name, field_info, initial_values)
 
         # Int types
         case FieldInfo(type="param", subtype="int"):
-            return IntParamFieldController(field_info)
+            return IntParamFieldController(panda_name, field_info, initial_values)
         case FieldInfo(type="read", subtype="int"):
-            return IntReadFieldController(field_info)
+            return IntReadFieldController(panda_name, field_info, initial_values)
         case FieldInfo(type="write", subtype="int"):
-            return IntWriteFieldController(field_info)
+            return IntWriteFieldController(panda_name, field_info, initial_values)
 
         # Action types
         case FieldInfo(
             type="read",
             subtype="action",
         ):
-            return ActionReadFieldController(field_info)
+            return ActionReadFieldController(panda_name, field_info, initial_values)
         case FieldInfo(
             type="write",
             subtype="action",
         ):
-            return ActionWriteFieldController(field_info)
+            return ActionWriteFieldController(panda_name, field_info, initial_values)
 
         # Lut types
         case FieldInfo(type="param", subtype="lut"):
-            return LutParamFieldController(field_info)
+            return LutParamFieldController(panda_name, field_info, initial_values)
         case FieldInfo(type="read", subtype="lut"):
-            return LutReadFieldController(field_info)
+            return LutReadFieldController(panda_name, field_info, initial_values)
         case FieldInfo(type="write", subtype="lut"):
-            return LutWriteFieldController(field_info)
+            return LutWriteFieldController(panda_name, field_info, initial_values)
 
         # Enum types
         case EnumFieldInfo(type="param"):
-            return EnumParamFieldController(field_info)
+            return EnumParamFieldController(panda_name, field_info, initial_values)
         case EnumFieldInfo(type="read"):
-            return EnumReadFieldController(field_info)
+            return EnumReadFieldController(panda_name, field_info, initial_values)
         case EnumFieldInfo(type="write"):
-            return EnumWriteFieldController(field_info)
-
+            return EnumWriteFieldController(panda_name, field_info, initial_values)
         case _:
             raise ValueError(f"Unknown field type: {type(field_info).__name__}.")

@@ -10,13 +10,12 @@ from fastcs.backends.epics.util import EpicsNameOptions, PvNamingConvention
 from ._version import __version__
 from .gui import PandaGUIOptions
 from .panda.controller import PandaController
-from .types import EpicsName
 
 DEFAULT_POLL_PERIOD = 0.1
 
 
 def ioc(
-    epics_prefix: EpicsName,
+    epics_prefix: str,
     hostname: str,
     screens_directory: Path | None = None,
     clear_bobfiles: bool = False,
@@ -31,7 +30,7 @@ def ioc(
 
     controller = PandaController(hostname, poll_period)
     backend = EpicsBackend(
-        controller, pv_prefix=str(epics_prefix), ioc_options=epics_ioc_options
+        controller, pv_prefix=epics_prefix, ioc_options=epics_ioc_options
     )
 
     if clear_bobfiles and not screens_directory:

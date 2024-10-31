@@ -95,15 +95,6 @@ class PandaName:
             block=block, block_number=block_number, field=field, sub_field=sub_field
         )
 
-    @cached_property
-    def epics_name(self):
-        return EpicsName(
-            block=self.block,
-            block_number=self.block_number,
-            field=self.field,
-            sub_field=self.sub_field,
-        )
-
     def __add__(self, other: PandaName) -> PandaName:
         return PandaName(
             block=_choose_sub_pv(self.block, other.block),
@@ -124,89 +115,10 @@ class PandaName:
             )
         return ""
 
-
-@dataclass(frozen=True)
-class EpicsName:
-    prefix: str | None = None
-    block: str | None = None
-    block_number: int | None = None
-    field: str | None = None
-    sub_field: str | None = None
-
-    @cached_property
-    def _string_form(self) -> str:
-        return _format_with_separator(
-            EPICS_SEPARATOR,
-            self.prefix,
-            (self.block, self.block_number),
-            self.field,
-            self.sub_field,
-        )
-
-    def __str__(self) -> str:
-        return self._string_form
-
-    @classmethod
-    def from_string(cls, name: str) -> EpicsName:
-        """Converts a string to an EPICS name, must contain a prefix."""
-        split_name = name.split(EPICS_SEPARATOR)
-        if len(split_name) < 3:
-            raise ValueError(
-                f"Received a a pv string `{name}` which isn't of the form "
-                "`PREFIX:BLOCK:FIELD` or `PREFIX:BLOCK:FIELD:SUB_FIELD`."
-            )
-        split_name = name.split(EPICS_SEPARATOR)
-        prefix, block_with_number, field = split_name[:3]
-        block, block_number = _extract_number_at_of_string(block_with_number)
-        sub_field = split_name[3] if len(split_name) == 4 else None
-
-        return EpicsName(
-            prefix=prefix,
-            block=block,
-            block_number=block_number,
-            field=field,
-            sub_field=sub_field,
-        )
-
-    @cached_property
-    def panda_name(self) -> PandaName:
-        return PandaName(
-            block=self.block,
-            block_number=self.block_number,
-            field=self.field,
-            sub_field=self.sub_field,
-        )
-
-    def __add__(self, other: EpicsName) -> EpicsName:
-        """
-        Returns the sum of PVs:
-
-        EpicsName(prefix="PREFIX", block="BLOCK") + EpicsName(field="FIELD")
-        == EpicsName.from_string("PREFIX:BLOCK:FIELD")
-        """
-
-        return EpicsName(
-            prefix=_choose_sub_pv(self.prefix, other.prefix),
-            block=_choose_sub_pv(self.block, other.block),
-            block_number=_choose_sub_pv(self.block_number, other.block_number),
-            field=_choose_sub_pv(self.field, other.field),
-            sub_field=_choose_sub_pv(self.sub_field, other.sub_field),
-        )
-
-    def __contains__(self, other: EpicsName) -> bool:
-        """Checks to see if a given epics name is a subset of another one.
-
-        Examples
-        --------
-
-        (EpicsName(block="field1") in EpicsName("prefix:block1:field1")) == True
-        (EpicsName(block="field1") in EpicsName("prefix:block1:field2")) == False
-        """
-
+    def __contains__(self, other: PandaName) -> bool:
         return (
-            _check_eq(self.prefix, other.prefix)
-            and _check_eq(self.block, other.block)
-            and _check_eq(self.block_number, other.block_number)
-            and _check_eq(self.field, other.field)
-            and _check_eq(self.sub_field, other.sub_field)
+            _check_eq(other.block, self.block)
+            and _check_eq(other.block_number, self.block_number)
+            and _check_eq(other.field, self.field)
+            and _check_eq(other.sub_field, self.sub_field)
         )

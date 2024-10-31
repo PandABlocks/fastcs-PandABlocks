@@ -7,7 +7,6 @@ from pathlib import Path
 from fastcs.backends.epics.util import PvNamingConvention
 
 from fastcs_pandablocks import DEFAULT_POLL_PERIOD, ioc
-from fastcs_pandablocks.types import EpicsName
 
 from . import __version__
 
@@ -83,7 +82,7 @@ def main():
     logging.basicConfig(format="%(levelname)s:%(message)s", level=level)
 
     ioc(
-        EpicsName(prefix=parsed_args.prefix),
+        parsed_args.prefix,
         parsed_args.hostname,
         screens_directory=Path(parsed_args.screens_dir),
         clear_bobfiles=parsed_args.clear_bobfiles,

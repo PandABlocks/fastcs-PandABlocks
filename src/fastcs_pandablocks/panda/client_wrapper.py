@@ -14,16 +14,14 @@ from pandablocks.commands import (
 )
 
 from fastcs_pandablocks.types import (
+    PandaName,
     RawBlocksType,
     RawFieldsType,
     RawInitialValuesType,
 )
-from fastcs_pandablocks.types.string_types import PandaName
 
 
 class RawPanda:
-    changes: dict[str, str] | None = None
-
     def __init__(self, hostname: str):
         self._client = AsyncioClient(host=hostname)
 
@@ -32,14 +30,12 @@ class RawPanda:
 
     async def disconnect(self):
         await self._client.close()
-        self.changes = None
 
     async def introspect(
         self,
     ) -> tuple[
         RawBlocksType, RawFieldsType, RawInitialValuesType, RawInitialValuesType
     ]:
-        self.changes = {}
         blocks, fields, labels, initial_values = {}, [], {}, {}
 
         blocks = {
@@ -81,9 +77,5 @@ class RawPanda:
     async def send(self, name: str, value: str):
         await self._client.send(Put(name, value))
 
-    async def get_changes(self):
-        if self.changes is None:
-            raise RuntimeError("Panda not introspected.")
-        self.changes = (
-            await self._client.send(GetChanges(ChangeGroup.ALL, False))
-        ).values
+    async def get_changes(self) -> dict[str, str]:
+        return (await self._client.send(GetChanges(ChangeGroup.ALL, False))).values

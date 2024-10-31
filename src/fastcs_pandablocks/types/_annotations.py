@@ -17,7 +17,7 @@ from pandablocks.responses import (
     UintFieldInfo,
 )
 
-from .string_types import PandaName
+from ._string_types import PandaName
 
 # Pyright gives us variable not allowed in type expression error
 # if we try to use the new (|) syntax

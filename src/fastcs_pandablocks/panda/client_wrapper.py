@@ -12,17 +12,16 @@ from pandablocks.commands import (
     GetFieldInfo,
     Put,
 )
-from pandablocks.responses import (
-    BlockInfo,
-)
 
-from fastcs_pandablocks.types import ResponseType
+from fastcs_pandablocks.types import (
+    RawBlocksType,
+    RawFieldsType,
+    RawInitialValuesType,
+)
+from fastcs_pandablocks.types.string_types import PandaName
 
 
 class RawPanda:
-    blocks: dict[str, BlockInfo] | None = None
-    fields: list[dict[str, ResponseType]] | None = None
-    metadata: dict[str, str] | None = None
     changes: dict[str, str] | None = None
 
     def __init__(self, hostname: str):
@@ -30,54 +29,61 @@ class RawPanda:
 
     async def connect(self):
         await self._client.connect()
-        await self.introspect()
 
     async def disconnect(self):
         await self._client.close()
-        self.blocks = None
-        self.fields = None
-        self.metadata = None
         self.changes = None
 
-    async def introspect(self):
-        self.blocks, self.fields, self.metadata, self.changes = {}, [], {}, {}
-        self.blocks = await self._client.send(GetBlockInfo())
-        self.fields = await asyncio.gather(
-            *[self._client.send(GetFieldInfo(block)) for block in self.blocks],
-        )
-        initial_values = (
-            await self._client.send(GetChanges(ChangeGroup.ALL, True))
-        ).values
+    async def introspect(
+        self,
+    ) -> tuple[
+        RawBlocksType, RawFieldsType, RawInitialValuesType, RawInitialValuesType
+    ]:
+        self.changes = {}
+        blocks, fields, labels, initial_values = {}, [], {}, {}
 
-        for field_name, value in initial_values.items():
+        blocks = {
+            PandaName.from_string(name): block_info
+            for name, block_info in (await self._client.send(GetBlockInfo())).items()
+        }
+        fields = [
+            {
+                PandaName(field=name): field_info
+                for name, field_info in block_values.items()
+            }
+            for block_values in await asyncio.gather(
+                *[self._client.send(GetFieldInfo(str(block))) for block in blocks]
+            )
+        ]
+
+        field_data = (await self._client.send(GetChanges(ChangeGroup.ALL, True))).values
+
+        for field_name, value in field_data.items():
             if field_name.startswith("*METADATA"):
-                self.metadata[field_name] = value
-            else:
-                self.changes[field_name] = value
+                field_name_without_prefix = field_name.removeprefix("*METADATA.")
+                if field_name_without_prefix == "DESIGN":
+                    continue  # TODO: Handle design.
+                elif not field_name_without_prefix.startswith("LABEL_"):
+                    raise TypeError(
+                        "Received metadata not corresponding to a `LABEL_`: "
+                        f"{field_name} = {value}."
+                    )
+                labels[
+                    PandaName.from_string(
+                        field_name_without_prefix.removeprefix("LABEL_")
+                    )
+                ] = value
+            else:  # Field is a default value
+                initial_values[PandaName.from_string(field_name)] = value
+
+        return blocks, fields, labels, initial_values
 
     async def send(self, name: str, value: str):
         await self._client.send(Put(name, value))
 
     async def get_changes(self):
-        if not self.changes:
+        if self.changes is None:
             raise RuntimeError("Panda not introspected.")
         self.changes = (
             await self._client.send(GetChanges(ChangeGroup.ALL, False))
         ).values
-
-    async def _ensure_connected(self):
-        if not self.blocks:
-            await self.connect()
-
-    async def __aenter__(self):
-        await self._ensure_connected()
-        return self
-
-    async def __aexit__(self, exc_type, exc, tb):
-        await self.disconnect()
-
-    def __aiter__(self):
-        return self
-
-    async def __anext__(self):
-        return await self.get_changes()

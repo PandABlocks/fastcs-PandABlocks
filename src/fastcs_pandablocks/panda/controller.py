@@ -22,12 +22,9 @@ class PandaController(Controller):
             return
 
         await self._raw_panda.connect()
+        blocks, fields, labels, initial_values = await self._raw_panda.introspect()
 
-        assert self._raw_panda.blocks
-        assert self._raw_panda.fields
-        self._blocks.parse_introspected_data(
-            self._raw_panda.blocks, self._raw_panda.fields
-        )
+        self._blocks.parse_introspected_data(blocks, fields, labels, initial_values)
         self.is_connected = True
 
     async def initialise(self) -> None:

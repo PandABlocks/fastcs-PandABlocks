@@ -64,6 +64,12 @@ class PandaName:
     field: str | None = None
     sub_field: str | None = None
 
+    def up_to_block(self) -> PandaName:
+        return PandaName(block=self.block, block_number=self.block_number)
+
+    def up_to_field(self) -> PandaName:
+        return self.up_to_block() + PandaName(field=self.field)
+
     @cached_property
     def _string_form(self) -> str:
         return _format_with_separator(
@@ -77,9 +83,13 @@ class PandaName:
     def from_string(cls, name: str):
         split_name = name.split(PANDA_SEPARATOR)
 
+        if split_name == [""]:
+            return PandaName()
+
+        block, block_number, field, sub_field = None, None, None, None
         block, block_number = _extract_number_at_of_string(split_name[0])
-        field = split_name[1]
-        sub_field = split_name[2] if len(split_name) == 3 else None
+        field = split_name[1] if len(split_name) > 1 else None
+        sub_field = split_name[2] if len(split_name) > 2 else None
 
         return PandaName(
             block=block, block_number=block_number, field=field, sub_field=sub_field

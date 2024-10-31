@@ -29,7 +29,7 @@ from fastcs_pandablocks.handlers import (
     DefaultFieldUpdater,
     EguSender,
 )
-from fastcs_pandablocks.types.annotations import ResponseType
+from fastcs_pandablocks.types.annotations import RawInitialValuesType, ResponseType
 from fastcs_pandablocks.types.string_types import PandaName
 
 
@@ -65,6 +65,7 @@ class FieldController(SubController):
 
         self.top_level_attribute: Attribute | None = None
         self._additional_attributes = {}
+        self.sub_controllers: dict[str, FieldController] = {}
         super().__init__(search_device_for_attributes=False)
 
     @property
@@ -72,7 +73,12 @@ class FieldController(SubController):
         return self._additional_attributes
 
     def initialise(self):
-        pass
+        for sub_field_name, sub_field_controller in self.sub_controllers.items():
+            self.register_sub_controller(sub_field_name, sub_field_controller)
+            sub_field_controller.initialise()
+            self._additional_attributes[sub_field_name] = (
+                sub_field_controller.top_level_attribute
+            )
 
 
 class TableFieldController(FieldController):
@@ -234,6 +240,22 @@ class ExtOutFieldController(FieldController):
         )
 
 
+class _BitsSubFieldController(FieldController):
+    def __init__(self, label: str):
+        super().__init__()
+
+        self.top_level_attribute = AttrR(
+            Bool(znam="0", onam="1"),
+            description=_strip_description("Value of the field connected to this bit."),
+            group=WidgetGroup.OUTPUTS.value,
+        )
+        self._additional_attributes["NAME"] = AttrR(
+            String(),
+            description="Name of the field connected to this bit.",
+            initial_value=label,
+        )
+
+
 class ExtOutBitsFieldController(ExtOutFieldController):
     def __init__(
         self,
@@ -245,16 +267,7 @@ class ExtOutBitsFieldController(ExtOutFieldController):
             if label == "":
                 continue  # Some rows are empty, do not create records.
 
-            self._additional_attributes[f"val{bit_number}"] = AttrR(
-                Bool(znam="0", onam="1"),
-                description="Value of the field connected to this bit.",
-                group=WidgetGroup.OUTPUTS.value,
-            )
-            self._additional_attributes[f"name{bit_number}"] = AttrR(
-                Bool(znam="0", onam="1"),
-                description="Value of the field connected to this bit.",
-                group=WidgetGroup.OUTPUTS.value,
-            )
+            self.sub_controllers[f"BIT{bit_number}"] = _BitsSubFieldController(label)
 
 
 class BitMuxFieldController(FieldController):
@@ -506,6 +519,8 @@ FieldControllerType = (
 def get_field_controller_from_field_info(
     panda_name: PandaName,
     field_info: ResponseType,
+    initial_values: RawInitialValuesType,
+    label: str | None,
 ) -> FieldControllerType:
     match field_info:
         case TableFieldInfo():
@@ -530,7 +545,7 @@ def get_field_controller_from_field_info(
         case ExtOutFieldInfo():
             return ExtOutFieldController(field_info)
         case BitMuxFieldInfo():
-            return BitMuxFieldController(field_info)
+            return BitMuxFieldController(panda_name, field_info)
         case FieldInfo(type="param", subtype="bit"):
             return BitParamFieldController(field_info)
         case FieldInfo(type="read", subtype="bit"):

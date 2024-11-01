@@ -39,9 +39,7 @@ MAXIMUM_DESCRIPTION_LENGTH = 40
 
 
 def _strip_description(description: str | None) -> str | None:
-    if description is None:
-        return description
-    return description[:MAXIMUM_DESCRIPTION_LENGTH]
+    return None if description is None else description[:MAXIMUM_DESCRIPTION_LENGTH]
 
 
 class FieldController(SubController):
@@ -140,6 +138,7 @@ class TimeReadFieldController(FieldController):
         self,
         panda_name: PandaName,
         field_info: SubtypeTimeFieldInfo,
+        initial_values: RawInitialValuesType,
     ):
         super().__init__(panda_name)
         self.top_level_attribute = AttrR(
@@ -163,6 +162,7 @@ class TimeWriteFieldController(FieldController):
         self,
         panda_name: PandaName,
         field_info: SubtypeTimeFieldInfo,
+        initial_value: RawInitialValuesType,
     ):
         super().__init__(panda_name)
         self.top_level_attribute = AttrW(
@@ -320,15 +320,17 @@ class BitMuxFieldController(FieldController):
         initial_values: RawInitialValuesType,
     ):
         super().__init__(panda_name)
+
         self.top_level_attribute = AttrRW(
             String(),
             description=_strip_description(bit_mux_field_info.description),
             handler=DefaultFieldHandler(panda_name),
             group=WidgetGroup.INPUTS.value,
+            initial_value=initial_values[panda_name],
         )
 
         self._additional_attributes["delay"] = AttrRW(
-            Float(),
+            Int(),
             description="Clock delay on input.",
             handler=DefaultFieldHandler(panda_name),
             group=WidgetGroup.INPUTS.value,

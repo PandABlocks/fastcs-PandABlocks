@@ -11,7 +11,7 @@ EPICS_SEPARATOR = ":"
 PANDA_SEPARATOR = "."
 
 
-def _extract_number_at_of_string(string: str) -> tuple[str, int | None]:
+def _extract_number_at_end_of_string(string: str) -> tuple[str, int | None]:
     pattern = r"(\D+)(\d+)$"
     match = re.match(pattern, string)
     if match:
@@ -40,21 +40,13 @@ def _to_python_attribute_name(string: str):
     return string.replace("-", "_").lower()
 
 
-def _choose_sub_pv(sub_pv_1: T, sub_pv_2: T) -> T:
+def _choose_sub_name(sub_pv_1: T, sub_pv_2: T) -> T:
     if sub_pv_1 is not None and sub_pv_2 is not None:
         if sub_pv_1 != sub_pv_2:
             raise TypeError(
                 "Ambiguous pv elements on add " f"{sub_pv_1} and {sub_pv_2}"
             )
     return sub_pv_2 or sub_pv_1
-
-
-def _check_eq(sub_pv_1: T, sub_pv_2: T) -> bool:
-    if sub_pv_1 is not None and sub_pv_2 is not None:
-        return sub_pv_1 == sub_pv_2
-    elif sub_pv_1 and sub_pv_2 is None:
-        return False
-    return True
 
 
 @dataclass(frozen=True)
@@ -87,7 +79,7 @@ class PandaName:
             return PandaName()
 
         block, block_number, field, sub_field = None, None, None, None
-        block, block_number = _extract_number_at_of_string(split_name[0])
+        block, block_number = _extract_number_at_end_of_string(split_name[0])
         field = split_name[1] if len(split_name) > 1 else None
         sub_field = split_name[2] if len(split_name) > 2 else None
 
@@ -97,10 +89,10 @@ class PandaName:
 
     def __add__(self, other: PandaName) -> PandaName:
         return PandaName(
-            block=_choose_sub_pv(self.block, other.block),
-            block_number=_choose_sub_pv(self.block_number, other.block_number),
-            field=_choose_sub_pv(self.field, other.field),
-            sub_field=_choose_sub_pv(self.sub_field, other.sub_field),
+            block=_choose_sub_name(self.block, other.block),
+            block_number=_choose_sub_name(self.block_number, other.block_number),
+            field=_choose_sub_name(self.field, other.field),
+            sub_field=_choose_sub_name(self.sub_field, other.sub_field),
         )
 
     @cached_property
@@ -116,9 +108,10 @@ class PandaName:
         return ""
 
     def __contains__(self, other: PandaName) -> bool:
-        return (
-            _check_eq(other.block, self.block)
-            and _check_eq(other.block_number, self.block_number)
-            and _check_eq(other.field, self.field)
-            and _check_eq(other.sub_field, self.sub_field)
-        )
+        for attr in ("block", "block_number", "field", "sub_field"):
+            sub_value, super_value = getattr(other, attr), getattr(self, attr)
+            if super_value is None:
+                break
+            if sub_value != super_value:
+                return False
+        return True

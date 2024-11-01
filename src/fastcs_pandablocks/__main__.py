@@ -81,10 +81,14 @@ def main():
     level = getattr(logging, parsed_args.log_level.upper(), None)
     logging.basicConfig(format="%(levelname)s:%(message)s", level=level)
 
+    screens_directory = (
+        Path(parsed_args.screens_dir) if parsed_args.screens_dir else None
+    )
+
     ioc(
         parsed_args.prefix,
         parsed_args.hostname,
-        screens_directory=Path(parsed_args.screens_dir),
+        screens_directory=screens_directory,
         clear_bobfiles=parsed_args.clear_bobfiles,
         poll_period=parsed_args.poll_period,
         naming_convention=PvNamingConvention(parsed_args.pv_naming_convention),

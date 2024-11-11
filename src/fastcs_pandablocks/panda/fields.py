@@ -56,6 +56,13 @@ class FieldController(SubController):
 
         self._additional_attributes: dict[str, Attribute] = {}
 
+        if label is not None:
+            self._additional_attributes["label"] = AttrR(
+                String(),
+                description="Label from metadata.",
+                initial_value=label,
+            )
+
         super().__init__(search_device_for_attributes=False)
 
     def make_sub_fields(
@@ -641,7 +648,7 @@ class EnumReadFieldController(FieldController):
         super().__init__(panda_name)
 
         # We use a raw string for this since many labels won't fit into
-        # mbbIn fields because of EPICS limitations.
+        # `mbbIn` fields because of EPICS limitations.
         # Since this is read only it doesn't matter.
         self.top_level_attribute = AttrR(
             String(),

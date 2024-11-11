@@ -59,6 +59,8 @@ class PandaController(Controller):
         self._raw_panda = RawPanda(hostname)
         self._blocks: dict[PandaName, FieldController] = {}
 
+        self.connected = False
+
         super().__init__()
 
     @property
@@ -66,9 +68,14 @@ class PandaController(Controller):
         return self._additional_attributes
 
     async def connect(self) -> None:
+        if self.connected:
+            # `connect` needs to be called in `initialise`,
+            # then FastCS will attempt to call it again.
+            return
         await self._raw_panda.connect()
         blocks, fields, labels, initial_values = await self._raw_panda.introspect()
         self._blocks = _parse_introspected_data(blocks, fields, labels, initial_values)
+        self.connected = True
 
     async def initialise(self) -> None:
         await self.connect()
@@ -109,6 +116,7 @@ class PandaController(Controller):
 
     @scan(0.1)
     async def update(self):
+        raise RuntimeError("FINALLY CALLED!")
         changes = await self._raw_panda.get_changes()
         await asyncio.gather(
             *[

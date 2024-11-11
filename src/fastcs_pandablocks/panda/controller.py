@@ -116,7 +116,6 @@ class PandaController(Controller):
 
     @scan(0.1)
     async def update(self):
-        raise RuntimeError("FINALLY CALLED!")
         changes = await self._raw_panda.get_changes()
         await asyncio.gather(
             *[

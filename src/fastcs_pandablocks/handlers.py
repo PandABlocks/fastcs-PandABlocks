@@ -15,7 +15,7 @@ class DefaultFieldSender(Sender):
 
 class DefaultFieldUpdater(Updater):
     #: We update the fields from the top level
-    update_period = float("inf")
+    update_period = None
 
     def __init__(self, panda_name: PandaName):
         self.panda_name = panda_name

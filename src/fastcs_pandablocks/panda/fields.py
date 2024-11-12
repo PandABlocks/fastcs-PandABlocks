@@ -341,13 +341,11 @@ class BitMuxFieldController(FieldController):
         )
 
         self._additional_attributes["delay"] = AttrRW(
-            Int(),
+            Int(max=bit_mux_field_info.max_delay, min=0),
             description="Clock delay on input.",
             handler=DefaultFieldHandler(panda_name),
             group=WidgetGroup.INPUTS.value,
         )
-
-        # TODO: Add DRVL DRVH to `delay`.
 
 
 class PosMuxFieldController(FieldController):
@@ -375,14 +373,17 @@ class UintParamFieldController(FieldController):
         initial_values: RawInitialValuesType,
     ):
         super().__init__(panda_name)
-        self.top_level_attribute = AttrR(
-            Float(prec=0),
+        self.top_level_attribute = AttrRW(
+            Float(
+                max_alarm=uint_param_field_info.max_val,
+                max=uint_param_field_info.max_val,
+                min_alarm=0,
+                min=0,
+            ),
             description=_strip_description(uint_param_field_info.description),
             group=WidgetGroup.PARAMETERS.value,
             initial_value=float(initial_values[panda_name]),
         )
-
-        # TODO: set DRVL, DRVH, HOPR (new fastcs feature)
 
 
 class UintReadFieldController(FieldController):
@@ -394,7 +395,7 @@ class UintReadFieldController(FieldController):
     ):
         super().__init__(panda_name)
         self.top_level_attribute = AttrR(
-            Float(prec=0),
+            Float(prec=0, min_alarm=0, max_alarm=uint_read_field_info.max_val),
             description=_strip_description(uint_read_field_info.description),
             group=WidgetGroup.READBACKS.value,
             initial_value=float(initial_values[panda_name]),
@@ -410,7 +411,13 @@ class UintWriteFieldController(FieldController):
     ):
         super().__init__(panda_name)
         self.top_level_attribute = AttrW(
-            Float(prec=0),
+            Float(
+                prec=0,
+                max_alarm=uint_write_field_info.max_val,
+                max=uint_write_field_info.max_val,
+                min_alarm=0,
+                min=0,
+            ),
             description=_strip_description(uint_write_field_info.description),
             group=WidgetGroup.OUTPUTS.value,
         )

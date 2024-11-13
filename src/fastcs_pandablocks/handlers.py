@@ -1,3 +1,4 @@
+from dataclasses import asdict
 from typing import Any
 
 from fastcs.attributes import Attribute, AttrR, AttrW, Handler, Sender, Updater
@@ -30,13 +31,17 @@ class DefaultFieldHandler(DefaultFieldSender, DefaultFieldUpdater, Handler):
 
 
 class EguSender(Sender):
-    def __init__(self, attr_to_update: Attribute):
+    def __init__(self, panda_name: PandaName, attr_to_update: Attribute):
         """Update the attr"""
+        self.panda_name = panda_name
         self.attr_to_update = attr_to_update
 
     async def put(self, controller: Any, attr: AttrW, value: str) -> None:
-        # TODO find out how to update attr_to_update's EGU with the value
-        ...
+        await controller.put_value_to_panda(self.panda_name, value)
+        kwargs = asdict(self.attr_to_update.datatype)
+        kwargs["units"] = value
+        new_attribute_datatype = type(self.attr_to_update.datatype)(**kwargs)
+        self.attr_to_update.update_datatype(new_attribute_datatype)
 
 
 class CaptureHandler(Handler):

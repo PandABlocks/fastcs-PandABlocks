@@ -126,8 +126,12 @@ class TimeParamFieldController(FieldController):
         initial_values: RawInitialValuesType,
     ):
         super().__init__(panda_name)
+
+        units_panda_name = panda_name + PandaName(sub_field="units")
+        initial_units = initial_values[units_panda_name]
+
         self.top_level_attribute = AttrRW(
-            Float(),
+            Float(units=initial_units),
             handler=DefaultFieldHandler(panda_name),
             description=_strip_description(field_info.description),
             group=WidgetGroup.PARAMETERS.value,
@@ -135,7 +139,7 @@ class TimeParamFieldController(FieldController):
         )
         self._additional_attributes["units"] = AttrW(
             String(),
-            handler=EguSender(self.top_level_attribute),
+            handler=EguSender(units_panda_name, self.top_level_attribute),
             group=WidgetGroup.PARAMETERS.value,
             allowed_values=field_info.units_labels,
         )
@@ -149,8 +153,12 @@ class TimeReadFieldController(FieldController):
         initial_values: RawInitialValuesType,
     ):
         super().__init__(panda_name)
+
+        units_panda_name = panda_name + PandaName(sub_field="units")
+        initial_units = initial_values[units_panda_name]
+
         self.top_level_attribute = AttrR(
-            Float(),
+            Float(units=initial_units),
             handler=DefaultFieldUpdater(
                 panda_name=panda_name,
             ),
@@ -160,7 +168,7 @@ class TimeReadFieldController(FieldController):
         )
         self._additional_attributes["units"] = AttrW(
             String(),
-            handler=EguSender(self.top_level_attribute),
+            handler=EguSender(units_panda_name, self.top_level_attribute),
             group=WidgetGroup.OUTPUTS.value,
             allowed_values=field_info.units_labels,
         )
@@ -171,11 +179,15 @@ class TimeWriteFieldController(FieldController):
         self,
         panda_name: PandaName,
         field_info: SubtypeTimeFieldInfo,
-        initial_value: RawInitialValuesType,
+        initial_values: RawInitialValuesType,
     ):
         super().__init__(panda_name)
+
+        units_panda_name = panda_name + PandaName(sub_field="units")
+        initial_units = initial_values[units_panda_name]
+
         self.top_level_attribute = AttrW(
-            Float(),
+            Float(units=initial_units),
             handler=DefaultFieldSender(panda_name),
             description=_strip_description(field_info.description),
             group=WidgetGroup.OUTPUTS.value,

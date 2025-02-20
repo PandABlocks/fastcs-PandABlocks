@@ -43,9 +43,7 @@ def _to_python_attribute_name(string: str):
 def _choose_sub_name(sub_pv_1: T, sub_pv_2: T) -> T:
     if sub_pv_1 is not None and sub_pv_2 is not None:
         if sub_pv_1 != sub_pv_2:
-            raise TypeError(
-                "Ambiguous pv elements on add " f"{sub_pv_1} and {sub_pv_2}"
-            )
+            raise TypeError(f"Ambiguous pv elements on add {sub_pv_1} and {sub_pv_2}")
     return sub_pv_2 or sub_pv_1
 
 

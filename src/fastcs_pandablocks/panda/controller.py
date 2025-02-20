@@ -2,6 +2,7 @@ import asyncio
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.controller import Controller
+from fastcs.datatypes import Bool, Float, Int, String, T
 from fastcs.wrappers import scan
 
 from fastcs_pandablocks.types import (
@@ -50,22 +51,24 @@ def _parse_introspected_data(
     return block_controllers
 
 
+def panda_value_to_attribute_value(attribute: Attribute[T], value: str) -> T:
+    if isinstance(attribute.datatype, (Int | Float | String | Bool)):
+        return attribute.datatype.dtype(value)  # type: ignore
+    raise NotImplementedError(f"Unknown datatype {attribute.datatype}")
+
+
 class PandaController(Controller):
     def __init__(self, hostname: str, poll_period: float) -> None:
         # TODO https://github.com/DiamondLightSource/FastCS/issues/62
         self.poll_period = poll_period
 
-        self._additional_attributes: dict[str, Attribute] = {}
+        self.attributes: dict[str, Attribute] = {}
         self._raw_panda = RawPanda(hostname)
         self._blocks: dict[PandaName, FieldController] = {}
 
         self.connected = False
 
         super().__init__()
-
-    @property
-    def additional_attributes(self):
-        return self._additional_attributes
 
     async def connect(self) -> None:
         if self.connected:
@@ -81,11 +84,9 @@ class PandaController(Controller):
         await self.connect()
         for block_name, block in self._blocks.items():
             if block.top_level_attribute is not None:
-                self._additional_attributes[block_name.attribute_name] = (
-                    block.top_level_attribute
-                )
-            if block.additional_attributes or block.sub_fields:
-                self.register_sub_controller(block_name.attribute_name, block)
+                self.attributes[block_name.attribute_name] = block.top_level_attribute
+            if block.attributes or block.sub_fields:
+                self.register_sub_controller(block_name.attribute_name.title(), block)
             await block.initialise()
 
     def get_attribute(self, panda_name: PandaName) -> Attribute:
@@ -106,11 +107,12 @@ class PandaController(Controller):
 
     async def update_field_value(self, panda_name: PandaName, value: str):
         attribute = self.get_attribute(panda_name)
+        attribute_value = panda_value_to_attribute_value(attribute, value)
 
-        if isinstance(attribute, AttrW):
-            await attribute.process(value)
-        elif isinstance(attribute, (AttrRW | AttrR)):
-            await attribute.set(value)
+        if isinstance(attribute, AttrW) and not isinstance(attribute, AttrRW):
+            await attribute.process(attribute_value)
+        elif isinstance(attribute, AttrR):
+            await attribute.set(attribute_value)
         else:
             raise RuntimeError(f"Couldn't find panda field for {panda_name}.")
 

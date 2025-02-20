@@ -4,8 +4,6 @@ import argparse
 import logging
 from pathlib import Path
 
-from fastcs.backends.epics.util import PvNamingConvention
-
 from fastcs_pandablocks import DEFAULT_POLL_PERIOD, ioc
 
 from . import __version__
@@ -39,14 +37,6 @@ def main():
             "directory is provided then bobfiles will not be generated."
         ),
     )
-    run_parser.add_argument(
-        "--clear-bobfiles",
-        action="store_true",
-        help=(
-            "Overwrite existing bobfiles from the given `screens-dir` "
-            "before generating new ones."
-        ),
-    )
 
     run_parser.add_argument(
         "--log-level",
@@ -59,18 +49,6 @@ def main():
         default=DEFAULT_POLL_PERIOD,
         type=float,
         help="Period in seconds with which to poll the panda.",
-    )
-    run_parser.add_argument(
-        "--pv-naming-convention",
-        default=PvNamingConvention.CAPITALIZED.name,
-        choices=[choice.name for choice in PvNamingConvention],
-        help="Naming convention of the EPICS PVs.",
-    )
-    run_parser.add_argument(
-        "--pv-separator",
-        default=":",
-        type=str,
-        help="Separator to use between EPICS PV sections.",
     )
 
     parsed_args = parser.parse_args()
@@ -89,10 +67,7 @@ def main():
         parsed_args.prefix,
         parsed_args.hostname,
         screens_directory=screens_directory,
-        clear_bobfiles=parsed_args.clear_bobfiles,
         poll_period=parsed_args.poll_period,
-        naming_convention=PvNamingConvention(parsed_args.pv_naming_convention),
-        pv_separator=parsed_args.pv_separator,
     )
 
 

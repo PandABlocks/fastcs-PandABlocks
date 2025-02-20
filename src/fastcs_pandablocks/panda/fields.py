@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import enum
+
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.controller import SubController
-from fastcs.datatypes import Bool, Float, Int, String
+from fastcs.datatypes import Bool, Enum, Float, Int, String
 from pandablocks.responses import (
     BitMuxFieldInfo,
     BitOutFieldInfo,
@@ -48,22 +50,23 @@ class FieldController(SubController):
         panda_name: PandaName,
         label: str | None = None,
     ):
+        self.description = label
         self.panda_name = panda_name
         self.top_level_attribute: Attribute | None = None
 
         # Sub fields eg `PGEN.OUT` and `PGEN.TRIGGER`
         self.sub_fields: dict[PandaName, FieldController] = {}
 
-        self._additional_attributes: dict[str, Attribute] = {}
+        self.attributes: dict[str, Attribute] = {}
 
         if label is not None:
-            self._additional_attributes["label"] = AttrR(
+            self.attributes["label"] = AttrR(
                 String(),
                 description="Label from metadata.",
                 initial_value=label,
             )
 
-        super().__init__(search_device_for_attributes=False)
+        super().__init__()
 
     def make_sub_fields(
         self,
@@ -84,21 +87,11 @@ class FieldController(SubController):
     async def initialise(self):
         for field_name, field in self.sub_fields.items():
             self.register_sub_controller(
-                field_name.attribute_name, sub_controller=field
+                field_name.attribute_name.title(), sub_controller=field
             )
             await field.initialise()
             if field.top_level_attribute:
-                self._additional_attributes[field_name.attribute_name] = (
-                    field.top_level_attribute
-                )
-
-    @property
-    def additional_attributes(self) -> dict[str, Attribute]:
-        """
-        Used by the FastCS mapping parser to get attributes since
-        we're not searching for device attributes.
-        """
-        return self._additional_attributes
+                self.attributes[field_name.attribute_name] = field.top_level_attribute
 
 
 class TableFieldController(FieldController):
@@ -125,6 +118,7 @@ class TimeParamFieldController(FieldController):
         field_info: SubtypeTimeFieldInfo | TimeFieldInfo,
         initial_values: RawInitialValuesType,
     ):
+        self.units_enum = enum.Enum("Units", field_info.units_labels)
         super().__init__(panda_name)
         self.top_level_attribute = AttrRW(
             Float(),
@@ -133,11 +127,10 @@ class TimeParamFieldController(FieldController):
             group=WidgetGroup.PARAMETERS.value,
             initial_value=float(initial_values[panda_name]),
         )
-        self._additional_attributes["units"] = AttrW(
-            String(),
+        self.attributes["units"] = AttrW(
+            Enum(self.units_enum),
             handler=EguSender(self.top_level_attribute),
             group=WidgetGroup.PARAMETERS.value,
-            allowed_values=field_info.units_labels,
         )
 
 
@@ -148,6 +141,7 @@ class TimeReadFieldController(FieldController):
         field_info: SubtypeTimeFieldInfo,
         initial_values: RawInitialValuesType,
     ):
+        self.units_enum = enum.Enum("Units", field_info.units_labels)
         super().__init__(panda_name)
         self.top_level_attribute = AttrR(
             Float(),
@@ -158,11 +152,10 @@ class TimeReadFieldController(FieldController):
             group=WidgetGroup.OUTPUTS.value,
             initial_value=float(initial_values[panda_name]),
         )
-        self._additional_attributes["units"] = AttrW(
-            String(),
+        self.attributes["units"] = AttrW(
+            Enum(self.units_enum),
             handler=EguSender(self.top_level_attribute),
             group=WidgetGroup.OUTPUTS.value,
-            allowed_values=field_info.units_labels,
         )
 
 
@@ -173,6 +166,7 @@ class TimeWriteFieldController(FieldController):
         field_info: SubtypeTimeFieldInfo,
         initial_value: RawInitialValuesType,
     ):
+        self.units_enum = enum.Enum("Units", field_info.units_labels)
         super().__init__(panda_name)
         self.top_level_attribute = AttrW(
             Float(),
@@ -180,11 +174,10 @@ class TimeWriteFieldController(FieldController):
             description=_strip_description(field_info.description),
             group=WidgetGroup.OUTPUTS.value,
         )
-        self._additional_attributes["units"] = AttrW(
-            String(),
+        self.attributes["units"] = AttrW(
+            Enum(self.units_enum),
             handler=EguSender(self.top_level_attribute),
             group=WidgetGroup.READBACKS.value,
-            allowed_values=field_info.units_labels,
         )
 
 
@@ -197,7 +190,7 @@ class BitOutFieldController(FieldController):
     ):
         super().__init__(panda_name)
         self.top_level_attribute = AttrR(
-            Bool(znam="0", onam="1"),
+            Bool(),
             description=_strip_description(field_info.description),
             group=WidgetGroup.OUTPUTS.value,
             initial_value=bool(int(initial_values[panda_name])),
@@ -213,7 +206,7 @@ class PosOutFieldController(FieldController):
     ):
         super().__init__(panda_name)
         top_level_attribute = AttrR(
-            Float(),
+            Bool(),
             description=_strip_description(field_info.description),
             group=WidgetGroup.OUTPUTS.value,
             initial_value=bool(int(initial_values[panda_name])),
@@ -241,22 +234,18 @@ class PosOutFieldController(FieldController):
 
         offset.set_update_callback(updated_scaled_on_offset_change)
 
-        self._additional_attributes.update(
-            {"scaled": scaled, "scale": scale, "offset": offset}
-        )
+        self.attributes.update({"scaled": scaled, "scale": scale, "offset": offset})
 
         self.top_level_attribute = top_level_attribute
-        self._additional_attributes["capture"] = AttrRW(
-            String(),
+        self.attributes["capture"] = AttrRW(
+            Enum(enum.Enum("Capture", field_info.capture_labels)),
             group=WidgetGroup.CAPTURE.value,
             handler=CaptureHandler(),
-            allowed_values=field_info.capture_labels,
         )
-        self._additional_attributes["dataset"] = AttrRW(
-            String(),
+        self.attributes["dataset"] = AttrRW(
+            Enum(enum.Enum("Dataset", field_info.capture_labels)),
             group=WidgetGroup.CAPTURE.value,
             handler=DatasetHandler(),
-            allowed_values=field_info.capture_labels,
         )
 
 
@@ -274,17 +263,15 @@ class ExtOutFieldController(FieldController):
             description=_strip_description(field_info.description),
             group=WidgetGroup.OUTPUTS.value,
         )
-        self._additional_attributes["capture"] = AttrRW(
-            String(),
+        self.attributes["capture"] = AttrRW(
+            Enum(enum.Enum("Capture", field_info.capture_labels)),
             group=WidgetGroup.CAPTURE.value,
             handler=CaptureHandler(),
-            allowed_values=field_info.capture_labels,
         )
-        self._additional_attributes["dataset"] = AttrRW(
-            String(),
+        self.attributes["dataset"] = AttrRW(
+            Enum(enum.Enum("Dataset", field_info.capture_labels)),
             group=WidgetGroup.CAPTURE.value,
             handler=DatasetHandler(),
-            allowed_values=field_info.capture_labels,
         )
 
 
@@ -293,11 +280,11 @@ class _BitsSubFieldController(FieldController):
         super().__init__(panda_name, label=label)
 
         self.top_level_attribute = AttrR(
-            Bool(znam="0", onam="1"),
+            Bool(),
             description=_strip_description("Value of the field connected to this bit."),
             group=WidgetGroup.OUTPUTS.value,
         )
-        self._additional_attributes["NAME"] = AttrR(
+        self.attributes["NAME"] = AttrR(
             String(),
             description="Name of the field connected to this bit.",
             initial_value=label,
@@ -340,7 +327,7 @@ class BitMuxFieldController(FieldController):
             initial_value=initial_values[panda_name],
         )
 
-        self._additional_attributes["delay"] = AttrRW(
+        self.attributes["delay"] = AttrRW(
             Int(),
             description="Clock delay on input.",
             handler=DefaultFieldHandler(panda_name),
@@ -357,13 +344,13 @@ class PosMuxFieldController(FieldController):
         pos_mux_field_info: PosMuxFieldInfo,
         initial_values: RawInitialValuesType,
     ):
+        self.enum_type = enum.Enum("Labels", pos_mux_field_info.labels)
         super().__init__(panda_name)
         self.top_level_attribute = AttrRW(
-            String(),
+            Enum(self.enum_type),
             description=_strip_description(pos_mux_field_info.description),
             group=WidgetGroup.INPUTS.value,
-            allowed_values=pos_mux_field_info.labels,
-            initial_value=initial_values[panda_name],
+            initial_value=self.enum_type[initial_values[panda_name]],
         )
 
 
@@ -519,7 +506,7 @@ class BitParamFieldController(FieldController):
     ):
         super().__init__(panda_name)
         self.top_level_attribute = AttrRW(
-            Bool(znam="0", onam="1"),
+            Bool(),
             description=_strip_description(bit_param_field_info.description),
             group=WidgetGroup.PARAMETERS.value,
             # Initial value is string "0"/"1".
@@ -537,7 +524,7 @@ class BitReadFieldController(FieldController):
     ):
         super().__init__(panda_name)
         self.top_level_attribute = AttrR(
-            Bool(znam="0", onam="1"),
+            Bool(),
             description=_strip_description(bit_read_field_info.description),
             group=WidgetGroup.READBACKS.value,
             initial_value=bool(int(initial_values[panda_name])),
@@ -553,7 +540,7 @@ class BitWriteFieldController(FieldController):
     ):
         super().__init__(panda_name)
         self.top_level_attribute = AttrW(
-            Bool(znam="0", onam="1"),
+            Bool(),
             description=_strip_description(bit_write_field_info.description),
             group=WidgetGroup.OUTPUTS.value,
         )
@@ -568,7 +555,7 @@ class ActionWriteFieldController(FieldController):
     ):
         super().__init__(panda_name)
         self.top_level_attribute = AttrW(
-            Bool(znam="0", onam="1"),
+            Bool(),
             description=_strip_description(action_write_field_info.description),
             group=WidgetGroup.OUTPUTS.value,
         )
@@ -628,13 +615,13 @@ class EnumParamFieldController(FieldController):
         enum_param_field_info: EnumFieldInfo,
         initial_values: RawInitialValuesType,
     ):
+        self.enum_type = enum.Enum("Labels", enum_param_field_info.labels)
         super().__init__(panda_name)
         self.top_level_attribute = AttrRW(
-            String(),
+            Enum(self.enum_type),
             description=_strip_description(enum_param_field_info.description),
-            allowed_values=enum_param_field_info.labels,
             group=WidgetGroup.PARAMETERS.value,
-            initial_value=initial_values[panda_name],
+            initial_value=self.enum_type[initial_values[panda_name]],
         )
 
 
@@ -665,11 +652,11 @@ class EnumWriteFieldController(FieldController):
         enum_write_field_info: EnumFieldInfo,
         initial_values: RawInitialValuesType,
     ):
+        self.enum_type = enum.Enum("Labels", enum_write_field_info.labels)
         super().__init__(panda_name)
         self.top_level_attribute = AttrW(
-            String(),
+            Enum(self.enum_type),
             description=_strip_description(enum_write_field_info.description),
-            allowed_values=enum_write_field_info.labels,
             group=WidgetGroup.OUTPUTS.value,
         )
 

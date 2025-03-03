@@ -29,6 +29,19 @@ class DefaultFieldHandler(DefaultFieldSender, DefaultFieldUpdater, Handler):
         super().__init__(panda_name)
 
 
+class TableFieldHandler(Handler):
+    def __init__(self, panda_name: PandaName):
+        self.panda_name = panda_name
+
+    async def update(self, controller: Any, attr: AttrR) -> None:
+        # TODO: Convert to panda value
+        ...
+
+    async def put(self, controller: Any, attr: AttrW, value: Any) -> None:
+        # TODO: Convert to attribtue value
+        ...
+
+
 class EguSender(Sender):
     def __init__(self, attr_to_update: Attribute):
         """Update the attr"""

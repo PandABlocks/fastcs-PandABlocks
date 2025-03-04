@@ -1,7 +1,7 @@
 import asyncio
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
-from fastcs.controller import Controller
+from fastcs.controller import Controller, SubController
 from fastcs.datatypes import Bool, Float, Int, String, T
 from fastcs.wrappers import scan
 
@@ -11,9 +11,42 @@ from fastcs_pandablocks.types import (
     RawFieldsType,
     RawInitialValuesType,
 )
+from fastcs_pandablocks.types._annotations import ResponseType
 
 from .client_wrapper import RawPanda
-from .fields import FieldController
+from .fields import make_attributes
+
+
+class BlockController(SubController):
+    def __init__(self, panda_name: PandaName, label: str | None = None):
+        self.description = label
+        self.panda_name = panda_name
+
+        self.attributes: dict[str, Attribute] = {}
+        self.panda_name_to_attribute: dict[PandaName, Attribute] = {}
+        super().__init__()
+
+    def make_attributes(
+        self,
+        field_info: dict[PandaName, ResponseType],
+        initial_values: dict[PandaName, str],
+    ):
+        if self.description is not None:
+            self.attributes["LABEL"] = AttrR(
+                String(),
+                description="Label from metadata.",
+                initial_value=self.description,
+            )
+        self.panda_name_to_attribute = make_attributes(
+            self.panda_name, field_info, initial_values
+        )
+        attribute_name_to_attribute = {}
+        for panda_name, attribute in self.panda_name_to_attribute.items():
+            assert panda_name.field
+            sub_field = f"_{panda_name.sub_field}" if panda_name.sub_field else ""
+            attribute_name_to_attribute[f"{panda_name.field}{sub_field}"] = attribute
+
+        self.attributes.update(attribute_name_to_attribute)
 
 
 def _parse_introspected_data(
@@ -22,7 +55,7 @@ def _parse_introspected_data(
     raw_labels: RawInitialValuesType,
     raw_initial_values: RawInitialValuesType,
 ):
-    block_controllers: dict[PandaName, FieldController] = {}
+    block_controllers: dict[PandaName, BlockController] = {}
     for (block_name, block_info), field_info in zip(
         raw_blocks.items(), raw_field_infos, strict=True
     ):
@@ -41,11 +74,11 @@ def _parse_introspected_data(
                 if key in numbered_block_name
             }
             label = raw_labels.get(numbered_block_name, None)
-            block = FieldController(
+            block = BlockController(
                 numbered_block_name,
                 label=block_info.description or label,
             )
-            block.make_sub_fields(field_info, block_initial_values)
+            block.make_attributes(field_info, block_initial_values)
             block_controllers[numbered_block_name] = block
 
     return block_controllers
@@ -64,7 +97,7 @@ class PandaController(Controller):
 
         self.attributes: dict[str, Attribute] = {}
         self._raw_panda = RawPanda(hostname)
-        self._blocks: dict[PandaName, FieldController] = {}
+        self._blocks: dict[PandaName, BlockController] = {}
 
         self.connected = False
 
@@ -83,27 +116,15 @@ class PandaController(Controller):
     async def initialise(self) -> None:
         await self.connect()
         for block_name, block in self._blocks.items():
-            if block.top_level_attribute is not None:
-                self.attributes[block_name.attribute_name] = block.top_level_attribute
-            if block.attributes or block.sub_fields:
-                self.register_sub_controller(block_name.attribute_name.title(), block)
-            await block.initialise()
+            self.register_sub_controller(block_name.attribute_name.title(), block)
 
     def get_attribute(self, panda_name: PandaName) -> Attribute:
         assert panda_name.block
         block_controller = self._blocks[panda_name.up_to_block()]
         if panda_name.field is None:
-            assert block_controller.top_level_attribute is not None
-            return block_controller.top_level_attribute
+            raise RuntimeError
 
-        field_controller = block_controller.sub_fields[panda_name.up_to_field()]
-        if panda_name.sub_field is None:
-            assert field_controller.top_level_attribute is not None
-            return field_controller.top_level_attribute
-
-        sub_field_controller = field_controller.sub_fields[panda_name]
-        assert sub_field_controller.top_level_attribute is not None
-        return sub_field_controller.top_level_attribute
+        return block_controller.panda_name_to_attribute[panda_name]
 
     async def update_field_value(self, panda_name: PandaName, value: str):
         attribute = self.get_attribute(panda_name)

@@ -96,7 +96,7 @@ class PandaName:
     @cached_property
     def attribute_name(self) -> str:
         if self.sub_field:
-            return _to_python_attribute_name(self.sub_field)
+            return _to_python_attribute_name(f"{self.field}_{self.sub_field}")
         if self.field:
             return _to_python_attribute_name(self.field)
         if self.block:

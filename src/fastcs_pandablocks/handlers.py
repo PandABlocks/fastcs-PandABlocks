@@ -1,6 +1,7 @@
 from typing import Any
 
 from fastcs.attributes import Attribute, AttrR, AttrW, Handler, Sender, Updater
+from fastcs.datatypes import T
 
 from fastcs_pandablocks.types import PandaName
 
@@ -9,7 +10,7 @@ class DefaultFieldSender(Sender):
     def __init__(self, panda_name: PandaName):
         self.panda_name = panda_name
 
-    async def put(self, controller: Any, attr: AttrW, value: str) -> None:
+    async def put(self, controller: Any, attr: AttrW[T], value: T) -> None:
         await controller.put_value_to_panda(self.panda_name, value)
 
 

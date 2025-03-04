@@ -7,7 +7,7 @@ from fastcs.launch import EpicsPVAOptions
 from fastcs.transport import EpicsGUIOptions, EpicsIOCOptions
 
 from ._version import __version__
-from .panda.controller import PandaController
+from .panda.panda_controller import PandaController
 
 DEFAULT_POLL_PERIOD = 0.1
 

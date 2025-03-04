@@ -11,7 +11,7 @@ def test_name():
     assert name.block_number == 1
     assert name.field == "b"
     assert name.sub_field == "c"
-    assert name.attribute_name == "c"
+    assert name.attribute_name == "b_c"
     assert str(name) == "a1.b.c"
 
     assert name.up_to_block() == PandaName.from_string("a1")

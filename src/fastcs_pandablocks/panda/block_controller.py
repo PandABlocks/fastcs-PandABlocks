@@ -1,9 +1,9 @@
-from collections.abc import Coroutine
+from collections.abc import Callable, Coroutine
 from typing import Any
 
 from fastcs.attributes import Attribute, AttrR
 from fastcs.controller import SubController
-from fastcs.datatypes import String
+from fastcs.datatypes import DataType, String
 
 from fastcs_pandablocks.types import PandaName
 
@@ -12,7 +12,9 @@ class BlockController(SubController):
     def __init__(
         self,
         panda_name: PandaName,
-        put_value_to_panda: Coroutine[Any, Any, None],
+        put_value_to_panda: Callable[
+            [PandaName, DataType, Any], Coroutine[None, None, None]
+        ],
         label: str | None = None,
     ):
         self.description = label

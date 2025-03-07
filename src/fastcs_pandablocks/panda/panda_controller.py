@@ -2,7 +2,7 @@ import asyncio
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.controller import Controller
-from fastcs.datatypes import Bool, Float, Int, String, T
+from fastcs.datatypes import DataType, T
 from fastcs.wrappers import scan
 
 from fastcs_pandablocks.panda.blocks import Blocks
@@ -11,16 +11,7 @@ from fastcs_pandablocks.types import (
 )
 
 from .client_wrapper import RawPanda
-
-
-def panda_value_to_attribute_value(attribute: Attribute[T], value: str) -> T:
-    if isinstance(attribute.datatype, (Int | Float | String | Bool)):
-        return attribute.datatype.dtype(value)  # type: ignore
-    raise NotImplementedError(f"Unknown datatype {attribute.datatype}")
-
-
-def attribute_value_to_panda_value(value: T) -> str:
-    return str(value)
+from .handlers import attribute_value_to_panda_value, panda_value_to_attribute_value
 
 
 class PandaController(Controller):
@@ -36,10 +27,12 @@ class PandaController(Controller):
 
         super().__init__()
 
-    async def _put_value_to_panda(self, panda_name: PandaName, value: T) -> None:
+    async def _put_value_to_panda(
+        self, panda_name: PandaName, fastcs_datatype: DataType[T], value: T
+    ) -> None:
         await self._raw_panda.send(
             str(panda_name),
-            attribute_value_to_panda_value(value),
+            attribute_value_to_panda_value(fastcs_datatype, value),
         )
 
     async def connect(self) -> None:
@@ -50,6 +43,7 @@ class PandaController(Controller):
         await self._raw_panda.connect()
         blocks, fields, labels, initial_values = await self._raw_panda.introspect()
         self._blocks.parse_introspected_data(blocks, fields, labels, initial_values)
+        self._blocks.setup_post_introspection()
         self.connected = True
 
     async def initialise(self) -> None:
@@ -67,7 +61,7 @@ class PandaController(Controller):
 
     async def update_field_value(self, panda_name: PandaName, value: str):
         attribute = self._blocks.get_attribute(panda_name)
-        attribute_value = panda_value_to_attribute_value(attribute, value)
+        attribute_value = panda_value_to_attribute_value(attribute.datatype, value)
 
         if isinstance(attribute, AttrW) and not isinstance(attribute, AttrRW):
             await attribute.process(attribute_value)
@@ -79,6 +73,7 @@ class PandaController(Controller):
     @scan(0.1)
     async def update(self):
         changes = await self._raw_panda.get_changes()
+
         await asyncio.gather(
             *[
                 self.update_field_value(PandaName.from_string(raw_panda_name), value)

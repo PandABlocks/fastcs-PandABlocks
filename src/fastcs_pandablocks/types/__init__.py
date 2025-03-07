@@ -7,7 +7,6 @@ from ._annotations import (
     ResponseType,
 )
 from ._string_types import (
-    EPICS_SEPARATOR,
     PANDA_SEPARATOR,
     PandaName,
 )
@@ -23,7 +22,6 @@ class WidgetGroup(Enum):
 
 
 __all__ = [
-    "EPICS_SEPARATOR",
     "PANDA_SEPARATOR",
     "PandaName",
     "ResponseType",

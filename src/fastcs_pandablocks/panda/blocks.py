@@ -1,12 +1,10 @@
 import enum
-import logging
-from collections.abc import Coroutine
-from dataclasses import dataclass
+from collections.abc import Callable, Coroutine
 from typing import Any
 
 import numpy as np
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
-from fastcs.datatypes import Bool, Enum, Float, Int, String, Table
+from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, Table
 from numpy.typing import DTypeLike
 from pandablocks.commands import TableFieldDetails
 from pandablocks.responses import (
@@ -25,7 +23,9 @@ from pandablocks.responses import (
     UintFieldInfo,
 )
 
-from fastcs_pandablocks.handlers import (
+from fastcs_pandablocks.panda.block_controller import BlockController
+from fastcs_pandablocks.panda.handlers import (
+    BitGroupOnUpdate,
     CaptureHandler,
     DatasetHandler,
     DefaultFieldHandler,
@@ -42,19 +42,13 @@ from fastcs_pandablocks.types import (
     WidgetGroup,
 )
 
-from .block_controller import BlockController
-
-
-@dataclass
-class AttrWithGroupPair:
-    attr_cls: type[AttrR | AttrW | AttrRW]
-    pvi_group: WidgetGroup
-
 
 class Blocks:
     def __init__(
         self,
-        put_value_to_panda: Coroutine[Any, Any, None],
+        put_value_to_panda: Callable[
+            [PandaName, DataType, Any], Coroutine[None, None, None]
+        ],
     ):
         self.put_value_to_panda = put_value_to_panda
 
@@ -64,10 +58,46 @@ class Blocks:
         #: The controllers which should be registered by `PandaController`
         self.top_level_controllers: dict[PandaName, BlockController] = {}
 
+        #: For keeping track of ext out bits so that updates in the group can be linked
+        self._bits_group_names: list[tuple[PandaName, list[PandaName]]] = []
+
     def get_attribute(self, panda_name: PandaName) -> Attribute:
         return self.all_controllers[panda_name.up_to_block()].panda_name_to_attribute[
             panda_name
         ]
+
+    # ==================================================================================
+    # ====== FOR LINKING AND GENERATING POST INTROSPECTION =============================
+    # ==================================================================================
+
+    async def setup_post_introspection(self):
+        await self._link_bits_groups()
+
+    async def _link_bits_groups(self):
+        for group_panda_name, bit_panda_names in self._bits_group_names:
+            group_attribute = self.get_attribute(group_panda_name)
+
+            bit_attributes: list[AttrRW] = [
+                self.get_attribute(panda_name) for panda_name in bit_panda_names
+            ]  # type: ignore
+
+            assert isinstance(group_attribute, AttrRW)
+            update_callback = BitGroupOnUpdate(group_attribute, bit_attributes)
+            group_attribute.add_update_callback(update_callback)
+
+            for bit_attribute in bit_attributes:
+                bit_attribute.description = (
+                    "Whether this field is set for capture in "
+                    f"the `{group_panda_name.up_to_field()}` group."
+                )
+                bit_attribute.add_update_callback(update_callback)
+
+            # To match all bits before the p4p transport starts.
+            await update_callback(group_attribute.get())
+
+    # ==================================================================================
+    # ====== FOR PARSING INTROSPECTED DATA =============================================
+    # ==================================================================================
 
     def parse_introspected_data(
         self,
@@ -159,8 +189,9 @@ class Blocks:
                     parent_block, field_panda_name, field_info, initial_values
                 )
             case ExtOutBitsFieldInfo():
-                # self._make_ext_out_bits(parent_block, field_panda_name, field_info)
-                logging.debug(f"SKIPPING EXT OUT BITS {field_panda_name}.")
+                self._make_ext_out_bits(
+                    parent_block, field_panda_name, field_info, initial_values
+                )
             case ExtOutFieldInfo():
                 self._make_ext_out(
                     parent_block, field_panda_name, field_info, initial_values
@@ -364,6 +395,16 @@ class Blocks:
             ),
         )
 
+        capture_name = panda_name + PandaName(sub_field="CAPTURE")
+        parent_block.add_attribute(
+            capture_name,
+            AttrRW(
+                Bool(),
+                group=WidgetGroup.CAPTURE.value,
+                initial_value=False,
+            ),
+        )
+
     def _make_pos_out(
         self,
         parent_block: BlockController,
@@ -411,23 +452,25 @@ class Blocks:
         async def updated_scaled_on_offset_change(*_):
             await scaled.set(scale.get() * pos_out.get() + offset.get())
 
-        offset.set_update_callback(updated_scaled_on_offset_change)
-        scale.set_update_callback(updated_scaled_on_offset_change)
-        pos_out.set_update_callback(updated_scaled_on_offset_change)
+        offset.add_update_callback(updated_scaled_on_offset_change)
+        scale.add_update_callback(updated_scaled_on_offset_change)
+        pos_out.add_update_callback(updated_scaled_on_offset_change)
 
         capture_enum = Enum(enum.Enum("Capture", field_info.capture_labels))
+
+        capture_panda_name = panda_name + PandaName(sub_field="CAPTURE")
         parent_block.add_attribute(
-            parent_block.panda_name + PandaName(sub_field="CAPTURE"),
+            capture_panda_name,
             AttrRW(
                 capture_enum,
                 description=field_info.description,
                 group=WidgetGroup.CAPTURE.value,
-                handler=CaptureHandler(),
+                handler=CaptureHandler(capture_panda_name),
                 initial_value=capture_enum.members[int(initial_values[panda_name])],
             ),
         )
         parent_block.add_attribute(
-            parent_block.panda_name + PandaName(sub_field="DATASET"),
+            panda_name + PandaName(sub_field="DATASET"),
             AttrRW(
                 String(),
                 description=(
@@ -447,19 +490,24 @@ class Blocks:
         field_info: ExtOutFieldInfo,
         initial_values: RawInitialValuesType,
     ):
+        """Returns the capture attribtute so we can add a callback in ext out bits.
+
+        For an ext out bits, we set one capture in the group, wait for the panda
+        response that the group is being captutured, and then update all the elements
+        in the group.
+        """
+
         capture_enum = Enum(enum.Enum("Capture", field_info.capture_labels))
         capture_panda_name = panda_name + PandaName(sub_field="CAPTURE")
-
-        parent_block.add_attribute(
-            capture_panda_name,
-            AttrRW(
-                capture_enum,
-                description=field_info.description,
-                group=WidgetGroup.CAPTURE.value,
-                handler=CaptureHandler(),
-                initial_value=capture_enum.enum_cls[initial_values[capture_panda_name]],
-            ),
+        capture_attribute = AttrRW(
+            capture_enum,
+            description=field_info.description,
+            group=WidgetGroup.CAPTURE.value,
+            handler=CaptureHandler(capture_panda_name),
+            initial_value=capture_enum.enum_cls[initial_values[capture_panda_name]],
         )
+
+        parent_block.add_attribute(capture_panda_name, capture_attribute)
         parent_block.add_attribute(
             panda_name + PandaName(sub_field="DATASET"),
             AttrRW(
@@ -474,44 +522,27 @@ class Blocks:
             ),
         )
 
-    # def _make_bits_sub_field(
-    #     self, parent_block: BlockController, panda_name: PandaName, label: str
-    # ):
-    #     parent_block.add_attribute(
-    #         panda_name + PandaName(sub_field="VAL"),
-    #         AttrR(
-    #             Bool(),
-    #             description="Value of the field connected to this bit.",
-    #             group=WidgetGroup.OUTPUTS.value,
-    #         ),
-    #     )
-    #     parent_block.add_attribute(
-    #         panda_name + PandaName(sub_field="NAME"),
-    #         AttrR(
-    #             String(),
-    #             description="Name of the field connected to this bit.",
-    #             initial_value=label,
-    #         ),
-    #     )
-    #
-    # def _make_ext_out_bits(
-    #     self,
-    #     parent_block: BlockController,
-    #     panda_name: PandaName,
-    #     field_info: ExtOutBitsFieldInfo,
-    # ):
-    #     self._make_ext_out(parent_block, panda_name, field_info)
-    #     self._make_bits_sub_field(parent_block, panda_name, "EXT OUT")
-    #
-    #     for bit_number, label in enumerate(field_info.bits, start=1):
-    #         if label == "":
-    #             continue  # Some rows are empty, do not create records.
-    #
-    #         sub_field_panda_name = panda_name +
-    #         PandaName(sub_field=f"BIT{bit_number}")
-    #         attributes[sub_field_panda_name] = AttrR(Bool())
-    #
-    #
+    def _make_ext_out_bits(
+        self,
+        parent_block: BlockController,
+        panda_name: PandaName,
+        field_info: ExtOutBitsFieldInfo,
+        initial_values: RawInitialValuesType,
+    ):
+        self._make_ext_out(parent_block, panda_name, field_info, initial_values)
+        capture_group_members = [
+            PandaName.from_string(label) + PandaName(sub_field="CAPTURE")
+            for label in field_info.bits
+            if label != ""
+        ]
+
+        self._bits_group_names.append(
+            (
+                panda_name + PandaName(sub_field="CAPTURE"),
+                capture_group_members,
+            )
+        )
+
     def _make_bit_mux(
         self,
         parent_block: BlockController,

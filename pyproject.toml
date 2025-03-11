@@ -12,9 +12,9 @@ classifiers = [
 ]
 description = "A softioc to control a PandABlocks-FPGA."
 dependencies = [
-  "fastcs@git+https://github.com/DiamondLightSource/FastCS@127-allow-multiple-update-callbacks",
+  "fastcs@git+https://github.com/DiamondLightSource/FastCS@main",
   "pandablocks~=0.10.0",
-  "numpy<2",                                                                                     # until https://github.com/mdavidsaver/p4p/issues/145 is fixed
+  "numpy<2",                                                      # until https://github.com/mdavidsaver/p4p/issues/145 is fixed
   "pydantic>2",
   "h5py",
 ]

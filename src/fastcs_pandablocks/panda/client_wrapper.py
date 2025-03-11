@@ -3,15 +3,21 @@ This method has a `RawPanda` which handles all the io with the client.
 """
 
 import asyncio
+from collections.abc import AsyncGenerator
 
+from fastcs.datatypes import DataType, T
 from pandablocks.asyncio import AsyncioClient
 from pandablocks.commands import (
+    Arm,
     ChangeGroup,
+    Disarm,
+    Get,
     GetBlockInfo,
     GetChanges,
     GetFieldInfo,
     Put,
 )
+from pandablocks.responses import Data
 
 from fastcs_pandablocks.types import (
     PandaName,
@@ -19,6 +25,8 @@ from fastcs_pandablocks.types import (
     RawFieldsType,
     RawInitialValuesType,
 )
+
+from .handlers import attribute_value_to_panda_value
 
 
 class RawPanda:
@@ -30,6 +38,14 @@ class RawPanda:
 
     async def disconnect(self):
         await self._client.close()
+
+    async def put_value_to_panda(
+        self, panda_name: PandaName, fastcs_datatype: DataType[T], value: T
+    ) -> None:
+        await self.send(
+            str(panda_name),
+            attribute_value_to_panda_value(fastcs_datatype, value),
+        )
 
     async def introspect(
         self,
@@ -77,5 +93,20 @@ class RawPanda:
     async def send(self, name: str, value: str):
         await self._client.send(Put(name, value))
 
+    async def get(self, name: str) -> str | list[str]:
+        return await self._client.send(Get(name))
+
     async def get_changes(self) -> dict[str, str]:
         return (await self._client.send(GetChanges(ChangeGroup.ALL, False))).values
+
+    async def arm(self):
+        await self._client.send(Arm())
+
+    async def disarm(self):
+        await self._client.send(Disarm())
+
+    async def data(
+        self, scaled: bool, flush_period: float
+    ) -> AsyncGenerator[Data, None]:
+        async for data in self._client.data(scaled=scaled, flush_period=flush_period):
+            yield data

@@ -1,5 +1,7 @@
 import asyncio
 import enum
+import logging
+from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
 from typing import Any
 
@@ -40,14 +42,18 @@ def attribute_value_to_panda_value(fastcs_datatype: DataType[T], value: T) -> st
 
 
 class DefaultFieldSender(Sender):
-    def __init__(self, panda_name: PandaName):
+    def __init__(
+        self,
+        panda_name: PandaName,
+        put_value_to_panda: Callable[
+            [PandaName, DataType, Any], Coroutine[None, None, None]
+        ],
+    ):
         self.panda_name = panda_name
+        self.put_value_to_panda = put_value_to_panda
 
     async def put(self, controller: Any, attr: AttrW[T], value: T) -> None:
-        # Until github.com/DiamondLightSource/FastCS/issues/130 this will always be the
-        # PandaController, which suits us fine, but we'll need to change it
-        # back once it's fixed.
-        await controller._put_value_to_panda(self.panda_name, attr.datatype, value)  # noqa: SLF001
+        await self.put_value_to_panda(self.panda_name, attr.datatype, value)
 
 
 class DefaultFieldUpdater(Updater):
@@ -62,8 +68,14 @@ class DefaultFieldUpdater(Updater):
 
 
 class DefaultFieldHandler(DefaultFieldSender, DefaultFieldUpdater, Handler):
-    def __init__(self, panda_name: PandaName):
-        super().__init__(panda_name)
+    def __init__(
+        self,
+        panda_name: PandaName,
+        put_value_to_panda: Callable[
+            [PandaName, DataType, Any], Coroutine[None, None, None]
+        ],
+    ):
+        super().__init__(panda_name, put_value_to_panda)
 
 
 class TableFieldHandler(Handler):
@@ -124,3 +136,27 @@ class BitGroupOnUpdate:
             ],
             _set_attr_if_not_already_value(self.capture_attribute, enum_value),
         )
+
+
+class ArmSender(Sender):
+    class ArmCommand(enum.Enum):
+        DISARM = "Disarm"
+        ARM = "Arm"
+
+    def __init__(
+        self,
+        arm: Callable[[], Coroutine[None, None, None]],
+        disarm: Callable[[], Coroutine[None, None, None]],
+    ):
+        self.arm = arm
+        self.disarm = disarm
+
+    async def put(
+        self, controller: Any, attr: AttrW[ArmCommand], value: ArmCommand
+    ) -> None:
+        if value is self.ArmCommand.ARM:
+            logging.info("Arming PandA.")
+            await self.arm()
+        else:
+            logging.info("Disarming PandA.")
+            await self.disarm()

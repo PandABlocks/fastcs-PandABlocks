@@ -1,10 +1,19 @@
+"""
+This contains `Blocks`, a wrapper that handles creating controllers and attributes from
+introspected panda data.
+
+Unfortunately attributes and names need to be cached throughout the introspection
+process so having this all in one (huge) file is the nicest way to handle this.
+"""
+
+import asyncio
 import enum
-from collections.abc import Callable, Coroutine
-from typing import Any
+from collections.abc import Generator
 
 import numpy as np
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
-from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, Table
+from fastcs.controller import SubController
+from fastcs.datatypes import Bool, Enum, Float, Int, String, Table
 from numpy.typing import DTypeLike
 from pandablocks.commands import TableFieldDetails
 from pandablocks.responses import (
@@ -23,8 +32,9 @@ from pandablocks.responses import (
     UintFieldInfo,
 )
 
-from fastcs_pandablocks.panda.block_controller import BlockController
+from fastcs_pandablocks.panda.client_wrapper import RawPanda
 from fastcs_pandablocks.panda.handlers import (
+    ArmSender,
     BitGroupOnUpdate,
     CaptureHandler,
     DatasetHandler,
@@ -35,43 +45,59 @@ from fastcs_pandablocks.panda.handlers import (
 )
 from fastcs_pandablocks.types import (
     PandaName,
-    RawBlocksType,
-    RawFieldsType,
     RawInitialValuesType,
     ResponseType,
     WidgetGroup,
 )
 
+from .block_controller import BlockController
+from .data import DataController, DatasetAttributes
+from .versions import VersionController
+
 
 class Blocks:
-    def __init__(
-        self,
-        put_value_to_panda: Callable[
-            [PandaName, DataType, Any], Coroutine[None, None, None]
-        ],
-    ):
-        self.put_value_to_panda = put_value_to_panda
+    def __init__(self, raw_panda: RawPanda):
+        self._raw_panda = raw_panda
+        #: The controllers which should be registered by `PandaController` and are
+        #: acccessible by panda name.
+        self._introspected_controllers: dict[PandaName, BlockController] = {}
 
-        #: All controllers, including subcontrollers of top level controllers
-        self.all_controllers: dict[PandaName, BlockController] = {}
-
-        #: The controllers which should be registered by `PandaController`
-        self.top_level_controllers: dict[PandaName, BlockController] = {}
+        #: For controllers we add on the fastcs side which aren't accessible
+        #: by panda name.
+        self._additional_controllers: dict[str, SubController] = {}
 
         #: For keeping track of ext out bits so that updates in the group can be linked
         self._bits_group_names: list[tuple[PandaName, list[PandaName]]] = []
 
+        #: For keeping track of dataset records so the :Data:Datasets table
+        #: can be updated.
+        self._dataset_attributes: dict[PandaName, DatasetAttributes] = {}
+
     def get_attribute(self, panda_name: PandaName) -> Attribute:
-        return self.all_controllers[panda_name.up_to_block()].panda_name_to_attribute[
-            panda_name
-        ]
+        return self._introspected_controllers[
+            panda_name.up_to_block()
+        ].panda_name_to_attribute[panda_name]
+
+    def controllers(self) -> Generator[tuple[str, SubController], None, None]:
+        for (
+            panda_name,
+            introspected_controller,
+        ) in self._introspected_controllers.items():
+            yield panda_name.attribute_name, introspected_controller
+
+        yield from self._additional_controllers.items()
 
     # ==================================================================================
     # ====== FOR LINKING AND GENERATING POST INTROSPECTION =============================
     # ==================================================================================
 
     async def setup_post_introspection(self):
-        await self._link_bits_groups()
+        await asyncio.gather(
+            self._link_bits_groups(),
+            self._add_version_block(),
+            self._add_pcap_arm(),
+            self._add_data_block(),
+        )
 
     async def _link_bits_groups(self):
         for group_panda_name, bit_panda_names in self._bits_group_names:
@@ -95,17 +121,44 @@ class Blocks:
             # To match all bits before the p4p transport starts.
             await update_callback(group_attribute.get())
 
+    async def _add_version_block(self):
+        idn_response = await self._raw_panda.get("*IDN")
+        assert isinstance(idn_response, str)
+        self._additional_controllers["Versions"] = VersionController(idn_response)
+
+    async def _add_pcap_arm(self):
+        pcap_name = PandaName("PCAP")
+        pcap_block = self._introspected_controllers.get(pcap_name, None)
+        if pcap_block is None:
+            raise ValueError("Did not receive a PCAP block during introspection.")
+
+        pcap_block.add_attribute(
+            pcap_name + PandaName(field="Arm"),
+            AttrW(
+                Enum(ArmSender.ArmCommand),
+                description="Arm/Disarm the PandA.",
+                handler=ArmSender(self._raw_panda.arm, self._raw_panda.disarm),
+                group=WidgetGroup.CAPTURE.value,
+            ),
+        )
+
+    async def _add_data_block(self):
+        self._additional_controllers["Data"] = DataController(
+            self._raw_panda.data, self._dataset_attributes
+        )
+
     # ==================================================================================
     # ====== FOR PARSING INTROSPECTED DATA =============================================
     # ==================================================================================
 
-    def parse_introspected_data(
-        self,
-        raw_blocks: RawBlocksType,
-        raw_field_infos: RawFieldsType,
-        raw_labels: RawInitialValuesType,
-        raw_initial_values: RawInitialValuesType,
-    ):
+    async def parse_introspected_data(self):
+        (
+            raw_blocks,
+            raw_field_infos,
+            raw_labels,
+            raw_initial_values,
+        ) = await self._raw_panda.introspect()
+
         for (block_name, block_info), field_info in zip(
             raw_blocks.items(), raw_field_infos, strict=True
         ):
@@ -126,13 +179,12 @@ class Blocks:
                 label = raw_labels.get(numbered_block_name, None)
                 block = BlockController(
                     numbered_block_name,
-                    self.put_value_to_panda,
+                    self._raw_panda.put_value_to_panda,
                     label=block_info.description or label,
                 )
                 self.fill_block(block, field_info, block_initial_values)
 
-                self.top_level_controllers[numbered_block_name] = block
-                self.all_controllers[numbered_block_name] = block
+                self._introspected_controllers[numbered_block_name] = block
 
     def fill_block(
         self,
@@ -163,7 +215,6 @@ class Blocks:
                 return self._make_table_field(
                     parent_block, field_panda_name, field_info
                 )
-            # Time types
             case TimeFieldInfo(subtype=None):
                 self._make_time_param(
                     parent_block, field_panda_name, field_info, initial_values
@@ -179,7 +230,6 @@ class Blocks:
             case SubtypeTimeFieldInfo(subtype="write"):
                 self._make_time_write(parent_block, field_panda_name, field_info)
 
-            # Bit types
             case BitOutFieldInfo():
                 self._make_bit_out(
                     parent_block, field_panda_name, field_info, initial_values
@@ -211,7 +261,6 @@ class Blocks:
             case FieldInfo(type="write", subtype="bit"):
                 self._make_bit_write(parent_block, field_panda_name, field_info)
 
-            # Pos types
             case PosOutFieldInfo():
                 self._make_pos_out(
                     parent_block, field_panda_name, field_info, initial_values
@@ -221,7 +270,6 @@ class Blocks:
                     parent_block, field_panda_name, field_info, initial_values
                 )
 
-            # Uint types
             # TODO: Add scaled as an option to fastcs int so we can have a uint32
             case UintFieldInfo(type="param"):
                 self._make_uint_param(
@@ -340,7 +388,7 @@ class Blocks:
 
         attribute = AttrRW(
             Float(units="s"),
-            handler=DefaultFieldHandler(panda_name),
+            handler=DefaultFieldHandler(panda_name, self._raw_panda.put_value_to_panda),
             description=field_info.description,
             group=WidgetGroup.PARAMETERS.value,
             initial_value=float(initial_values[panda_name]),
@@ -371,7 +419,7 @@ class Blocks:
     ):
         attribute = AttrW(
             Float(units="s"),
-            handler=DefaultFieldSender(panda_name),
+            handler=DefaultFieldHandler(panda_name, self._raw_panda.put_value_to_panda),
             description=field_info.description,
             group=WidgetGroup.OUTPUTS.value,
         )
@@ -425,7 +473,7 @@ class Blocks:
         scale = AttrRW(
             Float(),
             group=WidgetGroup.CAPTURE.value,
-            handler=DefaultFieldHandler(panda_name),
+            handler=DefaultFieldHandler(panda_name, self._raw_panda.put_value_to_panda),
             initial_value=float(initial_values[scale_panda_name]),
         )
         parent_block.add_attribute(scale_panda_name, scale)
@@ -434,7 +482,7 @@ class Blocks:
         offset = AttrRW(
             Float(),
             group=WidgetGroup.CAPTURE.value,
-            handler=DefaultFieldHandler(panda_name),
+            handler=DefaultFieldHandler(panda_name, self._raw_panda.put_value_to_panda),
             initial_value=float(initial_values[offset_panda_name]),
         )
         parent_block.add_attribute(offset_panda_name, offset)
@@ -459,28 +507,34 @@ class Blocks:
         capture_enum = Enum(enum.Enum("Capture", field_info.capture_labels))
 
         capture_panda_name = panda_name + PandaName(sub_field="CAPTURE")
+        capture_attribute = AttrRW(
+            capture_enum,
+            description=field_info.description,
+            group=WidgetGroup.CAPTURE.value,
+            handler=CaptureHandler(
+                capture_panda_name, self._raw_panda.put_value_to_panda
+            ),
+            initial_value=capture_enum.members[int(initial_values[panda_name])],
+        )
         parent_block.add_attribute(
             capture_panda_name,
-            AttrRW(
-                capture_enum,
-                description=field_info.description,
-                group=WidgetGroup.CAPTURE.value,
-                handler=CaptureHandler(capture_panda_name),
-                initial_value=capture_enum.members[int(initial_values[panda_name])],
+            capture_attribute,
+        )
+        dataset_attribute = AttrRW(
+            String(),
+            description=(
+                "Used to adjust the dataset name to one more scientifically relevant"
             ),
+            group=WidgetGroup.CAPTURE.value,
+            handler=DatasetHandler(),
+            initial_value="",
         )
         parent_block.add_attribute(
             panda_name + PandaName(sub_field="DATASET"),
-            AttrRW(
-                String(),
-                description=(
-                    "Used to adjust the dataset name to one more "
-                    "scientifically relevant"
-                ),
-                group=WidgetGroup.CAPTURE.value,
-                handler=DatasetHandler(),
-                initial_value="",
-            ),
+            dataset_attribute,
+        )
+        self._dataset_attributes[panda_name] = DatasetAttributes(
+            dataset_attribute, capture_attribute
         )
 
     def _make_ext_out(
@@ -503,23 +557,29 @@ class Blocks:
             capture_enum,
             description=field_info.description,
             group=WidgetGroup.CAPTURE.value,
-            handler=CaptureHandler(capture_panda_name),
+            handler=CaptureHandler(
+                capture_panda_name, self._raw_panda.put_value_to_panda
+            ),
             initial_value=capture_enum.enum_cls[initial_values[capture_panda_name]],
         )
 
         parent_block.add_attribute(capture_panda_name, capture_attribute)
+
+        dataset_attribute = AttrRW(
+            String(),
+            description=(
+                "Used to adjust the dataset name to one more scientifically relevant"
+            ),
+            group=WidgetGroup.CAPTURE.value,
+            handler=DatasetHandler(),
+            initial_value="",
+        )
         parent_block.add_attribute(
             panda_name + PandaName(sub_field="DATASET"),
-            AttrRW(
-                String(),
-                description=(
-                    "Used to adjust the dataset name to one more "
-                    "scientifically relevant"
-                ),
-                group=WidgetGroup.CAPTURE.value,
-                handler=DatasetHandler(),
-                initial_value="",
-            ),
+            dataset_attribute,
+        )
+        self._dataset_attributes[panda_name] = DatasetAttributes(
+            dataset_attribute, capture_attribute
         )
 
     def _make_ext_out_bits(
@@ -555,7 +615,9 @@ class Blocks:
             AttrRW(
                 String(),
                 description=bit_mux_field_info.description,
-                handler=DefaultFieldHandler(panda_name),
+                handler=DefaultFieldHandler(
+                    panda_name, self._raw_panda.put_value_to_panda
+                ),
                 group=WidgetGroup.INPUTS.value,
                 initial_value=initial_values[panda_name],
             ),
@@ -567,7 +629,9 @@ class Blocks:
             AttrRW(
                 Int(min=0, max=bit_mux_field_info.max_delay),
                 description="Clock delay on input.",
-                handler=DefaultFieldHandler(delay_panda_name),
+                handler=DefaultFieldHandler(
+                    panda_name, self._raw_panda.put_value_to_panda
+                ),
                 group=WidgetGroup.INPUTS.value,
                 initial_value=int(initial_values[delay_panda_name]),
             ),
@@ -586,7 +650,9 @@ class Blocks:
             AttrRW(
                 Enum(enum_type),
                 description=pos_mux_field_info.description,
-                handler=DefaultFieldHandler(panda_name),
+                handler=DefaultFieldHandler(
+                    panda_name, self._raw_panda.put_value_to_panda
+                ),
                 group=WidgetGroup.INPUTS.value,
                 initial_value=enum_type[initial_values[panda_name]],
             ),
@@ -604,7 +670,9 @@ class Blocks:
             AttrRW(
                 Float(prec=0, min=0, max=uint_param_field_info.max_val),
                 description=uint_param_field_info.description,
-                handler=DefaultFieldHandler(panda_name),
+                handler=DefaultFieldHandler(
+                    panda_name, self._raw_panda.put_value_to_panda
+                ),
                 group=WidgetGroup.PARAMETERS.value,
                 initial_value=float(initial_values[panda_name]),
             ),
@@ -639,7 +707,9 @@ class Blocks:
             AttrW(
                 Float(prec=0, min=0, max=uint_write_field_info.max_val),
                 description=uint_write_field_info.description,
-                handler=DefaultFieldSender(panda_name),
+                handler=DefaultFieldSender(
+                    panda_name, self._raw_panda.put_value_to_panda
+                ),
                 group=WidgetGroup.OUTPUTS.value,
             ),
         )
@@ -656,7 +726,9 @@ class Blocks:
             AttrRW(
                 Int(),
                 description=int_param_field_info.description,
-                handler=DefaultFieldHandler(panda_name),
+                handler=DefaultFieldHandler(
+                    panda_name, self._raw_panda.put_value_to_panda
+                ),
                 group=WidgetGroup.PARAMETERS.value,
                 initial_value=int(initial_values[panda_name]),
             ),
@@ -691,7 +763,9 @@ class Blocks:
             AttrW(
                 Int(),
                 description=int_write_field_info.description,
-                handler=DefaultFieldSender(panda_name),
+                handler=DefaultFieldSender(
+                    panda_name, self._raw_panda.put_value_to_panda
+                ),
                 group=WidgetGroup.PARAMETERS.value,
             ),
         )
@@ -708,7 +782,9 @@ class Blocks:
             AttrRW(
                 Float(units=scalar_param_field_info.units),
                 description=scalar_param_field_info.description,
-                handler=DefaultFieldHandler(panda_name),
+                handler=DefaultFieldHandler(
+                    panda_name, self._raw_panda.put_value_to_panda
+                ),
                 group=WidgetGroup.PARAMETERS.value,
                 initial_value=float(initial_values[panda_name]),
             ),
@@ -760,7 +836,9 @@ class Blocks:
             AttrRW(
                 Bool(),
                 description=bit_param_field_info.description,
-                handler=DefaultFieldHandler(panda_name),
+                handler=DefaultFieldHandler(
+                    panda_name, self._raw_panda.put_value_to_panda
+                ),
                 group=WidgetGroup.PARAMETERS.value,
                 initial_value=bool(int(initial_values[panda_name])),
             ),
@@ -795,7 +873,9 @@ class Blocks:
             AttrW(
                 Bool(),
                 description=bit_write_field_info.description,
-                handler=DefaultFieldSender(panda_name),
+                handler=DefaultFieldSender(
+                    panda_name, self._raw_panda.put_value_to_panda
+                ),
                 group=WidgetGroup.OUTPUTS.value,
             ),
         )
@@ -811,7 +891,9 @@ class Blocks:
             AttrW(
                 Bool(),
                 description=action_write_field_info.description,
-                handler=DefaultFieldSender(panda_name),
+                handler=DefaultFieldSender(
+                    panda_name, self._raw_panda.put_value_to_panda
+                ),
                 group=WidgetGroup.OUTPUTS.value,
             ),
         )
@@ -828,7 +910,9 @@ class Blocks:
             AttrRW(
                 String(),
                 description=lut_param_field_info.description,
-                handler=DefaultFieldHandler(panda_name),
+                handler=DefaultFieldHandler(
+                    panda_name, self._raw_panda.put_value_to_panda
+                ),
                 group=WidgetGroup.PARAMETERS.value,
                 initial_value=initial_values[panda_name],
             ),
@@ -881,7 +965,9 @@ class Blocks:
             AttrRW(
                 Enum(enum_type),
                 description=enum_param_field_info.description,
-                handler=DefaultFieldHandler(panda_name),
+                handler=DefaultFieldHandler(
+                    panda_name, self._raw_panda.put_value_to_panda
+                ),
                 group=WidgetGroup.PARAMETERS.value,
                 initial_value=enum_type[initial_values[panda_name]],
             ),
@@ -919,7 +1005,9 @@ class Blocks:
             AttrW(
                 Enum(enum_type),
                 description=enum_write_field_info.description,
-                handler=DefaultFieldSender(panda_name),
+                handler=DefaultFieldSender(
+                    panda_name, self._raw_panda.put_value_to_panda
+                ),
                 group=WidgetGroup.OUTPUTS.value,
             ),
         )

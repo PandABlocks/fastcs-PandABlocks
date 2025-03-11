@@ -1,9 +1,10 @@
 import enum
-from collections.abc import Callable, Coroutine
+from collections.abc import Callable, Coroutine, Generator
 from typing import Any
 
 import numpy as np
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
+from fastcs.controller import SubController
 from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, Table
 from numpy.typing import DTypeLike
 from pandablocks.commands import TableFieldDetails
@@ -23,7 +24,6 @@ from pandablocks.responses import (
     UintFieldInfo,
 )
 
-from fastcs_pandablocks.panda.block_controller import BlockController
 from fastcs_pandablocks.panda.handlers import (
     BitGroupOnUpdate,
     CaptureHandler,
@@ -42,6 +42,9 @@ from fastcs_pandablocks.types import (
     WidgetGroup,
 )
 
+from .block_controller import BlockController
+from .versions import VersionController
+
 
 class Blocks:
     def __init__(
@@ -52,26 +55,38 @@ class Blocks:
     ):
         self.put_value_to_panda = put_value_to_panda
 
-        #: All controllers, including subcontrollers of top level controllers
-        self.all_controllers: dict[PandaName, BlockController] = {}
+        #: The controllers which should be registered by `PandaController` and are
+        #: acccessible by panda name.
+        self._introspected_controllers: dict[PandaName, BlockController] = {}
 
-        #: The controllers which should be registered by `PandaController`
-        self.top_level_controllers: dict[PandaName, BlockController] = {}
+        #: For controllers we add on the fastcs side which aren't accessible
+        #: by panda name.
+        self._additional_controllers: dict[str, SubController] = {}
 
         #: For keeping track of ext out bits so that updates in the group can be linked
         self._bits_group_names: list[tuple[PandaName, list[PandaName]]] = []
 
     def get_attribute(self, panda_name: PandaName) -> Attribute:
-        return self.all_controllers[panda_name.up_to_block()].panda_name_to_attribute[
-            panda_name
-        ]
+        return self._introspected_controllers[
+            panda_name.up_to_block()
+        ].panda_name_to_attribute[panda_name]
+
+    def controllers(self) -> Generator[tuple[str, SubController], None, None]:
+        for (
+            panda_name,
+            introspected_controller,
+        ) in self._introspected_controllers.items():
+            yield panda_name.attribute_name, introspected_controller
+
+        yield from self._additional_controllers.items()
 
     # ==================================================================================
     # ====== FOR LINKING AND GENERATING POST INTROSPECTION =============================
     # ==================================================================================
 
-    async def setup_post_introspection(self):
+    async def setup_post_introspection(self, idn_response: str):
         await self._link_bits_groups()
+        await self._add_version_block(idn_response)
 
     async def _link_bits_groups(self):
         for group_panda_name, bit_panda_names in self._bits_group_names:
@@ -94,6 +109,9 @@ class Blocks:
 
             # To match all bits before the p4p transport starts.
             await update_callback(group_attribute.get())
+
+    async def _add_version_block(self, idn_response: str):
+        self._additional_controllers["Versions"] = VersionController(idn_response)
 
     # ==================================================================================
     # ====== FOR PARSING INTROSPECTED DATA =============================================
@@ -131,8 +149,7 @@ class Blocks:
                 )
                 self.fill_block(block, field_info, block_initial_values)
 
-                self.top_level_controllers[numbered_block_name] = block
-                self.all_controllers[numbered_block_name] = block
+                self._introspected_controllers[numbered_block_name] = block
 
     def fill_block(
         self,

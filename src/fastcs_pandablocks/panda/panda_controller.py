@@ -6,9 +6,7 @@ from fastcs.datatypes import DataType, T
 from fastcs.wrappers import scan
 
 from fastcs_pandablocks.panda.blocks import Blocks
-from fastcs_pandablocks.types import (
-    PandaName,
-)
+from fastcs_pandablocks.types import PandaName
 
 from .client_wrapper import RawPanda
 from .handlers import attribute_value_to_panda_value, panda_value_to_attribute_value
@@ -43,21 +41,17 @@ class PandaController(Controller):
         await self._raw_panda.connect()
         blocks, fields, labels, initial_values = await self._raw_panda.introspect()
         self._blocks.parse_introspected_data(blocks, fields, labels, initial_values)
-        await self._blocks.setup_post_introspection()
+
+        idn_response = await self._raw_panda.get("*IDN")
+        assert isinstance(idn_response, str)
+
+        await self._blocks.setup_post_introspection(idn_response)
         self.connected = True
 
     async def initialise(self) -> None:
         await self.connect()
-        for block_name, block in self._blocks.top_level_controllers.items():
-            self.register_sub_controller(block_name.attribute_name, block)
-
-    def get_attribute(self, panda_name: PandaName) -> Attribute:
-        assert panda_name.block
-        block_controller = self._blocks.top_level_controllers[panda_name.up_to_block()]
-        if panda_name.field is None:
-            raise RuntimeError
-
-        return block_controller.panda_name_to_attribute[panda_name]
+        for block_name, block in self._blocks.controllers():
+            self.register_sub_controller(block_name, block)
 
     async def update_field_value(self, panda_name: PandaName, value: str):
         attribute = self._blocks.get_attribute(panda_name)

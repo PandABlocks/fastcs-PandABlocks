@@ -7,6 +7,7 @@ import asyncio
 from pandablocks.asyncio import AsyncioClient
 from pandablocks.commands import (
     ChangeGroup,
+    Get,
     GetBlockInfo,
     GetChanges,
     GetFieldInfo,
@@ -76,6 +77,9 @@ class RawPanda:
 
     async def send(self, name: str, value: str):
         await self._client.send(Put(name, value))
+
+    async def get(self, name: str) -> str | list[str]:
+        return await self._client.send(Get(name))
 
     async def get_changes(self) -> dict[str, str]:
         return (await self._client.send(GetChanges(ChangeGroup.ALL, False))).values

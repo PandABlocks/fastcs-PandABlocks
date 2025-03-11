@@ -19,7 +19,7 @@ class PandaController(Controller):
 
         self.attributes: dict[str, Attribute] = {}
         self._raw_panda = RawPanda(hostname)
-        self._blocks: Blocks = Blocks(self._put_value_to_panda)
+        self._blocks: Blocks = Blocks(self._put_value_to_panda, self._raw_panda.data)
 
         self.connected = False
 

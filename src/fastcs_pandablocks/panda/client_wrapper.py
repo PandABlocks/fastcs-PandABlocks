@@ -3,6 +3,7 @@ This method has a `RawPanda` which handles all the io with the client.
 """
 
 import asyncio
+from collections.abc import AsyncGenerator
 
 from pandablocks.asyncio import AsyncioClient
 from pandablocks.commands import (
@@ -13,6 +14,7 @@ from pandablocks.commands import (
     GetFieldInfo,
     Put,
 )
+from pandablocks.responses import Data
 
 from fastcs_pandablocks.types import (
     PandaName,
@@ -83,3 +85,9 @@ class RawPanda:
 
     async def get_changes(self) -> dict[str, str]:
         return (await self._client.send(GetChanges(ChangeGroup.ALL, False))).values
+
+    async def data(
+        self, scaled: bool, flush_period: float
+    ) -> AsyncGenerator[Data, None]:
+        async for data in self._client.data(scaled=scaled, flush_period=flush_period):
+            yield data

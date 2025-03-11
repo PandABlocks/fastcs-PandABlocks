@@ -1,5 +1,5 @@
 import enum
-from collections.abc import Callable, Coroutine, Generator
+from collections.abc import AsyncGenerator, Callable, Coroutine, Generator
 from typing import Any
 
 import numpy as np
@@ -11,6 +11,7 @@ from pandablocks.commands import TableFieldDetails
 from pandablocks.responses import (
     BitMuxFieldInfo,
     BitOutFieldInfo,
+    Data,
     EnumFieldInfo,
     ExtOutBitsFieldInfo,
     ExtOutFieldInfo,
@@ -43,6 +44,7 @@ from fastcs_pandablocks.types import (
 )
 
 from .block_controller import BlockController
+from .data import DataController, DatasetAttributes
 from .versions import VersionController
 
 
@@ -52,8 +54,10 @@ class Blocks:
         put_value_to_panda: Callable[
             [PandaName, DataType, Any], Coroutine[None, None, None]
         ],
+        client_data: Callable[[bool, float], AsyncGenerator[Data, None]],
     ):
         self.put_value_to_panda = put_value_to_panda
+        self._client_data = client_data
 
         #: The controllers which should be registered by `PandaController` and are
         #: acccessible by panda name.
@@ -65,6 +69,8 @@ class Blocks:
 
         #: For keeping track of ext out bits so that updates in the group can be linked
         self._bits_group_names: list[tuple[PandaName, list[PandaName]]] = []
+
+        self._dataset_attributes: dict[PandaName, DatasetAttributes] = {}
 
     def get_attribute(self, panda_name: PandaName) -> Attribute:
         return self._introspected_controllers[
@@ -87,6 +93,7 @@ class Blocks:
     async def setup_post_introspection(self, idn_response: str):
         await self._link_bits_groups()
         await self._add_version_block(idn_response)
+        await self._add_data_block()
 
     async def _link_bits_groups(self):
         for group_panda_name, bit_panda_names in self._bits_group_names:
@@ -112,6 +119,11 @@ class Blocks:
 
     async def _add_version_block(self, idn_response: str):
         self._additional_controllers["Versions"] = VersionController(idn_response)
+
+    async def _add_data_block(self):
+        self._additional_controllers["Data"] = DataController(
+            self._client_data, self._dataset_attributes
+        )
 
     # ==================================================================================
     # ====== FOR PARSING INTROSPECTED DATA =============================================
@@ -476,28 +488,32 @@ class Blocks:
         capture_enum = Enum(enum.Enum("Capture", field_info.capture_labels))
 
         capture_panda_name = panda_name + PandaName(sub_field="CAPTURE")
+        capture_attribute = AttrRW(
+            capture_enum,
+            description=field_info.description,
+            group=WidgetGroup.CAPTURE.value,
+            handler=CaptureHandler(capture_panda_name),
+            initial_value=capture_enum.members[int(initial_values[panda_name])],
+        )
         parent_block.add_attribute(
             capture_panda_name,
-            AttrRW(
-                capture_enum,
-                description=field_info.description,
-                group=WidgetGroup.CAPTURE.value,
-                handler=CaptureHandler(capture_panda_name),
-                initial_value=capture_enum.members[int(initial_values[panda_name])],
+            capture_attribute,
+        )
+        dataset_attribute = AttrRW(
+            String(),
+            description=(
+                "Used to adjust the dataset name to one more scientifically relevant"
             ),
+            group=WidgetGroup.CAPTURE.value,
+            handler=DatasetHandler(),
+            initial_value="",
         )
         parent_block.add_attribute(
             panda_name + PandaName(sub_field="DATASET"),
-            AttrRW(
-                String(),
-                description=(
-                    "Used to adjust the dataset name to one more "
-                    "scientifically relevant"
-                ),
-                group=WidgetGroup.CAPTURE.value,
-                handler=DatasetHandler(),
-                initial_value="",
-            ),
+            dataset_attribute,
+        )
+        self._dataset_attributes[panda_name] = DatasetAttributes(
+            dataset_attribute, capture_attribute
         )
 
     def _make_ext_out(
@@ -525,18 +541,22 @@ class Blocks:
         )
 
         parent_block.add_attribute(capture_panda_name, capture_attribute)
+
+        dataset_attribute = AttrRW(
+            String(),
+            description=(
+                "Used to adjust the dataset name to one more scientifically relevant"
+            ),
+            group=WidgetGroup.CAPTURE.value,
+            handler=DatasetHandler(),
+            initial_value="",
+        )
         parent_block.add_attribute(
             panda_name + PandaName(sub_field="DATASET"),
-            AttrRW(
-                String(),
-                description=(
-                    "Used to adjust the dataset name to one more "
-                    "scientifically relevant"
-                ),
-                group=WidgetGroup.CAPTURE.value,
-                handler=DatasetHandler(),
-                initial_value="",
-            ),
+            dataset_attribute,
+        )
+        self._dataset_attributes[panda_name] = DatasetAttributes(
+            dataset_attribute, capture_attribute
         )
 
     def _make_ext_out_bits(

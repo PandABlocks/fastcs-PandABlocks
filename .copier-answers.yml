@@ -8,7 +8,7 @@ distribution_name: fastcs-pandablocks
 docker: true
 docs_type: sphinx
 git_platform: github.com
-github_org: PandABlocks-ioc
+github_org: PandABlocks
 package_name: fastcs_pandablocks
 pypi: true
 repo_name: fastcs-PandABlocks

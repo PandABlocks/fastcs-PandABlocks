@@ -45,7 +45,7 @@ dev = [
 fastcs-pandablocks = "fastcs_pandablocks.__main__:main"
 
 [project.urls]
-GitHub = "https://github.com/PandABlocks-ioc/fastcs-PandABlocks"
+GitHub = "https://github.com/PandABlocks/fastcs-PandABlocks"
 
 [[project.authors]] # Further authors may be added by duplicating this section
 email = "eva.lott@diamond.ac.uk"

@@ -1,0 +1,23 @@
+﻿``fastcs_pandablocks``
+======================
+
+.. automodule:: fastcs_pandablocks
+    :members:
+
+    
+    
+    .. rubric:: Submodules
+
+    .. autosummary::
+        :toctree:
+        :template: custom-module-template.rst
+        :recursive:
+    
+        panda
+        types
+    
+    
+
+    
+    
+    

@@ -143,7 +143,7 @@ class BitGroupOnUpdate:
         )
 
 
-class ArmSender(Sender):
+class ArmHandler(Handler):
     """A sender for arming and disarming the Pcap."""
 
     class ArmCommand(enum.Enum):
@@ -167,3 +167,6 @@ class ArmSender(Sender):
         else:
             logging.info("Disarming PandA.")
             await self.disarm()
+
+    async def update(self, controller: Any, attr: AttrR[ArmCommand]) -> None:
+        pass

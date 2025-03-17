@@ -26,7 +26,7 @@ from pandablocks.responses import (
 
 from fastcs_pandablocks.panda.client_wrapper import RawPanda
 from fastcs_pandablocks.panda.handlers import (
-    ArmSender,
+    ArmHandler,
     BitGroupOnUpdate,
     CaptureHandler,
     DefaultFieldHandler,
@@ -132,10 +132,10 @@ class Blocks:
 
         pcap_block.add_attribute(
             pcap_name + PandaName(field="Arm"),
-            AttrW(
-                Enum(ArmSender.ArmCommand),
+            AttrRW(
+                Enum(ArmHandler.ArmCommand),
                 description="Arm/Disarm the PandA.",
-                handler=ArmSender(self._raw_panda.arm, self._raw_panda.disarm),
+                handler=ArmHandler(self._raw_panda.arm, self._raw_panda.disarm),
                 group=WidgetGroup.CAPTURE.value,
             ),
         )

@@ -12,6 +12,11 @@ from .handlers import panda_value_to_attribute_value
 
 
 class PandaController(Controller):
+    """Controller for polling data from the panda through pandablocks-client.
+
+    Changes are received at a given poll period and passed to sub-controllers.
+    """
+
     def __init__(self, hostname: str, poll_period: float) -> None:
         # TODO https://github.com/DiamondLightSource/FastCS/issues/62
         super().__init__()

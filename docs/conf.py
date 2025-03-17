@@ -71,6 +71,10 @@ nitpick_ignore = [
     ("py:class", "'object'"),
     ("py:class", "'id'"),
     ("py:class", "typing_extensions.Literal"),
+    # Ignored until https://github.com/DiamondLightSource/FastCS/issues/137
+    ("py:class", "fastcs.datatypes.DataType"),
+    ("py:class", "fastcs.attributes.AttrRW"),
+    ("py:class", "fastcs.datatypes.T"),
 ]
 
 # Both the class’ and the __init__ method’s docstring are concatenated and
@@ -109,7 +113,11 @@ pygments_style = "sphinx"
 
 # This means you can link things like `str` and `asyncio` to the relevant
 # docs in the python documentation.
-intersphinx_mapping = {"python": ("https://docs.python.org/3/", None)}
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3/", None),
+    # Commented out until https://github.com/DiamondLightSource/FastCS/issues/137
+    # "fastcs": ("https://diamondlightsource.github.io/FastCS/main", None),
+}
 
 # A dictionary of graphviz graph attributes for inheritance diagrams.
 inheritance_graph_attrs = {"rankdir": "TB"}

@@ -1,4 +1,4 @@
-"""Contains logic relevant to fastcs. Will use `fastcs_pandablocks.panda`."""
+"""Contains logic relevant to fastcs. Will use ``fastcs_pandablocks.panda``."""
 
 from pathlib import Path
 
@@ -6,6 +6,7 @@ from fastcs import FastCS
 from fastcs.launch import EpicsPVAOptions
 from fastcs.transport import EpicsGUIOptions, EpicsIOCOptions
 
+from . import panda, types
 from ._version import __version__
 from .panda.panda_controller import PandaController
 
@@ -35,4 +36,4 @@ def ioc(
     transport.run()
 
 
-__all__ = ["__version__", "ioc", "DEFAULT_POLL_PERIOD"]
+__all__ = ["__version__", "panda", "types", "DEFAULT_POLL_PERIOD"]

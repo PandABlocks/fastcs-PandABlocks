@@ -30,6 +30,8 @@ from .handlers import attribute_value_to_panda_value
 
 
 class RawPanda:
+    """A wrapper for interacting with pandablocks-client."""
+
     def __init__(self, hostname: str):
         self._client = AsyncioClient(host=hostname)
 

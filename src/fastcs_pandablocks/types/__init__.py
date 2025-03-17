@@ -13,6 +13,8 @@ from ._string_types import (
 
 
 class WidgetGroup(Enum):
+    """Group that an attribute will be added to on the screen."""
+
     NONE = None
     PARAMETERS = "Parameters"
     OUTPUTS = "Outputs"

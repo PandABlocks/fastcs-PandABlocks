@@ -5,13 +5,16 @@ from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
 from typing import Any
 
-from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW, Handler, Sender, Updater
+from fastcs.attributes import AttrR, AttrRW, AttrW, Handler, Sender, Updater
 from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, T
 
 from fastcs_pandablocks.types import PandaName
 
 
 def panda_value_to_attribute_value(fastcs_datatype: DataType[T], value: str) -> T:
+    """Converts from a value received from the panda through pandablock-client to
+    the attribute value.
+    """
     match fastcs_datatype:
         case String():
             return value
@@ -27,6 +30,9 @@ def panda_value_to_attribute_value(fastcs_datatype: DataType[T], value: str) -> 
 
 
 def attribute_value_to_panda_value(fastcs_datatype: DataType[T], value: T) -> str:
+    """Converts from an attribute value to a value that can be sent to the panda
+    with pandablocks-client.
+    """
     match fastcs_datatype:
         case String():
             return value
@@ -42,6 +48,8 @@ def attribute_value_to_panda_value(fastcs_datatype: DataType[T], value: T) -> st
 
 
 class DefaultFieldSender(Sender):
+    """Default sender for sending introspected attributes."""
+
     def __init__(
         self,
         panda_name: PandaName,
@@ -57,6 +65,8 @@ class DefaultFieldSender(Sender):
 
 
 class DefaultFieldUpdater(Updater):
+    """Default updater for updating introspected attributes."""
+
     #: We update the fields from the top level
     update_period = None
 
@@ -68,6 +78,8 @@ class DefaultFieldUpdater(Updater):
 
 
 class DefaultFieldHandler(DefaultFieldSender, DefaultFieldUpdater, Handler):
+    """Default handler for sending and updating introspected attributes."""
+
     def __init__(
         self,
         panda_name: PandaName,
@@ -79,6 +91,8 @@ class DefaultFieldHandler(DefaultFieldSender, DefaultFieldUpdater, Handler):
 
 
 class TableFieldHandler(Handler):
+    """A handler for updating Table valued attributes."""
+
     def __init__(self, panda_name: PandaName):
         self.panda_name = panda_name
 
@@ -91,23 +105,8 @@ class TableFieldHandler(Handler):
         ...
 
 
-class EguSender(Sender):
-    def __init__(self, attr_to_update: Attribute):
-        """Update the attr"""
-        self.attr_to_update = attr_to_update
-
-    async def put(self, controller: Any, attr: AttrW, value: str) -> None:
-        # TODO find out how to update attr_to_update's EGU with the value
-        ...
-
-
-class CaptureHandler(DefaultFieldHandler): ...
-
-
-class DatasetHandler(Handler):
-    def __init__(self, *args, **kwargs): ...  # TODO: work dataset
-    async def update(self, controller: Any, attr: AttrR) -> None: ...
-    async def put(self, controller: Any, attr: AttrW, value: Any) -> None: ...
+class CaptureHandler(DefaultFieldHandler):
+    """A handler for capture attributes. Not currently used."""
 
 
 async def _set_attr_if_not_already_value(attribute: AttrRW[T], value: T):
@@ -117,6 +116,12 @@ async def _set_attr_if_not_already_value(attribute: AttrRW[T], value: T):
 
 @dataclass
 class BitGroupOnUpdate:
+    """Bits are tied together in bit groups so that when one is set for capture,
+    they all are.
+
+    This handler sets all capture attributes in the group when one of them is set.
+    """
+
     capture_attribute: AttrRW[enum.Enum]
     bit_attributes: list[AttrRW[bool]]
 
@@ -139,6 +144,8 @@ class BitGroupOnUpdate:
 
 
 class ArmSender(Sender):
+    """A sender for arming and disarming the Pcap."""
+
     class ArmCommand(enum.Enum):
         DISARM = "Disarm"
         ARM = "Arm"

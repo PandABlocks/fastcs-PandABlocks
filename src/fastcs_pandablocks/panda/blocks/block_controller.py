@@ -9,6 +9,8 @@ from fastcs_pandablocks.types import PandaName
 
 
 class BlockController(SubController):
+    """Controller for handling a panda block."""
+
     def __init__(
         self,
         panda_name: PandaName,

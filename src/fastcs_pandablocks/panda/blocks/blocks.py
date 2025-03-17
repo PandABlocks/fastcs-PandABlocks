@@ -1,11 +1,3 @@
-"""
-This contains `Blocks`, a wrapper that handles creating controllers and attributes from
-introspected panda data.
-
-Unfortunately attributes and names need to be cached throughout the introspection
-process so having this all in one (huge) file is the nicest way to handle this.
-"""
-
 import asyncio
 import enum
 from collections.abc import Generator
@@ -37,7 +29,6 @@ from fastcs_pandablocks.panda.handlers import (
     ArmSender,
     BitGroupOnUpdate,
     CaptureHandler,
-    DatasetHandler,
     DefaultFieldHandler,
     DefaultFieldSender,
     DefaultFieldUpdater,
@@ -56,6 +47,13 @@ from .versions import VersionController
 
 
 class Blocks:
+    """A wrapper that handles creating controllers and attributes from introspected
+    panda data.
+
+    Unfortunately attributes and names need to be cached throughout the introspection
+    process so having this all in one (huge) file is the nicest way to handle this.
+    """
+
     def __init__(self, raw_panda: RawPanda):
         self._raw_panda = raw_panda
         #: The controllers which should be registered by `PandaController` and are
@@ -526,7 +524,6 @@ class Blocks:
                 "Used to adjust the dataset name to one more scientifically relevant"
             ),
             group=WidgetGroup.CAPTURE.value,
-            handler=DatasetHandler(),
             initial_value="",
         )
         parent_block.add_attribute(
@@ -571,7 +568,6 @@ class Blocks:
                 "Used to adjust the dataset name to one more scientifically relevant"
             ),
             group=WidgetGroup.CAPTURE.value,
-            handler=DatasetHandler(),
             initial_value="",
         )
         parent_block.add_attribute(

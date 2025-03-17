@@ -24,7 +24,7 @@
     .. autosummary::
         :nosignatures:
     
-        ArmSender
+        ArmHandler
         BitGroupOnUpdate
         CaptureHandler
         DefaultFieldHandler

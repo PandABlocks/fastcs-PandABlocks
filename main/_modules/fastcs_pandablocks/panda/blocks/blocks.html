@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>fastcs_pandablocks.panda.blocks.blocks &#8212; fastcs-PandABlocks 0.1.0a2.dev1+g37de998 documentation</title>
+    <title>fastcs_pandablocks.panda.blocks.blocks &#8212; fastcs-PandABlocks 0.1.0a3.dev1+g81b36d9 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../_static/documentation_options.js?v=9538a8ec"></script>
+    <script src="../../../../_static/documentation_options.js?v=83067e28"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
@@ -470,7 +470,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs_pandablocks.panda.client_wrapper</span><span class="w"> </span><span class="kn">import</span> <span class="n">RawPanda</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">fastcs_pandablocks.panda.handlers</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-    <span class="n">ArmSender</span><span class="p">,</span>
+    <span class="n">ArmHandler</span><span class="p">,</span>
     <span class="n">BitGroupOnUpdate</span><span class="p">,</span>
     <span class="n">CaptureHandler</span><span class="p">,</span>
     <span class="n">DefaultFieldHandler</span><span class="p">,</span>
@@ -578,10 +578,10 @@
 
         <span class="n">pcap_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
             <span class="n">pcap_name</span> <span class="o">+</span> <span class="n">PandaName</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="s2">&quot;Arm&quot;</span><span class="p">),</span>
-            <span class="n">AttrW</span><span class="p">(</span>
-                <span class="n">Enum</span><span class="p">(</span><span class="n">ArmSender</span><span class="o">.</span><span class="n">ArmCommand</span><span class="p">),</span>
+            <span class="n">AttrRW</span><span class="p">(</span>
+                <span class="n">Enum</span><span class="p">(</span><span class="n">ArmHandler</span><span class="o">.</span><span class="n">ArmCommand</span><span class="p">),</span>
                 <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Arm/Disarm the PandA.&quot;</span><span class="p">,</span>
-                <span class="n">handler</span><span class="o">=</span><span class="n">ArmSender</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">arm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">disarm</span><span class="p">),</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">ArmHandler</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">arm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">disarm</span><span class="p">),</span>
                 <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">CAPTURE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
             <span class="p">),</span>
         <span class="p">)</span>

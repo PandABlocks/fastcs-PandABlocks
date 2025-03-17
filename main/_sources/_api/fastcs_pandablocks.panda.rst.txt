@@ -1,0 +1,25 @@
+``fastcs_pandablocks.panda``
+============================
+
+.. automodule:: fastcs_pandablocks.panda
+    :members:
+
+    
+    
+    .. rubric:: Submodules
+
+    .. autosummary::
+        :toctree:
+        :template: custom-module-template.rst
+        :recursive:
+    
+        blocks
+        client_wrapper
+        handlers
+        panda_controller
+    
+    
+
+    
+    
+    

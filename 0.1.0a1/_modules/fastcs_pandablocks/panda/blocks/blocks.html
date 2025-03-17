@@ -1,0 +1,1508 @@
+
+<!DOCTYPE html>
+
+
+<html lang="en" data-content_root="../../../../" >
+
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>fastcs_pandablocks.panda.blocks.blocks &#8212; fastcs-PandABlocks 0.1.0a1 documentation</title>
+  
+  
+  
+  <script data-cfasync="false">
+    document.documentElement.dataset.mode = localStorage.getItem("mode") || "";
+    document.documentElement.dataset.theme = localStorage.getItem("theme") || "";
+  </script>
+  <!--
+    this give us a css class that will be invisible only if js is disabled
+  -->
+  <noscript>
+    <style>
+      .pst-js-only { display: none !important; }
+
+    </style>
+  </noscript>
+  
+  <!-- Loaded before other Sphinx assets -->
+  <link href="../../../../_static/styles/theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+<link href="../../../../_static/styles/pydata-sphinx-theme.css?digest=8878045cc6db502f8baf" rel="stylesheet" />
+
+    <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=03e43079" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=4ae1632d" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/sphinx-design.min.css?v=95c83b7e" />
+  
+  <!-- So that users can add custom icons -->
+  <script src="../../../../_static/scripts/fontawesome.js?digest=8878045cc6db502f8baf"></script>
+  <!-- Pre-loaded scripts that we'll load fully later -->
+  <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
+<link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
+
+    <script src="../../../../_static/documentation_options.js?v=49b5e7b8"></script>
+    <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../../_static/copybutton.js?v=30646c52"></script>
+    <script src="../../../../_static/design-tabs.js?v=f930bc37"></script>
+    <script>DOCUMENTATION_OPTIONS.pagename = '_modules/fastcs_pandablocks/panda/blocks/blocks';</script>
+    <script>
+        DOCUMENTATION_OPTIONS.theme_version = '0.16.1';
+        DOCUMENTATION_OPTIONS.theme_switcher_json_url = 'https://PandABlocks.github.io/fastcs-PandABlocks/switcher.json';
+        DOCUMENTATION_OPTIONS.theme_switcher_version_match = '0.1.0a1';
+        DOCUMENTATION_OPTIONS.show_version_warning_banner =
+            false;
+        </script>
+    <link rel="icon" href="../../../../_static/dls-logo.svg"/>
+    <link rel="index" title="Index" href="../../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../../search.html" />
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <meta name="docsearch:language" content="en"/>
+  <meta name="docsearch:version" content="0.1.0a1" />
+  </head>
+  
+  
+  <body data-bs-spy="scroll" data-bs-target=".bd-toc-nav" data-offset="180" data-bs-root-margin="0px 0px -60%" data-default-mode="">
+
+  
+  
+  <div id="pst-skip-link" class="skip-link d-print-none"><a href="#main-content">Skip to main content</a></div>
+  
+  <div id="pst-scroll-pixel-helper"></div>
+  
+  <button type="button" class="btn rounded-pill" id="pst-back-to-top">
+    <i class="fa-solid fa-arrow-up"></i>Back to top</button>
+
+  
+  <dialog id="pst-search-dialog">
+    
+<form class="bd-search d-flex align-items-center"
+      action="../../../../search.html"
+      method="get">
+  <i class="fa-solid fa-magnifying-glass"></i>
+  <input type="search"
+         class="form-control"
+         name="q"
+         placeholder="Search the docs ..."
+         aria-label="Search the docs ..."
+         autocomplete="off"
+         autocorrect="off"
+         autocapitalize="off"
+         spellcheck="false"/>
+  <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd>K</kbd></span>
+</form>
+  </dialog>
+
+  <div class="pst-async-banner-revealer d-none">
+  <aside id="bd-header-version-warning" class="d-none d-print-none" aria-label="Version warning"></aside>
+</div>
+
+  
+    <header class="bd-header navbar navbar-expand-lg bd-navbar d-print-none">
+<div class="bd-header__inner bd-page-width">
+  <button class="pst-navbar-icon sidebar-toggle primary-toggle" aria-label="Site navigation">
+    <span class="fa-solid fa-bars"></span>
+  </button>
+  
+  
+  <div class="col-lg-3 navbar-header-items__start">
+    
+      <div class="navbar-item">
+
+  
+    
+  
+
+<a class="navbar-brand logo" href="../../../../index.html">
+  
+  
+  
+  
+  
+    
+    
+      
+    
+    
+    <img src="../../../../_static/dls-logo.svg" class="logo__image only-light" alt=""/>
+    <img src="../../../../_static/dls-logo.svg" class="logo__image only-dark pst-js-only" alt=""/>
+  
+  
+    <p class="title logo__title">fastcs-PandABlocks</p>
+  
+</a></div>
+    
+  </div>
+  
+  <div class="col-lg-9 navbar-header-items">
+    
+    <div class="me-auto navbar-header-items__center">
+      
+        <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../how-to.html">
+    How-to Guides
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../explanations.html">
+    Explanations
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../reference.html">
+    Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+      
+    </div>
+    
+    
+    <div class="navbar-header-items__end">
+      
+        <div class="navbar-item navbar-persistent--container">
+          
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+        </div>
+      
+      
+        <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+      
+        <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/PandABlocks/fastcs-PandABlocks" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/fastcs-PandABlocks" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-cube fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+      
+        <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-2"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-2"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-2"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-2">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+      
+    </div>
+    
+  </div>
+  
+  
+    <div class="navbar-persistent--mobile">
+
+<button class="btn search-button-field search-button__button pst-js-only" title="Search" aria-label="Search" data-bs-placement="bottom" data-bs-toggle="tooltip">
+ <i class="fa-solid fa-magnifying-glass"></i>
+ <span class="search-button__default-text">Search</span>
+ <span class="search-button__kbd-shortcut"><kbd class="kbd-shortcut__modifier">Ctrl</kbd>+<kbd class="kbd-shortcut__modifier">K</kbd></span>
+</button>
+    </div>
+  
+
+  
+</div>
+
+    </header>
+  
+
+  <div class="bd-container">
+    <div class="bd-container__inner bd-page-width">
+      
+      
+      
+        
+      
+      <dialog id="pst-primary-sidebar-modal"></dialog>
+      <div id="pst-primary-sidebar" class="bd-sidebar-primary bd-sidebar hide-on-wide">
+        
+
+  
+  <div class="sidebar-header-items sidebar-primary__section">
+    
+    
+      <div class="sidebar-header-items__center">
+        
+          
+          
+            <div class="navbar-item">
+<nav>
+  <ul class="bd-navbar-elements navbar-nav">
+    
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../tutorials.html">
+    Tutorials
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../how-to.html">
+    How-to Guides
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../explanations.html">
+    Explanations
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../../reference.html">
+    Reference
+  </a>
+</li>
+
+  </ul>
+</nav></div>
+          
+        
+      </div>
+    
+    
+    
+      <div class="sidebar-header-items__end">
+        
+          <div class="navbar-item">
+
+<button class="btn btn-sm nav-link pst-navbar-icon theme-switch-button pst-js-only" aria-label="Color mode" data-bs-title="Color mode"  data-bs-placement="bottom" data-bs-toggle="tooltip">
+  <i class="theme-switch fa-solid fa-sun                fa-lg" data-mode="light" title="Light"></i>
+  <i class="theme-switch fa-solid fa-moon               fa-lg" data-mode="dark"  title="Dark"></i>
+  <i class="theme-switch fa-solid fa-circle-half-stroke fa-lg" data-mode="auto"  title="System Settings"></i>
+</button></div>
+        
+          <div class="navbar-item"><ul class="navbar-icon-links"
+    aria-label="Icon Links">
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://github.com/PandABlocks/fastcs-PandABlocks" title="GitHub" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fa-brands fa-square-github fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">GitHub</span></a>
+        </li>
+        <li class="nav-item">
+          
+          
+          
+          
+          
+          
+          
+          
+          <a href="https://pypi.org/project/fastcs-PandABlocks" title="PyPI" class="nav-link pst-navbar-icon" rel="noopener" target="_blank" data-bs-toggle="tooltip" data-bs-placement="bottom"><i class="fas fa-cube fa-lg" aria-hidden="true"></i>
+            <span class="sr-only">PyPI</span></a>
+        </li>
+</ul></div>
+        
+          <div class="navbar-item">
+<div class="version-switcher__container dropdown pst-js-only">
+  <button id="pst-version-switcher-button-3"
+    type="button"
+    class="version-switcher__button btn btn-sm dropdown-toggle"
+    data-bs-toggle="dropdown"
+    aria-haspopup="listbox"
+    aria-controls="pst-version-switcher-list-3"
+    aria-label="Version switcher list"
+  >
+    Choose version  <!-- this text may get changed later by javascript -->
+    <span class="caret"></span>
+  </button>
+  <div id="pst-version-switcher-list-3"
+    class="version-switcher__menu dropdown-menu list-group-flush py-0"
+    role="listbox" aria-labelledby="pst-version-switcher-button-3">
+    <!-- dropdown will be populated by javascript on page load -->
+  </div>
+</div></div>
+        
+      </div>
+    
+  </div>
+  
+  
+  <div class="sidebar-primary-items__end sidebar-primary__section">
+      <div class="sidebar-primary-item">
+<div id="ethical-ad-placement"
+      class="flat"
+      data-ea-publisher="readthedocs"
+      data-ea-type="readthedocs-sidebar"
+      data-ea-manual="true">
+</div></div>
+  </div>
+
+
+      </div>
+      
+      <main id="main-content" class="bd-main" role="main">
+        
+        
+          <div class="bd-content">
+            <div class="bd-article-container">
+              
+              <div class="bd-header-article d-print-none">
+<div class="header-article-items header-article__inner">
+  
+    <div class="header-article-items__start">
+      
+        <div class="header-article-item">
+
+<nav aria-label="Breadcrumb" class="d-print-none">
+  <ul class="bd-breadcrumbs">
+    
+    <li class="breadcrumb-item breadcrumb-home">
+      <a href="../../../../index.html" class="nav-link" aria-label="Home">
+        <i class="fa-solid fa-home"></i>
+      </a>
+    </li>
+    
+    <li class="breadcrumb-item"><a href="../../../index.html" class="nav-link">Module code</a></li>
+    
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">fastcs_pandablocks.panda.blocks.blocks</span></li>
+  </ul>
+</nav>
+</div>
+      
+    </div>
+  
+  
+</div>
+</div>
+              
+              
+              
+                
+<div id="searchbox"></div>
+                <article class="bd-article">
+                  
+  <h1>Source code for fastcs_pandablocks.panda.blocks.blocks</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">asyncio</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">enum</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Generator</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.attributes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Attribute</span><span class="p">,</span> <span class="n">AttrR</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">,</span> <span class="n">AttrW</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">SubController</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs.datatypes</span><span class="w"> </span><span class="kn">import</span> <span class="n">Bool</span><span class="p">,</span> <span class="n">Enum</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Int</span><span class="p">,</span> <span class="n">String</span><span class="p">,</span> <span class="n">Table</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">DTypeLike</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pandablocks.commands</span><span class="w"> </span><span class="kn">import</span> <span class="n">TableFieldDetails</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pandablocks.responses</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">BitMuxFieldInfo</span><span class="p">,</span>
+    <span class="n">BitOutFieldInfo</span><span class="p">,</span>
+    <span class="n">EnumFieldInfo</span><span class="p">,</span>
+    <span class="n">ExtOutBitsFieldInfo</span><span class="p">,</span>
+    <span class="n">ExtOutFieldInfo</span><span class="p">,</span>
+    <span class="n">FieldInfo</span><span class="p">,</span>
+    <span class="n">PosMuxFieldInfo</span><span class="p">,</span>
+    <span class="n">PosOutFieldInfo</span><span class="p">,</span>
+    <span class="n">ScalarFieldInfo</span><span class="p">,</span>
+    <span class="n">SubtypeTimeFieldInfo</span><span class="p">,</span>
+    <span class="n">TableFieldInfo</span><span class="p">,</span>
+    <span class="n">TimeFieldInfo</span><span class="p">,</span>
+    <span class="n">UintFieldInfo</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs_pandablocks.panda.client_wrapper</span><span class="w"> </span><span class="kn">import</span> <span class="n">RawPanda</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs_pandablocks.panda.handlers</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">ArmSender</span><span class="p">,</span>
+    <span class="n">BitGroupOnUpdate</span><span class="p">,</span>
+    <span class="n">CaptureHandler</span><span class="p">,</span>
+    <span class="n">DefaultFieldHandler</span><span class="p">,</span>
+    <span class="n">DefaultFieldSender</span><span class="p">,</span>
+    <span class="n">DefaultFieldUpdater</span><span class="p">,</span>
+    <span class="n">TableFieldHandler</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">fastcs_pandablocks.types</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">PandaName</span><span class="p">,</span>
+    <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="n">ResponseType</span><span class="p">,</span>
+    <span class="n">WidgetGroup</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.block_controller</span><span class="w"> </span><span class="kn">import</span> <span class="n">BlockController</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">DataController</span><span class="p">,</span> <span class="n">DatasetAttributes</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.versions</span><span class="w"> </span><span class="kn">import</span> <span class="n">VersionController</span>
+
+
+<div class="viewcode-block" id="Blocks">
+<a class="viewcode-back" href="../../../../_api/fastcs_pandablocks.panda.blocks.html#fastcs_pandablocks.panda.blocks.Blocks">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Blocks</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A wrapper that handles creating controllers and attributes from introspected</span>
+<span class="sd">    panda data.</span>
+
+<span class="sd">    Unfortunately attributes and names need to be cached throughout the introspection</span>
+<span class="sd">    process so having this all in one (huge) file is the nicest way to handle this.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">raw_panda</span><span class="p">:</span> <span class="n">RawPanda</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span> <span class="o">=</span> <span class="n">raw_panda</span>
+        <span class="c1">#: The controllers which should be registered by `PandaController` and are</span>
+        <span class="c1">#: acccessible by panda name.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_introspected_controllers</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">PandaName</span><span class="p">,</span> <span class="n">BlockController</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1">#: For controllers we add on the fastcs side which aren&#39;t accessible</span>
+        <span class="c1">#: by panda name.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_additional_controllers</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SubController</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+        <span class="c1">#: For keeping track of ext out bits so that updates in the group can be linked</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bits_group_names</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="n">PandaName</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="n">PandaName</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">[]</span>
+
+        <span class="c1">#: For keeping track of dataset records so the :Data:Datasets table</span>
+        <span class="c1">#: can be updated.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_attributes</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">PandaName</span><span class="p">,</span> <span class="n">DatasetAttributes</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_attribute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Attribute</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_introspected_controllers</span><span class="p">[</span>
+            <span class="n">panda_name</span><span class="o">.</span><span class="n">up_to_block</span><span class="p">()</span>
+        <span class="p">]</span><span class="o">.</span><span class="n">panda_name_to_attribute</span><span class="p">[</span><span class="n">panda_name</span><span class="p">]</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">controllers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Generator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">SubController</span><span class="p">],</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+        <span class="k">for</span> <span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">introspected_controller</span><span class="p">,</span>
+        <span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_introspected_controllers</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">yield</span> <span class="n">panda_name</span><span class="o">.</span><span class="n">attribute_name</span><span class="p">,</span> <span class="n">introspected_controller</span>
+
+        <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">_additional_controllers</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+
+    <span class="c1"># ==================================================================================</span>
+    <span class="c1"># ====== FOR LINKING AND GENERATING POST INTROSPECTION =============================</span>
+    <span class="c1"># ==================================================================================</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">setup_post_introspection</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_link_bits_groups</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_version_block</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_pcap_arm</span><span class="p">(),</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_add_data_block</span><span class="p">(),</span>
+        <span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_link_bits_groups</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">group_panda_name</span><span class="p">,</span> <span class="n">bit_panda_names</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bits_group_names</span><span class="p">:</span>
+            <span class="n">group_attribute</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="n">group_panda_name</span><span class="p">)</span>
+
+            <span class="n">bit_attributes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">AttrRW</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">get_attribute</span><span class="p">(</span><span class="n">panda_name</span><span class="p">)</span> <span class="k">for</span> <span class="n">panda_name</span> <span class="ow">in</span> <span class="n">bit_panda_names</span>
+            <span class="p">]</span>  <span class="c1"># type: ignore</span>
+
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">group_attribute</span><span class="p">,</span> <span class="n">AttrRW</span><span class="p">)</span>
+            <span class="n">update_callback</span> <span class="o">=</span> <span class="n">BitGroupOnUpdate</span><span class="p">(</span><span class="n">group_attribute</span><span class="p">,</span> <span class="n">bit_attributes</span><span class="p">)</span>
+            <span class="n">group_attribute</span><span class="o">.</span><span class="n">add_update_callback</span><span class="p">(</span><span class="n">update_callback</span><span class="p">)</span>
+
+            <span class="k">for</span> <span class="n">bit_attribute</span> <span class="ow">in</span> <span class="n">bit_attributes</span><span class="p">:</span>
+                <span class="n">bit_attribute</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="p">(</span>
+                    <span class="s2">&quot;Whether this field is set for capture in &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;the `</span><span class="si">{</span><span class="n">group_panda_name</span><span class="o">.</span><span class="n">up_to_field</span><span class="p">()</span><span class="si">}</span><span class="s2">` group.&quot;</span>
+                <span class="p">)</span>
+                <span class="n">bit_attribute</span><span class="o">.</span><span class="n">add_update_callback</span><span class="p">(</span><span class="n">update_callback</span><span class="p">)</span>
+
+            <span class="c1"># To match all bits before the p4p transport starts.</span>
+            <span class="k">await</span> <span class="n">update_callback</span><span class="p">(</span><span class="n">group_attribute</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_add_version_block</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">idn_response</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;*IDN&quot;</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idn_response</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_additional_controllers</span><span class="p">[</span><span class="s2">&quot;Versions&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">VersionController</span><span class="p">(</span><span class="n">idn_response</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_add_pcap_arm</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">pcap_name</span> <span class="o">=</span> <span class="n">PandaName</span><span class="p">(</span><span class="s2">&quot;PCAP&quot;</span><span class="p">)</span>
+        <span class="n">pcap_block</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_introspected_controllers</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">pcap_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">pcap_block</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Did not receive a PCAP block during introspection.&quot;</span><span class="p">)</span>
+
+        <span class="n">pcap_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">pcap_name</span> <span class="o">+</span> <span class="n">PandaName</span><span class="p">(</span><span class="n">field</span><span class="o">=</span><span class="s2">&quot;Arm&quot;</span><span class="p">),</span>
+            <span class="n">AttrW</span><span class="p">(</span>
+                <span class="n">Enum</span><span class="p">(</span><span class="n">ArmSender</span><span class="o">.</span><span class="n">ArmCommand</span><span class="p">),</span>
+                <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Arm/Disarm the PandA.&quot;</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">ArmSender</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">arm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">disarm</span><span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">CAPTURE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">_add_data_block</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_additional_controllers</span><span class="p">[</span><span class="s2">&quot;Data&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">DataController</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_attributes</span>
+        <span class="p">)</span>
+
+    <span class="c1"># ==================================================================================</span>
+    <span class="c1"># ====== FOR PARSING INTROSPECTED DATA =============================================</span>
+    <span class="c1"># ==================================================================================</span>
+
+    <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">parse_introspected_data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="p">(</span>
+            <span class="n">raw_blocks</span><span class="p">,</span>
+            <span class="n">raw_field_infos</span><span class="p">,</span>
+            <span class="n">raw_labels</span><span class="p">,</span>
+            <span class="n">raw_initial_values</span><span class="p">,</span>
+        <span class="p">)</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">introspect</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="p">(</span><span class="n">block_name</span><span class="p">,</span> <span class="n">block_info</span><span class="p">),</span> <span class="n">field_info</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span>
+            <span class="n">raw_blocks</span><span class="o">.</span><span class="n">items</span><span class="p">(),</span> <span class="n">raw_field_infos</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span>
+        <span class="p">):</span>
+            <span class="n">numbered_block_names</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="p">[</span><span class="n">block_name</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">block_info</span><span class="o">.</span><span class="n">number</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="k">else</span> <span class="p">[</span>
+                    <span class="n">block_name</span> <span class="o">+</span> <span class="n">PandaName</span><span class="p">(</span><span class="n">block_number</span><span class="o">=</span><span class="n">number</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">number</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">block_info</span><span class="o">.</span><span class="n">number</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+                <span class="p">]</span>
+            <span class="p">)</span>
+            <span class="k">for</span> <span class="n">numbered_block_name</span> <span class="ow">in</span> <span class="n">numbered_block_names</span><span class="p">:</span>
+                <span class="n">block_initial_values</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="n">key</span><span class="p">:</span> <span class="n">value</span>
+                    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">raw_initial_values</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                    <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">numbered_block_name</span>
+                <span class="p">}</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="n">raw_labels</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">numbered_block_name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+                <span class="n">block</span> <span class="o">=</span> <span class="n">BlockController</span><span class="p">(</span>
+                    <span class="n">numbered_block_name</span><span class="p">,</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">put_value_to_panda</span><span class="p">,</span>
+                    <span class="n">label</span><span class="o">=</span><span class="n">block_info</span><span class="o">.</span><span class="n">description</span> <span class="ow">or</span> <span class="n">label</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">fill_block</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">block_initial_values</span><span class="p">)</span>
+
+                <span class="bp">self</span><span class="o">.</span><span class="n">_introspected_controllers</span><span class="p">[</span><span class="n">numbered_block_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">block</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">fill_block</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">field_infos</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">PandaName</span><span class="p">,</span> <span class="n">ResponseType</span><span class="p">],</span>
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">for</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span> <span class="ow">in</span> <span class="n">field_infos</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">full_field_name</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">panda_name</span> <span class="o">+</span> <span class="n">field_panda_name</span>
+            <span class="n">field_initial_values</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="n">key</span><span class="p">:</span> <span class="n">value</span>
+                <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">initial_values</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">field_panda_name</span>
+            <span class="p">}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_field_to_block</span><span class="p">(</span>
+                <span class="n">block</span><span class="p">,</span> <span class="n">full_field_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">field_initial_values</span>
+            <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">add_field_to_block</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">field_panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">field_info</span><span class="p">:</span> <span class="n">ResponseType</span><span class="p">,</span>
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="k">match</span> <span class="n">field_info</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">TableFieldInfo</span><span class="p">():</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_table_field</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">TimeFieldInfo</span><span class="p">(</span><span class="n">subtype</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_time_param</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">SubtypeTimeFieldInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;param&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_time_param</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">SubtypeTimeFieldInfo</span><span class="p">(</span><span class="n">subtype</span><span class="o">=</span><span class="s2">&quot;read&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_time_read</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">SubtypeTimeFieldInfo</span><span class="p">(</span><span class="n">subtype</span><span class="o">=</span><span class="s2">&quot;write&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_time_write</span><span class="p">(</span><span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">)</span>
+
+            <span class="k">case</span> <span class="n">BitOutFieldInfo</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_bit_out</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">ExtOutBitsFieldInfo</span><span class="p">(</span><span class="n">subtype</span><span class="o">=</span><span class="s2">&quot;timestamp&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_ext_out</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">ExtOutBitsFieldInfo</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_ext_out_bits</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">ExtOutFieldInfo</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_ext_out</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">BitMuxFieldInfo</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_bit_mux</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">FieldInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;param&quot;</span><span class="p">,</span> <span class="n">subtype</span><span class="o">=</span><span class="s2">&quot;bit&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_bit_param</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">FieldInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;read&quot;</span><span class="p">,</span> <span class="n">subtype</span><span class="o">=</span><span class="s2">&quot;bit&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_bit_read</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">FieldInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;write&quot;</span><span class="p">,</span> <span class="n">subtype</span><span class="o">=</span><span class="s2">&quot;bit&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_bit_write</span><span class="p">(</span><span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">)</span>
+
+            <span class="k">case</span> <span class="n">PosOutFieldInfo</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_pos_out</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">PosMuxFieldInfo</span><span class="p">():</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_pos_mux</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span>
+                <span class="p">)</span>
+
+            <span class="c1"># TODO: Add scaled as an option to fastcs int so we can have a uint32</span>
+            <span class="k">case</span> <span class="n">UintFieldInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;param&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint_param</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">UintFieldInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;read&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint_read</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">UintFieldInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;write&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_uint_write</span><span class="p">(</span><span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">)</span>
+
+            <span class="c1"># Scalar types</span>
+            <span class="k">case</span> <span class="n">ScalarFieldInfo</span><span class="p">(</span><span class="n">subtype</span><span class="o">=</span><span class="s2">&quot;param&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_scalar_param</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">ScalarFieldInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;read&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_scalar_read</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">ScalarFieldInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;write&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_scalar_write</span><span class="p">(</span><span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">)</span>
+
+            <span class="c1"># Int types</span>
+            <span class="k">case</span> <span class="n">FieldInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;param&quot;</span><span class="p">,</span> <span class="n">subtype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_int_param</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">FieldInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;read&quot;</span><span class="p">,</span> <span class="n">subtype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_int_read</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">FieldInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;write&quot;</span><span class="p">,</span> <span class="n">subtype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_int_write</span><span class="p">(</span><span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">)</span>
+
+            <span class="c1"># Action types</span>
+            <span class="k">case</span> <span class="n">FieldInfo</span><span class="p">(</span>
+                <span class="nb">type</span><span class="o">=</span><span class="s2">&quot;write&quot;</span><span class="p">,</span>
+                <span class="n">subtype</span><span class="o">=</span><span class="s2">&quot;action&quot;</span><span class="p">,</span>
+            <span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_action_write</span><span class="p">(</span><span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">)</span>
+
+            <span class="c1"># Lut types</span>
+            <span class="k">case</span> <span class="n">FieldInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;param&quot;</span><span class="p">,</span> <span class="n">subtype</span><span class="o">=</span><span class="s2">&quot;lut&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_lut_param</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">FieldInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;read&quot;</span><span class="p">,</span> <span class="n">subtype</span><span class="o">=</span><span class="s2">&quot;lut&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_lut_read</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">FieldInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;write&quot;</span><span class="p">,</span> <span class="n">subtype</span><span class="o">=</span><span class="s2">&quot;lut&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_lut_write</span><span class="p">(</span><span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">)</span>
+
+            <span class="c1"># Enum types</span>
+            <span class="k">case</span> <span class="n">EnumFieldInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;param&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_enum_param</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">EnumFieldInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;read&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_enum_read</span><span class="p">(</span>
+                    <span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span>
+                <span class="p">)</span>
+            <span class="k">case</span> <span class="n">EnumFieldInfo</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s2">&quot;write&quot;</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_make_enum_write</span><span class="p">(</span><span class="n">parent_block</span><span class="p">,</span> <span class="n">field_panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">)</span>
+            <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown field type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">field_info</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_table_datatypes_from_table_field_details</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">details</span><span class="p">:</span> <span class="n">TableFieldDetails</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DTypeLike</span><span class="p">:</span>
+        <span class="k">match</span> <span class="n">details</span><span class="p">:</span>
+            <span class="k">case</span> <span class="n">TableFieldDetails</span><span class="p">(</span><span class="n">subtype</span><span class="o">=</span><span class="s2">&quot;int&quot;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">int32</span>
+            <span class="k">case</span> <span class="n">TableFieldDetails</span><span class="p">(</span><span class="n">subtype</span><span class="o">=</span><span class="s2">&quot;uint&quot;</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span>
+            <span class="k">case</span> <span class="n">TableFieldDetails</span><span class="p">(</span><span class="n">subtype</span><span class="o">=</span><span class="s2">&quot;enum&quot;</span><span class="p">):</span>
+                <span class="c1"># TODO: replace with string once</span>
+                <span class="c1"># https://github.com/epics-base/p4p/issues/168</span>
+                <span class="c1"># is fixed.</span>
+                <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">uint32</span>
+            <span class="k">case</span><span class="w"> </span><span class="k">_</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Received unknown datatype for table in panda.&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_table_field</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">field_info</span><span class="p">:</span> <span class="n">TableFieldInfo</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">structured_datatype</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_table_datatypes_from_table_field_details</span><span class="p">(</span><span class="n">details</span><span class="p">))</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">details</span> <span class="ow">in</span> <span class="n">field_info</span><span class="o">.</span><span class="n">fields</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="p">]</span>
+        <span class="c1"># TODO: Add units handler to update the units field and value of this one PV</span>
+        <span class="c1"># https://github.com/PandABlocks/PandABlocks-ioc/blob/c1e8056abf3f680fa3840493eb4ac6ca2be31313/src/pandablocks_ioc/ioc.py#L750-L769</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">attributes</span><span class="p">[</span><span class="n">panda_name</span><span class="o">.</span><span class="n">attribute_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span>
+            <span class="n">Table</span><span class="p">(</span><span class="n">structured_datatype</span><span class="p">),</span>
+            <span class="n">handler</span><span class="o">=</span><span class="n">TableFieldHandler</span><span class="p">(</span><span class="n">panda_name</span><span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_time_param</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">field_info</span><span class="p">:</span> <span class="n">SubtypeTimeFieldInfo</span> <span class="o">|</span> <span class="n">TimeFieldInfo</span><span class="p">,</span>
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="c1"># TODO: add a handler for units to scale to get seconds</span>
+        <span class="c1"># The units come through in the same *CHANGES so there shouldn&#39;t</span>
+        <span class="c1"># be a race condition here.</span>
+        <span class="c1"># PandaName(block=&#39;PULSE&#39;, block_number=2, field=&#39;WIDTH&#39;, sub_field=None): &#39;0&#39;,</span>
+        <span class="c1"># PandaName(..., sub_field=&#39;UNITS&#39;): &#39;s&#39;,</span>
+
+        <span class="n">attribute</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span>
+            <span class="n">Float</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">),</span>
+            <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldHandler</span><span class="p">(</span><span class="n">panda_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">put_value_to_panda</span><span class="p">),</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">initial_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">initial_values</span><span class="p">[</span><span class="n">panda_name</span><span class="p">]),</span>
+        <span class="p">)</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="n">panda_name</span><span class="p">,</span> <span class="n">attribute</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_time_read</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">field_info</span><span class="p">:</span> <span class="n">SubtypeTimeFieldInfo</span><span class="p">,</span>
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">attribute</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span>
+            <span class="n">Float</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">),</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldUpdater</span><span class="p">(</span><span class="n">panda_name</span><span class="p">),</span>
+            <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">OUTPUTS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">initial_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">initial_values</span><span class="p">[</span><span class="n">panda_name</span><span class="p">]),</span>
+        <span class="p">)</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="n">panda_name</span><span class="p">,</span> <span class="n">attribute</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_time_write</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">field_info</span><span class="p">:</span> <span class="n">SubtypeTimeFieldInfo</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">attribute</span> <span class="o">=</span> <span class="n">AttrW</span><span class="p">(</span>
+            <span class="n">Float</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="s2">&quot;s&quot;</span><span class="p">),</span>
+            <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldHandler</span><span class="p">(</span><span class="n">panda_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">put_value_to_panda</span><span class="p">),</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">OUTPUTS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="n">panda_name</span><span class="p">,</span> <span class="n">attribute</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_bit_out</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">field_info</span><span class="p">:</span> <span class="n">BitOutFieldInfo</span><span class="p">,</span>
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">AttrR</span><span class="p">(</span>
+                <span class="n">Bool</span><span class="p">(),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldUpdater</span><span class="p">(</span><span class="n">panda_name</span><span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">OUTPUTS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="n">initial_value</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">initial_values</span><span class="p">[</span><span class="n">panda_name</span><span class="p">])),</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="n">capture_name</span> <span class="o">=</span> <span class="n">panda_name</span> <span class="o">+</span> <span class="n">PandaName</span><span class="p">(</span><span class="n">sub_field</span><span class="o">=</span><span class="s2">&quot;CAPTURE&quot;</span><span class="p">)</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">capture_name</span><span class="p">,</span>
+            <span class="n">AttrRW</span><span class="p">(</span>
+                <span class="n">Bool</span><span class="p">(),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">CAPTURE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="n">initial_value</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_pos_out</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">field_info</span><span class="p">:</span> <span class="n">PosOutFieldInfo</span><span class="p">,</span>
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">pos_out</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span>
+            <span class="n">Int</span><span class="p">(),</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldUpdater</span><span class="p">(</span><span class="n">panda_name</span><span class="p">),</span>
+            <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">OUTPUTS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">initial_value</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">initial_values</span><span class="p">[</span><span class="n">panda_name</span><span class="p">]),</span>
+        <span class="p">)</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="n">panda_name</span><span class="p">,</span> <span class="n">pos_out</span><span class="p">)</span>
+
+        <span class="n">scale_panda_name</span> <span class="o">=</span> <span class="n">panda_name</span> <span class="o">+</span> <span class="n">PandaName</span><span class="p">(</span><span class="n">sub_field</span><span class="o">=</span><span class="s2">&quot;SCALE&quot;</span><span class="p">)</span>
+        <span class="n">scale</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span>
+            <span class="n">Float</span><span class="p">(),</span>
+            <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">CAPTURE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldHandler</span><span class="p">(</span><span class="n">panda_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">put_value_to_panda</span><span class="p">),</span>
+            <span class="n">initial_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">initial_values</span><span class="p">[</span><span class="n">scale_panda_name</span><span class="p">]),</span>
+        <span class="p">)</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="n">scale_panda_name</span><span class="p">,</span> <span class="n">scale</span><span class="p">)</span>
+
+        <span class="n">offset_panda_name</span> <span class="o">=</span> <span class="n">panda_name</span> <span class="o">+</span> <span class="n">PandaName</span><span class="p">(</span><span class="n">sub_field</span><span class="o">=</span><span class="s2">&quot;OFFSET&quot;</span><span class="p">)</span>
+        <span class="n">offset</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span>
+            <span class="n">Float</span><span class="p">(),</span>
+            <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">CAPTURE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldHandler</span><span class="p">(</span><span class="n">panda_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">put_value_to_panda</span><span class="p">),</span>
+            <span class="n">initial_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">initial_values</span><span class="p">[</span><span class="n">offset_panda_name</span><span class="p">]),</span>
+        <span class="p">)</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="n">offset_panda_name</span><span class="p">,</span> <span class="n">offset</span><span class="p">)</span>
+
+        <span class="n">scaled_panda_name</span> <span class="o">=</span> <span class="n">panda_name</span> <span class="o">+</span> <span class="n">PandaName</span><span class="p">(</span><span class="n">sub_field</span><span class="o">=</span><span class="s2">&quot;SCALED&quot;</span><span class="p">)</span>
+        <span class="n">scaled</span> <span class="o">=</span> <span class="n">AttrR</span><span class="p">(</span>
+            <span class="n">Float</span><span class="p">(),</span>
+            <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">CAPTURE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Value with scaling applied.&quot;</span><span class="p">,</span>
+            <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldUpdater</span><span class="p">(</span><span class="n">scaled_panda_name</span><span class="p">),</span>
+            <span class="n">initial_value</span><span class="o">=</span><span class="n">scale</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">*</span> <span class="n">pos_out</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">+</span> <span class="n">offset</span><span class="o">.</span><span class="n">get</span><span class="p">(),</span>
+        <span class="p">)</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="n">scaled_panda_name</span><span class="p">,</span> <span class="n">scaled</span><span class="p">)</span>
+
+        <span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">updated_scaled_on_offset_change</span><span class="p">(</span><span class="o">*</span><span class="n">_</span><span class="p">):</span>
+            <span class="k">await</span> <span class="n">scaled</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">scale</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">*</span> <span class="n">pos_out</span><span class="o">.</span><span class="n">get</span><span class="p">()</span> <span class="o">+</span> <span class="n">offset</span><span class="o">.</span><span class="n">get</span><span class="p">())</span>
+
+        <span class="n">offset</span><span class="o">.</span><span class="n">add_update_callback</span><span class="p">(</span><span class="n">updated_scaled_on_offset_change</span><span class="p">)</span>
+        <span class="n">scale</span><span class="o">.</span><span class="n">add_update_callback</span><span class="p">(</span><span class="n">updated_scaled_on_offset_change</span><span class="p">)</span>
+        <span class="n">pos_out</span><span class="o">.</span><span class="n">add_update_callback</span><span class="p">(</span><span class="n">updated_scaled_on_offset_change</span><span class="p">)</span>
+
+        <span class="n">capture_enum</span> <span class="o">=</span> <span class="n">Enum</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s2">&quot;Capture&quot;</span><span class="p">,</span> <span class="n">field_info</span><span class="o">.</span><span class="n">capture_labels</span><span class="p">))</span>
+
+        <span class="n">capture_panda_name</span> <span class="o">=</span> <span class="n">panda_name</span> <span class="o">+</span> <span class="n">PandaName</span><span class="p">(</span><span class="n">sub_field</span><span class="o">=</span><span class="s2">&quot;CAPTURE&quot;</span><span class="p">)</span>
+        <span class="n">capture_attribute</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span>
+            <span class="n">capture_enum</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">CAPTURE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">handler</span><span class="o">=</span><span class="n">CaptureHandler</span><span class="p">(</span>
+                <span class="n">capture_panda_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">put_value_to_panda</span>
+            <span class="p">),</span>
+            <span class="n">initial_value</span><span class="o">=</span><span class="n">capture_enum</span><span class="o">.</span><span class="n">members</span><span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">initial_values</span><span class="p">[</span><span class="n">panda_name</span><span class="p">])],</span>
+        <span class="p">)</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">capture_panda_name</span><span class="p">,</span>
+            <span class="n">capture_attribute</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">dataset_attribute</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span>
+            <span class="n">String</span><span class="p">(),</span>
+            <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+                <span class="s2">&quot;Used to adjust the dataset name to one more scientifically relevant&quot;</span>
+            <span class="p">),</span>
+            <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">CAPTURE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">initial_value</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span> <span class="o">+</span> <span class="n">PandaName</span><span class="p">(</span><span class="n">sub_field</span><span class="o">=</span><span class="s2">&quot;DATASET&quot;</span><span class="p">),</span>
+            <span class="n">dataset_attribute</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_attributes</span><span class="p">[</span><span class="n">panda_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">DatasetAttributes</span><span class="p">(</span>
+            <span class="n">dataset_attribute</span><span class="p">,</span> <span class="n">capture_attribute</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_ext_out</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">field_info</span><span class="p">:</span> <span class="n">ExtOutFieldInfo</span><span class="p">,</span>
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Returns the capture attribtute so we can add a callback in ext out bits.</span>
+
+<span class="sd">        For an ext out bits, we set one capture in the group, wait for the panda</span>
+<span class="sd">        response that the group is being captutured, and then update all the elements</span>
+<span class="sd">        in the group.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">capture_enum</span> <span class="o">=</span> <span class="n">Enum</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s2">&quot;Capture&quot;</span><span class="p">,</span> <span class="n">field_info</span><span class="o">.</span><span class="n">capture_labels</span><span class="p">))</span>
+        <span class="n">capture_panda_name</span> <span class="o">=</span> <span class="n">panda_name</span> <span class="o">+</span> <span class="n">PandaName</span><span class="p">(</span><span class="n">sub_field</span><span class="o">=</span><span class="s2">&quot;CAPTURE&quot;</span><span class="p">)</span>
+        <span class="n">capture_attribute</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span>
+            <span class="n">capture_enum</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">CAPTURE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">handler</span><span class="o">=</span><span class="n">CaptureHandler</span><span class="p">(</span>
+                <span class="n">capture_panda_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">put_value_to_panda</span>
+            <span class="p">),</span>
+            <span class="n">initial_value</span><span class="o">=</span><span class="n">capture_enum</span><span class="o">.</span><span class="n">enum_cls</span><span class="p">[</span><span class="n">initial_values</span><span class="p">[</span><span class="n">capture_panda_name</span><span class="p">]],</span>
+        <span class="p">)</span>
+
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span><span class="n">capture_panda_name</span><span class="p">,</span> <span class="n">capture_attribute</span><span class="p">)</span>
+
+        <span class="n">dataset_attribute</span> <span class="o">=</span> <span class="n">AttrRW</span><span class="p">(</span>
+            <span class="n">String</span><span class="p">(),</span>
+            <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+                <span class="s2">&quot;Used to adjust the dataset name to one more scientifically relevant&quot;</span>
+            <span class="p">),</span>
+            <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">CAPTURE</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="n">initial_value</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span> <span class="o">+</span> <span class="n">PandaName</span><span class="p">(</span><span class="n">sub_field</span><span class="o">=</span><span class="s2">&quot;DATASET&quot;</span><span class="p">),</span>
+            <span class="n">dataset_attribute</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dataset_attributes</span><span class="p">[</span><span class="n">panda_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">DatasetAttributes</span><span class="p">(</span>
+            <span class="n">dataset_attribute</span><span class="p">,</span> <span class="n">capture_attribute</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_ext_out_bits</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">field_info</span><span class="p">:</span> <span class="n">ExtOutBitsFieldInfo</span><span class="p">,</span>
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_make_ext_out</span><span class="p">(</span><span class="n">parent_block</span><span class="p">,</span> <span class="n">panda_name</span><span class="p">,</span> <span class="n">field_info</span><span class="p">,</span> <span class="n">initial_values</span><span class="p">)</span>
+        <span class="n">capture_group_members</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">PandaName</span><span class="o">.</span><span class="n">from_string</span><span class="p">(</span><span class="n">label</span><span class="p">)</span> <span class="o">+</span> <span class="n">PandaName</span><span class="p">(</span><span class="n">sub_field</span><span class="o">=</span><span class="s2">&quot;CAPTURE&quot;</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">label</span> <span class="ow">in</span> <span class="n">field_info</span><span class="o">.</span><span class="n">bits</span>
+            <span class="k">if</span> <span class="n">label</span> <span class="o">!=</span> <span class="s2">&quot;&quot;</span>
+        <span class="p">]</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bits_group_names</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="n">panda_name</span> <span class="o">+</span> <span class="n">PandaName</span><span class="p">(</span><span class="n">sub_field</span><span class="o">=</span><span class="s2">&quot;CAPTURE&quot;</span><span class="p">),</span>
+                <span class="n">capture_group_members</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_bit_mux</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">bit_mux_field_info</span><span class="p">:</span> <span class="n">BitMuxFieldInfo</span><span class="p">,</span>
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">AttrRW</span><span class="p">(</span>
+                <span class="n">String</span><span class="p">(),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">bit_mux_field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldHandler</span><span class="p">(</span>
+                    <span class="n">panda_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">put_value_to_panda</span>
+                <span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">INPUTS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="n">initial_value</span><span class="o">=</span><span class="n">initial_values</span><span class="p">[</span><span class="n">panda_name</span><span class="p">],</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="n">delay_panda_name</span> <span class="o">=</span> <span class="n">panda_name</span> <span class="o">+</span> <span class="n">PandaName</span><span class="p">(</span><span class="n">sub_field</span><span class="o">=</span><span class="s2">&quot;DELAY&quot;</span><span class="p">)</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">delay_panda_name</span><span class="p">,</span>
+            <span class="n">AttrRW</span><span class="p">(</span>
+                <span class="n">Int</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">bit_mux_field_info</span><span class="o">.</span><span class="n">max_delay</span><span class="p">),</span>
+                <span class="n">description</span><span class="o">=</span><span class="s2">&quot;Clock delay on input.&quot;</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldHandler</span><span class="p">(</span>
+                    <span class="n">panda_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">put_value_to_panda</span>
+                <span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">INPUTS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="n">initial_value</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">initial_values</span><span class="p">[</span><span class="n">delay_panda_name</span><span class="p">]),</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_pos_mux</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">pos_mux_field_info</span><span class="p">:</span> <span class="n">PosMuxFieldInfo</span><span class="p">,</span>
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">enum_type</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s2">&quot;Labels&quot;</span><span class="p">,</span> <span class="n">pos_mux_field_info</span><span class="o">.</span><span class="n">labels</span><span class="p">)</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">AttrRW</span><span class="p">(</span>
+                <span class="n">Enum</span><span class="p">(</span><span class="n">enum_type</span><span class="p">),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">pos_mux_field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldHandler</span><span class="p">(</span>
+                    <span class="n">panda_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">put_value_to_panda</span>
+                <span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">INPUTS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="n">initial_value</span><span class="o">=</span><span class="n">enum_type</span><span class="p">[</span><span class="n">initial_values</span><span class="p">[</span><span class="n">panda_name</span><span class="p">]],</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_uint_param</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">uint_param_field_info</span><span class="p">:</span> <span class="n">UintFieldInfo</span><span class="p">,</span>
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">AttrRW</span><span class="p">(</span>
+                <span class="n">Float</span><span class="p">(</span><span class="n">prec</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">uint_param_field_info</span><span class="o">.</span><span class="n">max_val</span><span class="p">),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">uint_param_field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldHandler</span><span class="p">(</span>
+                    <span class="n">panda_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">put_value_to_panda</span>
+                <span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="n">initial_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">initial_values</span><span class="p">[</span><span class="n">panda_name</span><span class="p">]),</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_uint_read</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">uint_read_field_info</span><span class="p">:</span> <span class="n">UintFieldInfo</span><span class="p">,</span>
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">AttrR</span><span class="p">(</span>
+                <span class="n">Float</span><span class="p">(</span><span class="n">prec</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">uint_read_field_info</span><span class="o">.</span><span class="n">max_val</span><span class="p">),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">uint_read_field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldUpdater</span><span class="p">(</span><span class="n">panda_name</span><span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">READBACKS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="n">initial_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">initial_values</span><span class="p">[</span><span class="n">panda_name</span><span class="p">]),</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_uint_write</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">uint_write_field_info</span><span class="p">:</span> <span class="n">UintFieldInfo</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">AttrW</span><span class="p">(</span>
+                <span class="n">Float</span><span class="p">(</span><span class="n">prec</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="n">uint_write_field_info</span><span class="o">.</span><span class="n">max_val</span><span class="p">),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">uint_write_field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldSender</span><span class="p">(</span>
+                    <span class="n">panda_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">put_value_to_panda</span>
+                <span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">OUTPUTS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_int_param</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">int_param_field_info</span><span class="p">:</span> <span class="n">FieldInfo</span><span class="p">,</span>
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">AttrRW</span><span class="p">(</span>
+                <span class="n">Int</span><span class="p">(),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">int_param_field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldHandler</span><span class="p">(</span>
+                    <span class="n">panda_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">put_value_to_panda</span>
+                <span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="n">initial_value</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">initial_values</span><span class="p">[</span><span class="n">panda_name</span><span class="p">]),</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_int_read</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">int_read_field_info</span><span class="p">:</span> <span class="n">FieldInfo</span><span class="p">,</span>
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">AttrR</span><span class="p">(</span>
+                <span class="n">Int</span><span class="p">(),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">int_read_field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldUpdater</span><span class="p">(</span><span class="n">panda_name</span><span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">READBACKS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="n">initial_value</span><span class="o">=</span><span class="nb">int</span><span class="p">(</span><span class="n">initial_values</span><span class="p">[</span><span class="n">panda_name</span><span class="p">]),</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_int_write</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">int_write_field_info</span><span class="p">:</span> <span class="n">FieldInfo</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">AttrW</span><span class="p">(</span>
+                <span class="n">Int</span><span class="p">(),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">int_write_field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldSender</span><span class="p">(</span>
+                    <span class="n">panda_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">put_value_to_panda</span>
+                <span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_scalar_param</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">scalar_param_field_info</span><span class="p">:</span> <span class="n">ScalarFieldInfo</span><span class="p">,</span>
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">AttrRW</span><span class="p">(</span>
+                <span class="n">Float</span><span class="p">(</span><span class="n">units</span><span class="o">=</span><span class="n">scalar_param_field_info</span><span class="o">.</span><span class="n">units</span><span class="p">),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">scalar_param_field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldHandler</span><span class="p">(</span>
+                    <span class="n">panda_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">put_value_to_panda</span>
+                <span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="n">initial_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">initial_values</span><span class="p">[</span><span class="n">panda_name</span><span class="p">]),</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_scalar_read</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">scalar_read_field_info</span><span class="p">:</span> <span class="n">ScalarFieldInfo</span><span class="p">,</span>
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">AttrR</span><span class="p">(</span>
+                <span class="n">Float</span><span class="p">(),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">scalar_read_field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldUpdater</span><span class="p">(</span><span class="n">panda_name</span><span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">READBACKS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="n">initial_value</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">initial_values</span><span class="p">[</span><span class="n">panda_name</span><span class="p">]),</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_scalar_write</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">scalar_write_field_info</span><span class="p">:</span> <span class="n">ScalarFieldInfo</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">AttrR</span><span class="p">(</span>
+                <span class="n">Float</span><span class="p">(),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">scalar_write_field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldUpdater</span><span class="p">(</span><span class="n">panda_name</span><span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_bit_param</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">bit_param_field_info</span><span class="p">:</span> <span class="n">FieldInfo</span><span class="p">,</span>
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">AttrRW</span><span class="p">(</span>
+                <span class="n">Bool</span><span class="p">(),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">bit_param_field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldHandler</span><span class="p">(</span>
+                    <span class="n">panda_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">put_value_to_panda</span>
+                <span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="n">initial_value</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">initial_values</span><span class="p">[</span><span class="n">panda_name</span><span class="p">])),</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_bit_read</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">bit_read_field_info</span><span class="p">:</span> <span class="n">FieldInfo</span><span class="p">,</span>
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">AttrR</span><span class="p">(</span>
+                <span class="n">Bool</span><span class="p">(),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">bit_read_field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldUpdater</span><span class="p">(</span><span class="n">panda_name</span><span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">READBACKS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="n">initial_value</span><span class="o">=</span><span class="nb">bool</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">initial_values</span><span class="p">[</span><span class="n">panda_name</span><span class="p">])),</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_bit_write</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">bit_write_field_info</span><span class="p">:</span> <span class="n">FieldInfo</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">AttrW</span><span class="p">(</span>
+                <span class="n">Bool</span><span class="p">(),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">bit_write_field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldSender</span><span class="p">(</span>
+                    <span class="n">panda_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">put_value_to_panda</span>
+                <span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">OUTPUTS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_action_write</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">action_write_field_info</span><span class="p">:</span> <span class="n">FieldInfo</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">AttrW</span><span class="p">(</span>
+                <span class="n">Bool</span><span class="p">(),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">action_write_field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldSender</span><span class="p">(</span>
+                    <span class="n">panda_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">put_value_to_panda</span>
+                <span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">OUTPUTS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_lut_param</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">lut_param_field_info</span><span class="p">:</span> <span class="n">FieldInfo</span><span class="p">,</span>
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">AttrRW</span><span class="p">(</span>
+                <span class="n">String</span><span class="p">(),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">lut_param_field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldHandler</span><span class="p">(</span>
+                    <span class="n">panda_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">put_value_to_panda</span>
+                <span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="n">initial_value</span><span class="o">=</span><span class="n">initial_values</span><span class="p">[</span><span class="n">panda_name</span><span class="p">],</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_lut_read</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">lut_read_field_info</span><span class="p">:</span> <span class="n">FieldInfo</span><span class="p">,</span>
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">AttrR</span><span class="p">(</span>
+                <span class="n">String</span><span class="p">(),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">lut_read_field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldUpdater</span><span class="p">(</span><span class="n">panda_name</span><span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">READBACKS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="n">initial_value</span><span class="o">=</span><span class="n">initial_values</span><span class="p">[</span><span class="n">panda_name</span><span class="p">],</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_lut_write</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">lut_read_field_info</span><span class="p">:</span> <span class="n">FieldInfo</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">AttrR</span><span class="p">(</span>
+                <span class="n">String</span><span class="p">(),</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldUpdater</span><span class="p">(</span><span class="n">panda_name</span><span class="p">),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">lut_read_field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">OUTPUTS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_enum_param</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">enum_param_field_info</span><span class="p">:</span> <span class="n">EnumFieldInfo</span><span class="p">,</span>
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">enum_type</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s2">&quot;Labels&quot;</span><span class="p">,</span> <span class="n">enum_param_field_info</span><span class="o">.</span><span class="n">labels</span><span class="p">)</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">AttrRW</span><span class="p">(</span>
+                <span class="n">Enum</span><span class="p">(</span><span class="n">enum_type</span><span class="p">),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">enum_param_field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldHandler</span><span class="p">(</span>
+                    <span class="n">panda_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">put_value_to_panda</span>
+                <span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">PARAMETERS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="n">initial_value</span><span class="o">=</span><span class="n">enum_type</span><span class="p">[</span><span class="n">initial_values</span><span class="p">[</span><span class="n">panda_name</span><span class="p">]],</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_enum_read</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">enum_read_field_info</span><span class="p">:</span> <span class="n">EnumFieldInfo</span><span class="p">,</span>
+        <span class="n">initial_values</span><span class="p">:</span> <span class="n">RawInitialValuesType</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">enum_type</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s2">&quot;Labels&quot;</span><span class="p">,</span> <span class="n">enum_read_field_info</span><span class="o">.</span><span class="n">labels</span><span class="p">)</span>
+
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">AttrR</span><span class="p">(</span>
+                <span class="n">Enum</span><span class="p">(</span><span class="n">enum_type</span><span class="p">),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">enum_read_field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldUpdater</span><span class="p">(</span><span class="n">panda_name</span><span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">READBACKS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+                <span class="n">initial_value</span><span class="o">=</span><span class="n">enum_type</span><span class="p">[</span><span class="n">initial_values</span><span class="p">[</span><span class="n">panda_name</span><span class="p">]],</span>
+            <span class="p">),</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_enum_write</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">parent_block</span><span class="p">:</span> <span class="n">BlockController</span><span class="p">,</span>
+        <span class="n">panda_name</span><span class="p">:</span> <span class="n">PandaName</span><span class="p">,</span>
+        <span class="n">enum_write_field_info</span><span class="p">:</span> <span class="n">EnumFieldInfo</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">enum_type</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">(</span><span class="s2">&quot;Labels&quot;</span><span class="p">,</span> <span class="n">enum_write_field_info</span><span class="o">.</span><span class="n">labels</span><span class="p">)</span>
+        <span class="n">parent_block</span><span class="o">.</span><span class="n">add_attribute</span><span class="p">(</span>
+            <span class="n">panda_name</span><span class="p">,</span>
+            <span class="n">AttrW</span><span class="p">(</span>
+                <span class="n">Enum</span><span class="p">(</span><span class="n">enum_type</span><span class="p">),</span>
+                <span class="n">description</span><span class="o">=</span><span class="n">enum_write_field_info</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+                <span class="n">handler</span><span class="o">=</span><span class="n">DefaultFieldSender</span><span class="p">(</span>
+                    <span class="n">panda_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_raw_panda</span><span class="o">.</span><span class="n">put_value_to_panda</span>
+                <span class="p">),</span>
+                <span class="n">group</span><span class="o">=</span><span class="n">WidgetGroup</span><span class="o">.</span><span class="n">OUTPUTS</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+            <span class="p">),</span>
+        <span class="p">)</span></div>
+
+</pre></div>
+
+                </article>
+              
+              
+              
+              
+              
+                <footer class="prev-next-footer d-print-none">
+                  
+<div class="prev-next-area">
+</div>
+                </footer>
+              
+            </div>
+            
+            
+              
+            
+          </div>
+          <footer class="bd-footer-content">
+            
+          </footer>
+        
+      </main>
+    </div>
+  </div>
+  
+  <!-- Scripts loaded after <body> so the DOM is not blocked -->
+  <script defer src="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf"></script>
+<script defer src="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf"></script>
+
+  <footer class="bd-footer">
+<div class="bd-footer__inner bd-page-width">
+  
+  
+  
+    <div class="footer-items__end">
+      
+        <div class="footer-item">
+<p class="theme-version">
+  <!-- # L10n: Setting the PST URL as an argument as this does not need to be localized -->
+  Built with the <a href="https://pydata-sphinx-theme.readthedocs.io/en/stable/index.html">PyData Sphinx Theme</a> 0.16.1.
+</p></div>
+      
+    </div>
+  
+</div>
+
+  </footer>
+  </body>
+</html>

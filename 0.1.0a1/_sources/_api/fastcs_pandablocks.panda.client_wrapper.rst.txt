@@ -1,0 +1,21 @@
+``fastcs_pandablocks.panda.client_wrapper``
+===========================================
+        
+
+.. automodule:: fastcs_pandablocks.panda.client_wrapper
+    :members:
+
+    
+    
+    
+
+    
+    
+    .. rubric:: Members
+
+    .. autosummary::
+        :nosignatures:
+    
+        RawPanda
+    
+    

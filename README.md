@@ -5,10 +5,7 @@
 
 # fastcs_pandablocks
 
-A softioc to control a PandABlocks-FPGA.
-
-This is where you should write a short paragraph that describes what your module does,
-how it does it, and why people should use it.
+A softioc to control a PandABlocks-FPGA using [PandABlocks-client](https://github.com/PandABlocks/PandABlocks-client).
 
 Source          | <https://github.com/PandABlocks-ioc/fastcs-PandABlocks>
 :---:           | :---:
@@ -17,22 +14,12 @@ Docker          | `docker run ghcr.io/pandablocks-ioc/fastcs-PandABlocks:latest`
 Documentation   | <https://pandablocks-ioc.github.io/fastcs-PandABlocks>
 Releases        | <https://github.com/PandABlocks-ioc/fastcs-PandABlocks/releases>
 
-This is where you should put some images or code snippets that illustrate
-some relevant examples. If it is a library then you might put some
-introductory code here:
-
-```python
-from fastcs_pandablocks import __version__
-
-print(f"Hello fastcs_pandablocks {__version__}")
-```
-
-Or if it is a commandline tool then you might put some example commands here:
-
-```
-python -m fastcs_pandablocks --version
-```
-
 <!-- README only content. Anything below this line won't be included in index.md -->
 
-See https://pandablocks-ioc.github.io/fastcs-PandABlocks for more detailed documentation.
+Start the ioc with the project script `fastcs-pandablocks`:
+
+```
+fastcs-pandablocks run <hostname> <prefix> --screens-dir ./screens --log-level INFO --poll-period 0.1
+```
+
+See <https://pandablocks-ioc.github.io/fastcs-PandABlocks> for more detailed documentation.

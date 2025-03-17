@@ -31,7 +31,7 @@ If you require a feature that is not currently released you can also install
 from github:
 
 ```
-python3 -m pip install git+https://github.com/PandABlocks-ioc/fastcs-PandABlocks.git
+$ python3 -m pip install git+https://github.com/PandABlocks/fastcs-PandABlocks.git
 ```
 
 The library should now be installed and the commandline interface on your path.

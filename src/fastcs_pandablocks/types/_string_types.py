@@ -68,6 +68,9 @@ class PandaName:
     def __str__(self) -> str:
         return self._string_form
 
+    def __repr__(self) -> str:
+        return self._string_form
+
     @classmethod
     def from_string(cls, name: str):
         split_name = name.split(PANDA_SEPARATOR)

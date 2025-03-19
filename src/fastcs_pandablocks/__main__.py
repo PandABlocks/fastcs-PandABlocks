@@ -42,7 +42,7 @@ def main():
         "--log-level",
         default="INFO",
         choices=["CRITICAL", "ERROR", "WARNING", "INFO", "DEBUG"],
-        help="Set the logging level.",
+        help="Set the logging level. 'DEBUG' will display data received from PandA.",
     )
     run_parser.add_argument(
         "--poll-period",

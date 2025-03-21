@@ -19,21 +19,23 @@ def ioc(
     screens_directory: Path | None = None,
     poll_period: float = DEFAULT_POLL_PERIOD,
 ):
-    p4p_ioc_options = EpicsPVAOptions(ioc=EpicsIOCOptions(pv_prefix=pv_prefix))
-    if screens_directory:
-        if not screens_directory.is_dir():
-            raise ValueError(
-                f"`screens_directory` {screens_directory} is not a directory"
-            )
+    if screens_directory and not screens_directory.is_dir():
+        raise ValueError(f"`screens_directory` {screens_directory} is not a directory.")
 
-        gui_options = EpicsGUIOptions(
-            output_path=screens_directory / "out.bob", title=pv_prefix
-        )
-        p4p_ioc_options.gui = gui_options
+    epics_gui_options = (
+        EpicsGUIOptions(output_path=screens_directory / "output.bob", title=pv_prefix)
+        if screens_directory
+        else None
+    )
+
+    epics_pva_options = EpicsPVAOptions(
+        ioc=EpicsIOCOptions(pv_prefix=pv_prefix), gui=epics_gui_options
+    )
 
     controller = PandaController(hostname, poll_period)
-    transport = FastCS(controller, [p4p_ioc_options])
-    transport.run()
+    launcher = FastCS(controller, [epics_pva_options])
+    launcher.create_gui()
+    launcher.run()
 
 
 __all__ = ["__version__", "panda", "types", "DEFAULT_POLL_PERIOD"]

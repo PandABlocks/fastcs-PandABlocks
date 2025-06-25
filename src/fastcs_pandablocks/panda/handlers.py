@@ -1,5 +1,6 @@
 import asyncio
 import enum
+import logging
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
 from typing import Any
@@ -9,6 +10,7 @@ from fastcs.attributes import (
     AttrHandlerRW,
     AttrHandlerW,
     AttrRW,
+    AttrW,
 )
 from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, T
 
@@ -63,6 +65,9 @@ class DefaultFieldSender(AttrHandlerW):
     ):
         self.panda_name = panda_name
         self.put_value_to_panda = put_value_to_panda
+
+    async def put(self, attr: AttrW[T], value: T) -> None:
+        await self.put_value_to_panda(self.panda_name, attr.datatype, value)
 
 
 class DefaultFieldUpdater(AttrHandlerR):
@@ -133,7 +138,7 @@ class BitGroupOnUpdate:
         )
 
 
-class ArmSender(AttrHandlerW):
+class ArmSender(AttrHandlerRW):
     """A sender for arming and disarming the Pcap."""
 
     class ArmCommand(enum.Enum):
@@ -147,3 +152,11 @@ class ArmSender(AttrHandlerW):
     ):
         self.arm = arm
         self.disarm = disarm
+
+    async def put(self, attr: AttrW[ArmCommand], value: ArmCommand) -> None:  # type: ignore
+        if value is self.ArmCommand.ARM:
+            logging.info("Arming PandA.")
+            await self.arm()
+        else:
+            logging.info("Disarming PandA.")
+            await self.disarm()

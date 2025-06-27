@@ -133,7 +133,7 @@ class BitGroupOnUpdate:
         )
 
 
-class ArmSender(AttrHandlerW):
+class ArmSender(AttrHandlerRW):
     """A sender for arming and disarming the Pcap."""
 
     class ArmCommand(enum.Enum):

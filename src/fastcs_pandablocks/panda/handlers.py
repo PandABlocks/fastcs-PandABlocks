@@ -1,5 +1,6 @@
 import asyncio
 import enum
+import logging
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
 from typing import Any
@@ -8,7 +9,9 @@ from fastcs.attributes import (
     AttrHandlerR,
     AttrHandlerRW,
     AttrHandlerW,
+    AttrR,
     AttrRW,
+    AttrW,
 )
 from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, T
 
@@ -64,6 +67,14 @@ class DefaultFieldSender(AttrHandlerW):
         self.panda_name = panda_name
         self.put_value_to_panda = put_value_to_panda
 
+    async def update(self, attr: AttrR) -> None:
+        # TODO: Convert to panda value
+        ...
+
+    async def put(self, attr: AttrW, value: Any) -> None:
+        # TODO: Convert to attribtue value
+        ...
+
 
 class DefaultFieldUpdater(AttrHandlerR):
     """Default updater for updating introspected attributes."""
@@ -93,6 +104,14 @@ class TableFieldHandler(AttrHandlerRW):
 
     def __init__(self, panda_name: PandaName):
         self.panda_name = panda_name
+
+    async def update(self, attr: AttrR) -> None:
+        # TODO: Convert to panda value
+        ...
+
+    async def put(self, attr: AttrW, value: Any) -> None:
+        # TODO: Convert to attribtue value
+        ...
 
 
 class CaptureHandler(DefaultFieldHandler):
@@ -147,3 +166,14 @@ class ArmSender(AttrHandlerRW):
     ):
         self.arm = arm
         self.disarm = disarm
+
+    async def put(self, attr: AttrW, value: Any) -> None:
+        if value is self.ArmCommand.ARM:
+            logging.info("Arming PandA.")
+            await self.arm()
+        else:
+            logging.info("Disarming PandA.")
+            await self.disarm()
+
+    async def update(self, attr: AttrR) -> None:
+        pass

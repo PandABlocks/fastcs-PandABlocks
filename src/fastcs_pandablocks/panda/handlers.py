@@ -5,7 +5,14 @@ from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
 from typing import Any
 
-from fastcs.attributes import AttrR, AttrRW, AttrW, Handler, Sender, Updater
+from fastcs.attributes import (
+    AttrHandlerR,
+    AttrHandlerRW,
+    AttrHandlerW,
+    AttrR,
+    AttrRW,
+    AttrW,
+)
 from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, T
 
 from fastcs_pandablocks.types import PandaName
@@ -47,7 +54,7 @@ def attribute_value_to_panda_value(fastcs_datatype: DataType[T], value: T) -> st
             raise NotImplementedError(f"Unknown datatype {fastcs_datatype}")
 
 
-class DefaultFieldSender(Sender):
+class DefaultFieldSender(AttrHandlerW):
     """Default sender for sending introspected attributes."""
 
     def __init__(
@@ -60,11 +67,16 @@ class DefaultFieldSender(Sender):
         self.panda_name = panda_name
         self.put_value_to_panda = put_value_to_panda
 
-    async def put(self, controller: Any, attr: AttrW[T], value: T) -> None:
-        await self.put_value_to_panda(self.panda_name, attr.datatype, value)
+    async def update(self, attr: AttrR) -> None:
+        # TODO: Convert to panda value
+        ...
+
+    async def put(self, attr: AttrW, value: Any) -> None:
+        # TODO: Convert to attribtue value
+        ...
 
 
-class DefaultFieldUpdater(Updater):
+class DefaultFieldUpdater(AttrHandlerR):
     """Default updater for updating introspected attributes."""
 
     #: We update the fields from the top level
@@ -73,11 +85,8 @@ class DefaultFieldUpdater(Updater):
     def __init__(self, panda_name: PandaName):
         self.panda_name = panda_name
 
-    async def update(self, controller: Any, attr: AttrR) -> None:
-        pass  # TODO: update the attr with the value from the panda
 
-
-class DefaultFieldHandler(DefaultFieldSender, DefaultFieldUpdater, Handler):
+class DefaultFieldHandler(DefaultFieldSender, DefaultFieldUpdater, AttrHandlerRW):
     """Default handler for sending and updating introspected attributes."""
 
     def __init__(
@@ -90,17 +99,17 @@ class DefaultFieldHandler(DefaultFieldSender, DefaultFieldUpdater, Handler):
         super().__init__(panda_name, put_value_to_panda)
 
 
-class TableFieldHandler(Handler):
+class TableFieldHandler(AttrHandlerRW):
     """A handler for updating Table valued attributes."""
 
     def __init__(self, panda_name: PandaName):
         self.panda_name = panda_name
 
-    async def update(self, controller: Any, attr: AttrR) -> None:
+    async def update(self, attr: AttrR) -> None:
         # TODO: Convert to panda value
         ...
 
-    async def put(self, controller: Any, attr: AttrW, value: Any) -> None:
+    async def put(self, attr: AttrW, value: Any) -> None:
         # TODO: Convert to attribtue value
         ...
 
@@ -143,7 +152,7 @@ class BitGroupOnUpdate:
         )
 
 
-class ArmHandler(Handler):
+class ArmSender(AttrHandlerRW):
     """A sender for arming and disarming the Pcap."""
 
     class ArmCommand(enum.Enum):
@@ -158,9 +167,7 @@ class ArmHandler(Handler):
         self.arm = arm
         self.disarm = disarm
 
-    async def put(
-        self, controller: Any, attr: AttrW[ArmCommand], value: ArmCommand
-    ) -> None:
+    async def put(self, attr: AttrW, value: Any) -> None:
         if value is self.ArmCommand.ARM:
             logging.info("Arming PandA.")
             await self.arm()
@@ -168,5 +175,5 @@ class ArmHandler(Handler):
             logging.info("Disarming PandA.")
             await self.disarm()
 
-    async def update(self, controller: Any, attr: AttrR[ArmCommand]) -> None:
+    async def update(self, attr: AttrR) -> None:
         pass

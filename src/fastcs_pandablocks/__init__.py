@@ -3,8 +3,8 @@
 from pathlib import Path
 
 from fastcs import FastCS
-from fastcs.launch import EpicsPVAOptions
 from fastcs.transport import EpicsGUIOptions, EpicsIOCOptions
+from fastcs.transport.epics.pva.options import EpicsPVAOptions
 
 from . import panda, types
 from ._version import __version__
@@ -19,7 +19,7 @@ def ioc(
     screens_directory: Path | None = None,
     poll_period: float = DEFAULT_POLL_PERIOD,
 ):
-    p4p_ioc_options = EpicsPVAOptions(ioc=EpicsIOCOptions(pv_prefix=pv_prefix))
+    p4p_ioc_options = EpicsPVAOptions(pva_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))
     if screens_directory:
         if not screens_directory.is_dir():
             raise ValueError(

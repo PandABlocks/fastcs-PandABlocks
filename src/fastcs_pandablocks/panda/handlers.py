@@ -26,7 +26,7 @@ def panda_value_to_attribute_value(fastcs_datatype: DataType[T], value: str) -> 
         case String():
             return value
         case Bool():
-            return str(int(value))
+            return bool(int(value))
         case Int() | Float():
             return fastcs_datatype.dtype(value)
         case Enum():
@@ -67,13 +67,9 @@ class DefaultFieldSender(AttrHandlerW):
         self.panda_name = panda_name
         self.put_value_to_panda = put_value_to_panda
 
-    async def update(self, attr: AttrR) -> None:
-        # TODO: Convert to panda value
-        ...
-
     async def put(self, attr: AttrW, value: Any) -> None:
         # TODO: Convert to attribtue value
-        ...
+        await self.put_value_to_panda(self.panda_name, attr.datatype, value)
 
 
 class DefaultFieldUpdater(AttrHandlerR):
@@ -84,6 +80,8 @@ class DefaultFieldUpdater(AttrHandlerR):
 
     def __init__(self, panda_name: PandaName):
         self.panda_name = panda_name
+
+    async def update(self, attr: AttrR) -> None: ...
 
 
 class DefaultFieldHandler(DefaultFieldSender, DefaultFieldUpdater, AttrHandlerRW):

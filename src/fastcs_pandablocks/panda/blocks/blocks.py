@@ -608,16 +608,17 @@ class Blocks:
         bit_mux_field_info: BitMuxFieldInfo,
         initial_values: RawInitialValuesType,
     ):
+        enum_type = enum.Enum("Labels", bit_mux_field_info.labels)
         parent_block.add_attribute(
             panda_name,
             AttrRW(
-                String(),
+                Enum(enum_type),
                 description=bit_mux_field_info.description,
                 handler=DefaultFieldHandler(
                     panda_name, self._raw_panda.put_value_to_panda
                 ),
                 group=WidgetGroup.INPUTS.value,
-                initial_value=initial_values[panda_name],
+                initial_value=enum_type[initial_values[panda_name]],
             ),
         )
 
@@ -628,7 +629,7 @@ class Blocks:
                 Int(min=0, max=bit_mux_field_info.max_delay),
                 description="Clock delay on input.",
                 handler=DefaultFieldHandler(
-                    panda_name, self._raw_panda.put_value_to_panda
+                    delay_panda_name, self._raw_panda.put_value_to_panda
                 ),
                 group=WidgetGroup.INPUTS.value,
                 initial_value=int(initial_values[delay_panda_name]),

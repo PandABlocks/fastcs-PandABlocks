@@ -1,14 +1,19 @@
 import asyncio
+import logging
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.controller import Controller
 from fastcs.cs_methods import Scan
+from fastcs.datatypes import Table
+from pandablocks.utils import words_to_table
 
 from fastcs_pandablocks.panda.blocks import Blocks
 from fastcs_pandablocks.panda.client_wrapper import RawPanda
 from fastcs_pandablocks.types import PandaName
 
-from .handlers import panda_value_to_attribute_value
+from .handlers import TableFieldHandler, panda_value_to_attribute_value
+
+LOGGER = logging.getLogger(__name__)
 
 
 class PandaController(Controller):
@@ -43,23 +48,50 @@ class PandaController(Controller):
         for block_name, block in self._blocks.controllers():
             self.register_sub_controller(block_name, block)
 
-    async def update_field_value(self, panda_name: PandaName, value: str):
+    async def update_field_value(self, panda_name: PandaName, value: str | list[str]):
         attribute = self._blocks.get_attribute(panda_name)
-        attribute_value = panda_value_to_attribute_value(attribute.datatype, value)
 
-        if isinstance(attribute, AttrW) and not isinstance(attribute, AttrRW):
+        if isinstance(value, list):
+            assert isinstance(attribute.datatype, Table)
+            sender = getattr(attribute, "sender", None)
+            if not isinstance(sender, TableFieldHandler):
+                LOGGER.error(
+                    f"Cannot interpret changes on {panda_name!r}: "
+                    "sender is not TableFieldHandler"
+                )
+                return
+            table_values = words_to_table(value, sender.field_info)
+            attribute_value = panda_value_to_attribute_value(
+                attribute.datatype, table_values
+            )
+        else:
+            attribute_value = panda_value_to_attribute_value(attribute.datatype, value)
+
+        if isinstance(attribute, AttrRW):
+            await attribute.set(attribute_value)
+            await attribute.update_display_without_process(attribute_value)
+        elif isinstance(attribute, AttrW):
             await attribute.process(attribute_value)
         elif isinstance(attribute, AttrR):
             await attribute.set(attribute_value)
         else:
-            raise RuntimeError(f"Couldn't find panda field for {panda_name}.")
+            LOGGER.error(f"Couldn't find panda field for {panda_name}.")
 
     async def _update(self):
-        changes = await self._raw_panda.get_changes()
-
-        await asyncio.gather(
-            *[
-                self.update_field_value(PandaName.from_string(raw_panda_name), value)
-                for raw_panda_name, value in changes.items()
-            ]
-        )
+        try:
+            changes = await self._raw_panda.get_changes()
+            await asyncio.gather(
+                *[
+                    self.update_field_value(
+                        PandaName.from_string(raw_panda_name), value
+                    )
+                    for raw_panda_name, value in changes.items()
+                ]
+            )
+        # TODO: General exception is not ideal; narrow this dowm.
+        except Exception as e:
+            LOGGER.error(
+                f"Failed to update changes from PandaBlocks client: {e}",
+                stack_info=True,
+                exc_info=True,
+            )

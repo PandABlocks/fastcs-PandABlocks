@@ -5,6 +5,7 @@ from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
 from typing import Any
 
+import numpy as np
 from fastcs.attributes import (
     AttrHandlerR,
     AttrHandlerRW,
@@ -13,12 +14,16 @@ from fastcs.attributes import (
     AttrRW,
     AttrW,
 )
-from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, T
+from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, T, Table
+from pandablocks.responses import TableFieldInfo
+from pandablocks.utils import table_to_words
 
 from fastcs_pandablocks.types import PandaName
 
 
-def panda_value_to_attribute_value(fastcs_datatype: DataType[T], value: str) -> T:
+def panda_value_to_attribute_value(
+    fastcs_datatype: DataType[T], value: str | dict
+) -> T:
     """Converts from a value received from the panda through pandablock-client to
     the attribute value.
     """
@@ -31,12 +36,21 @@ def panda_value_to_attribute_value(fastcs_datatype: DataType[T], value: str) -> 
             return fastcs_datatype.dtype(value)
         case Enum():
             return fastcs_datatype.enum_cls[value]
+        case Table():
+            num_rows = len(next(iter(value.values())))
+            structured_datatype = fastcs_datatype.structured_dtype
+            attribute_value = np.zeros(num_rows, fastcs_datatype.structured_dtype)
+            for field_name, _ in structured_datatype:
+                attribute_value[field_name] = value[field_name]
+            return attribute_value
 
         case _:
             raise NotImplementedError(f"Unknown datatype {fastcs_datatype}")
 
 
-def attribute_value_to_panda_value(fastcs_datatype: DataType[T], value: T) -> str:
+def attribute_value_to_panda_value(
+    fastcs_datatype: DataType[T], value: T
+) -> str | dict:
     """Converts from an attribute value to a value that can be sent to the panda
     with pandablocks-client.
     """
@@ -49,7 +63,11 @@ def attribute_value_to_panda_value(fastcs_datatype: DataType[T], value: T) -> st
             return str(value)
         case Enum():
             return value.name
-
+        case Table():
+            panda_value = {}
+            for field_name, _ in fastcs_datatype.structured_dtype:
+                panda_value[field_name] = value[field_name].tolist()
+            return panda_value
         case _:
             raise NotImplementedError(f"Unknown datatype {fastcs_datatype}")
 
@@ -69,7 +87,11 @@ class DefaultFieldSender(AttrHandlerW):
 
     async def put(self, attr: AttrW, value: Any) -> None:
         # TODO: Convert to attribtue value
-        await self.put_value_to_panda(self.panda_name, attr.datatype, value)
+        await self.put_value_to_panda(
+            self.panda_name,
+            attr.datatype,
+            attribute_value_to_panda_value(attr.datatype, value),
+        )
 
 
 class DefaultFieldUpdater(AttrHandlerR):
@@ -100,16 +122,23 @@ class DefaultFieldHandler(DefaultFieldSender, DefaultFieldUpdater, AttrHandlerRW
 class TableFieldHandler(AttrHandlerRW):
     """A handler for updating Table valued attributes."""
 
-    def __init__(self, panda_name: PandaName):
+    def __init__(
+        self,
+        panda_name: PandaName,
+        field_info: TableFieldInfo,
+        put_value_to_panda: Callable[
+            [PandaName, DataType, Any], Coroutine[None, None, None]
+        ],
+    ):
         self.panda_name = panda_name
-
-    async def update(self, attr: AttrR) -> None:
-        # TODO: Convert to panda value
-        ...
+        self.field_info = field_info
+        self.put_value_to_panda = put_value_to_panda
 
     async def put(self, attr: AttrW, value: Any) -> None:
-        # TODO: Convert to attribtue value
-        ...
+        attr_value = attribute_value_to_panda_value(attr.datatype, value)
+        assert isinstance(attr_value, dict)
+        panda_words = table_to_words(attr_value, self.field_info)
+        await self.put_value_to_panda(self.panda_name, attr.datatype, panda_words)
 
 
 class CaptureHandler(DefaultFieldHandler):

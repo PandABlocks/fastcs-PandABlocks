@@ -33,6 +33,7 @@ def ioc(
 
     controller = PandaController(hostname, poll_period)
     transport = FastCS(controller, [p4p_ioc_options])
+    transport.create_gui()
     transport.run()
 
 

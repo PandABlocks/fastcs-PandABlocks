@@ -23,6 +23,7 @@ from pandablocks.responses import (
     TimeFieldInfo,
     UintFieldInfo,
 )
+from pandablocks.utils import words_to_table
 
 from fastcs_pandablocks.panda.client_wrapper import RawPanda
 from fastcs_pandablocks.panda.handlers import (
@@ -33,6 +34,7 @@ from fastcs_pandablocks.panda.handlers import (
     DefaultFieldSender,
     DefaultFieldUpdater,
     TableFieldHandler,
+    panda_value_to_attribute_value,
 )
 from fastcs_pandablocks.types import (
     PandaName,
@@ -211,7 +213,7 @@ class Blocks:
         match field_info:
             case TableFieldInfo():
                 return self._make_table_field(
-                    parent_block, field_panda_name, field_info
+                    parent_block, field_panda_name, field_info, initial_values
                 )
             case TimeFieldInfo(subtype=None):
                 self._make_time_param(
@@ -359,17 +361,30 @@ class Blocks:
         parent_block: BlockController,
         panda_name: PandaName,
         field_info: TableFieldInfo,
+        initial_values: RawInitialValuesType,
     ):
         structured_datatype = [
             (name, self._table_datatypes_from_table_field_details(details))
             for name, details in field_info.fields.items()
         ]
+
+        initial_value = panda_value_to_attribute_value(
+            fastcs_datatype=Table(structured_datatype),
+            value=words_to_table(
+                words=initial_values[panda_name], table_field_info=field_info
+            ),
+        )
+
         # TODO: Add units handler to update the units field and value of this one PV
         # https://github.com/PandABlocks/PandABlocks-ioc/blob/c1e8056abf3f680fa3840493eb4ac6ca2be31313/src/pandablocks_ioc/ioc.py#L750-L769
-        parent_block.attributes[panda_name.attribute_name] = AttrRW(
+        attribute = AttrRW(
             Table(structured_datatype),
-            handler=TableFieldHandler(panda_name),
+            handler=TableFieldHandler(
+                panda_name, field_info, self._raw_panda.put_value_to_panda
+            ),
+            initial_value=initial_value,
         )
+        parent_block.add_attribute(panda_name, attribute)
 
     def _make_time_param(
         self,

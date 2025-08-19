@@ -5,19 +5,17 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "name": "Debug Unit Test",
+            "name": "panda",
             "type": "debugpy",
             "request": "launch",
+            "module": "fastcs_pandablocks",
             "justMyCode": false,
-            "program": "${file}",
-            "purpose": [
-                "debug-test"
-            ],
             "console": "integratedTerminal",
-            "env": {
-                // Enable break on exception when debugging tests (see: tests/conftest.py)
-                "PYTEST_RAISE": "1",
-            },
+            "args": [
+                "run",
+                "172.23.252.201",
+                "TEST-PANDA"
+            ]
         }
     ]
 }

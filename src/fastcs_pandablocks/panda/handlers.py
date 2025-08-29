@@ -64,6 +64,7 @@ def attribute_value_to_panda_value(
         case Enum():
             return value.name
         case Table():
+            assert isinstance(value, np.ndarray)
             panda_value = {}
             for field_name, _ in fastcs_datatype.structured_dtype:
                 panda_value[field_name] = value[field_name].tolist()

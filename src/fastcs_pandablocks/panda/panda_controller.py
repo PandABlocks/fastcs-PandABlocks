@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from typing import Any
 
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
 from fastcs.controller import Controller
@@ -49,33 +50,49 @@ class PandaController(Controller):
             self.register_sub_controller(block_name, block)
 
     async def update_field_value(self, panda_name: PandaName, value: str | list[str]):
+        """Update a panda field with either a single value or a list of words."""
+
         attribute = self._blocks.get_attribute(panda_name)
-
-        if isinstance(value, list):
-            assert isinstance(attribute.datatype, Table)
-            sender = getattr(attribute, "sender", None)
-            if not isinstance(sender, TableFieldHandler):
-                LOGGER.error(
-                    f"Cannot interpret changes on {panda_name!r}: "
-                    "sender is not TableFieldHandler"
-                )
-                return
-            table_values = words_to_table(value, sender.field_info)
-            attribute_value = panda_value_to_attribute_value(
-                attribute.datatype, table_values
-            )
-        else:
-            attribute_value = panda_value_to_attribute_value(attribute.datatype, value)
-
-        if isinstance(attribute, AttrRW):
-            await attribute.set(attribute_value)
-            await attribute.update_display_without_process(attribute_value)
-        elif isinstance(attribute, AttrW):
-            await attribute.process(attribute_value)
-        elif isinstance(attribute, AttrR):
-            await attribute.set(attribute_value)
-        else:
+        if attribute is None:
             LOGGER.error(f"Couldn't find panda field for {panda_name}.")
+            return
+
+        try:
+            attribute_value = self._coerce_value_to_panda_type(attribute, value)
+        except ValueError as e:
+            LOGGER.error(str(e))
+            return
+
+        await self.update_attribute(attribute, attribute_value)
+
+    def _coerce_value_to_panda_type(
+        self, attribute: Attribute, value: str | list[str]
+    ) -> Any:
+        """Convert a provided value into an attribute_value for this panda attribute."""
+        match value:
+            case list() as words:
+                if not isinstance(attribute.datatype, Table):
+                    raise ValueError(f"{attribute} is not a Table attribute")
+                sender = getattr(attribute, "sender", None)
+                if not isinstance(sender, TableFieldHandler):
+                    raise ValueError(f"Sender for {attribute} is not TableFieldHandler")
+                table_values = words_to_table(words, sender.field_info)
+                return panda_value_to_attribute_value(attribute.datatype, table_values)
+            case _:
+                return panda_value_to_attribute_value(attribute.datatype, value)
+
+    async def update_attribute(
+        self, attribute: Attribute, attribute_value: Any
+    ) -> None:
+        """Dispatch setting logic based on attribute type."""
+        match attribute:
+            case AttrRW():
+                await attribute.set(attribute_value)
+                await attribute.update_display_without_process(attribute_value)
+            case AttrW():
+                await attribute.process(attribute_value)
+            case AttrR():
+                await attribute.set(attribute_value)
 
     async def _update(self):
         try:

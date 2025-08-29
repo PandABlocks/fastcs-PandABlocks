@@ -10,9 +10,11 @@ from pandablocks.utils import words_to_table
 
 from fastcs_pandablocks.panda.blocks import Blocks
 from fastcs_pandablocks.panda.client_wrapper import RawPanda
+from fastcs_pandablocks.panda.handlers import (
+    TableFieldHandler,
+    panda_value_to_attribute_value,
+)
 from fastcs_pandablocks.types import PandaName
-
-from .handlers import TableFieldHandler, panda_value_to_attribute_value
 
 LOGGER = logging.getLogger(__name__)
 

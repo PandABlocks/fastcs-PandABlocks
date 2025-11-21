@@ -3,7 +3,7 @@ import re
 from typing import TypedDict
 
 from fastcs.attributes import AttrR
-from fastcs.controller import SubController
+from fastcs.controller import Controller
 from fastcs.datatypes import String
 
 from fastcs_pandablocks.types import WidgetGroup
@@ -55,7 +55,7 @@ def _parse_idn_response(idn_response: str) -> PandaVersions:
     )
 
 
-class VersionController(SubController):
+class VersionController(Controller):
     def __init__(self, idn_response: str):
         super().__init__()
         self.description = "Version information from the PandA."

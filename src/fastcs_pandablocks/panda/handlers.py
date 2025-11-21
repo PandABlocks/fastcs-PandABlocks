@@ -6,11 +6,8 @@ from dataclasses import dataclass
 from typing import Any
 
 import numpy as np
+from fastcs.attribute_io import AttributeIO, AttributeIORef
 from fastcs.attributes import (
-    AttrHandlerR,
-    AttrHandlerRW,
-    AttrHandlerW,
-    AttrR,
     AttrRW,
     AttrW,
 )
@@ -73,82 +70,49 @@ def attribute_value_to_panda_value(
             raise NotImplementedError(f"Unknown datatype {fastcs_datatype}")
 
 
-class DefaultFieldSender(AttrHandlerW):
-    """Default sender for sending introspected attributes."""
+@dataclass
+class DefaultFieldHandlerIORef(AttributeIORef):
+    panda_name: PandaName
+    put_value_to_panda: Callable[
+        [PandaName, DataType, Any], Coroutine[None, None, None]
+    ]
 
-    def __init__(
-        self,
-        panda_name: PandaName,
-        put_value_to_panda: Callable[
-            [PandaName, DataType, Any], Coroutine[None, None, None]
-        ],
-    ):
-        self.panda_name = panda_name
-        self.put_value_to_panda = put_value_to_panda
 
-    async def put(self, attr: AttrW, value: Any) -> None:
-        # TODO: Convert to attribtue value
-        await self.put_value_to_panda(
-            self.panda_name,
+class DefaultFieldHandlerIO(AttributeIO[T, DefaultFieldHandlerIORef]):
+    """Default handler for sending and updating introspected attributes."""
+
+    async def send(self, attr: AttrW[T, DefaultFieldHandlerIORef], value: T) -> None:
+        await attr.io_ref.put_value_to_panda(
+            attr.io_ref.panda_name,
             attr.datatype,
             attribute_value_to_panda_value(attr.datatype, value),
         )
 
 
-class DefaultFieldUpdater(AttrHandlerR):
-    """Default updater for updating introspected attributes."""
-
-    #: We update the fields from the top level
-    update_period = None
-
-    def __init__(self, panda_name: PandaName):
-        self.panda_name = panda_name
-
-    async def update(self, attr: AttrR) -> None: ...
+@dataclass
+class TableFieldHandlerIORef(AttributeIORef):
+    panda_name: PandaName
+    field_info: TableFieldInfo
+    put_value_to_panda: Callable[
+        [PandaName, DataType, Any], Coroutine[None, None, None]
+    ]
 
 
-class DefaultFieldHandler(DefaultFieldSender, DefaultFieldUpdater, AttrHandlerRW):
-    """Default handler for sending and updating introspected attributes."""
-
-    def __init__(
-        self,
-        panda_name: PandaName,
-        put_value_to_panda: Callable[
-            [PandaName, DataType, Any], Coroutine[None, None, None]
-        ],
-    ):
-        super().__init__(panda_name, put_value_to_panda)
-
-
-class TableFieldHandler(AttrHandlerRW):
+class TableFieldHandlerIO(AttributeIO[T, TableFieldHandlerIORef]):
     """A handler for updating Table valued attributes."""
 
-    def __init__(
-        self,
-        panda_name: PandaName,
-        field_info: TableFieldInfo,
-        put_value_to_panda: Callable[
-            [PandaName, DataType, Any], Coroutine[None, None, None]
-        ],
-    ):
-        self.panda_name = panda_name
-        self.field_info = field_info
-        self.put_value_to_panda = put_value_to_panda
-
-    async def put(self, attr: AttrW, value: Any) -> None:
+    async def send(self, attr: AttrW[T, TableFieldHandlerIORef], value: T) -> None:
         attr_value = attribute_value_to_panda_value(attr.datatype, value)
         assert isinstance(attr_value, dict)
-        panda_words = table_to_words(attr_value, self.field_info)
-        await self.put_value_to_panda(self.panda_name, attr.datatype, panda_words)
-
-
-class CaptureHandler(DefaultFieldHandler):
-    """A handler for capture attributes. Not currently used."""
+        panda_words = table_to_words(attr_value, attr.io_ref.field_info)
+        await attr.io_ref.put_value_to_panda(
+            attr.io_ref.panda_name, attr.datatype, panda_words
+        )
 
 
 async def _set_attr_if_not_already_value(attribute: AttrRW[T], value: T):
     if attribute.get() != value:
-        await attribute.set(value)
+        await attribute.update(value)
 
 
 @dataclass
@@ -156,7 +120,7 @@ class BitGroupOnUpdate:
     """Bits are tied together in bit groups so that when one is set for capture,
     they all are.
 
-    This handler sets all capture attributes in the group when one of them is set.
+    This callback sets all capture attributes in the group when one of them is set.
     """
 
     capture_attribute: AttrRW[enum.Enum]
@@ -180,28 +144,24 @@ class BitGroupOnUpdate:
         )
 
 
-class ArmSender(AttrHandlerRW):
+class ArmCommand(enum.Enum):
+    DISARM = "Disarm"
+    ARM = "Arm"
+
+
+@dataclass
+class ArmIORef(AttributeIORef):
+    arm: Callable[[], Coroutine[None, None, None]]
+    disarm: Callable[[], Coroutine[None, None, None]]
+
+
+class ArmIO(AttributeIO[T, ArmIORef]):
     """A sender for arming and disarming the Pcap."""
 
-    class ArmCommand(enum.Enum):
-        DISARM = "Disarm"
-        ARM = "Arm"
-
-    def __init__(
-        self,
-        arm: Callable[[], Coroutine[None, None, None]],
-        disarm: Callable[[], Coroutine[None, None, None]],
-    ):
-        self.arm = arm
-        self.disarm = disarm
-
-    async def put(self, attr: AttrW, value: Any) -> None:
-        if value is self.ArmCommand.ARM:
+    async def send(self, attr: AttrW[T, ArmIORef], value: Any):
+        if value is ArmCommand.ARM:
             logging.info("Arming PandA.")
-            await self.arm()
+            await attr.io_ref.arm()
         else:
             logging.info("Disarming PandA.")
-            await self.disarm()
-
-    async def update(self, attr: AttrR) -> None:
-        pass
+            await attr.io_ref.disarm()

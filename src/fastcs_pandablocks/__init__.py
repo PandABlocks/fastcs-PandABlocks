@@ -4,7 +4,13 @@ from pathlib import Path
 
 from fastcs import FastCS
 from fastcs.transport import EpicsGUIOptions, EpicsIOCOptions
-from fastcs.transport.epics.pva.options import EpicsPVAOptions
+from fastcs.transport.epics.pva.transport import EpicsPVATransport
+
+from fastcs_pandablocks.panda.handlers import (
+    ArmIO,
+    DefaultFieldHandlerIO,
+    TableFieldHandlerIO,
+)
 
 from . import panda, types
 from ._version import __version__
@@ -19,7 +25,7 @@ def ioc(
     screens_directory: Path | None = None,
     poll_period: float = DEFAULT_POLL_PERIOD,
 ):
-    p4p_ioc_options = EpicsPVAOptions(pva_ioc=EpicsIOCOptions(pv_prefix=pv_prefix))
+    p4p_ioc_options = EpicsPVATransport(epicspva=EpicsIOCOptions(pv_prefix=pv_prefix))
     if screens_directory:
         if not screens_directory.is_dir():
             raise ValueError(
@@ -31,9 +37,13 @@ def ioc(
         )
         p4p_ioc_options.gui = gui_options
 
-    controller = PandaController(hostname, poll_period)
+    controller = PandaController(
+        hostname,
+        poll_period,
+        ios=[ArmIO(), DefaultFieldHandlerIO(), TableFieldHandlerIO()],
+    )
     transport = FastCS(controller, [p4p_ioc_options])
-    transport.create_gui()
+    # transport.create_gui()
     transport.run()
 
 

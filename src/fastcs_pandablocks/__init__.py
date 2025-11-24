@@ -43,7 +43,6 @@ def ioc(
         ios=[ArmIO(), DefaultFieldHandlerIO(), TableFieldHandlerIO()],
     )
     transport = FastCS(controller, [p4p_ioc_options])
-    # transport.create_gui()
     transport.run()
 
 

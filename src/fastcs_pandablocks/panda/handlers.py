@@ -21,9 +21,8 @@ from fastcs_pandablocks.types import PandaName
 def panda_value_to_attribute_value(
     fastcs_datatype: DataType[T], value: str | dict
 ) -> T:
-    """Converts from a value received from the panda through pandablock-client to
-    the attribute value.
-    """
+    """Converts from a value received from the panda to the attribute value."""
+
     match fastcs_datatype:
         case String():
             return value
@@ -48,9 +47,8 @@ def panda_value_to_attribute_value(
 def attribute_value_to_panda_value(
     fastcs_datatype: DataType[T], value: T
 ) -> str | dict:
-    """Converts from an attribute value to a value that can be sent to the panda
-    with pandablocks-client.
-    """
+    """Converts from an attribute value to a value that can be sent to the panda."""
+
     match fastcs_datatype:
         case String():
             return value

@@ -496,7 +496,7 @@ class Blocks:
             Float(),
             group=WidgetGroup.CAPTURE.value,
             io_ref=DefaultFieldHandlerIORef(
-                panda_name, self._raw_panda.put_value_to_panda
+                scale_panda_name, self._raw_panda.put_value_to_panda
             ),
             initial_value=float(initial_values[scale_panda_name]),
         )
@@ -507,7 +507,7 @@ class Blocks:
             Float(),
             group=WidgetGroup.CAPTURE.value,
             io_ref=DefaultFieldHandlerIORef(
-                panda_name, self._raw_panda.put_value_to_panda
+                offset_panda_name, self._raw_panda.put_value_to_panda
             ),
             initial_value=float(initial_values[offset_panda_name]),
         )
@@ -650,7 +650,7 @@ class Blocks:
                 Int(min=0, max=bit_mux_field_info.max_delay),
                 description="Clock delay on input.",
                 io_ref=DefaultFieldHandlerIORef(
-                    panda_name, self._raw_panda.put_value_to_panda
+                    delay_panda_name, self._raw_panda.put_value_to_panda
                 ),
                 group=WidgetGroup.INPUTS.value,
                 initial_value=int(initial_values[delay_panda_name]),

@@ -3,6 +3,7 @@ import enum
 import logging
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
+from decimal import Decimal
 from typing import Any
 
 import numpy as np
@@ -37,7 +38,7 @@ def panda_value_to_attribute_value(
             structured_datatype = fastcs_datatype.structured_dtype
             attribute_value = np.zeros(num_rows, fastcs_datatype.structured_dtype)
             for field_name, _ in structured_datatype:
-                attribute_value[field_name] = value[field_name]
+                attribute_value[field_name] = value[field_name.upper()]
             return attribute_value
 
         case _:
@@ -62,7 +63,7 @@ def attribute_value_to_panda_value(
             assert isinstance(value, np.ndarray)
             panda_value = {}
             for field_name, _ in fastcs_datatype.structured_dtype:
-                panda_value[field_name] = value[field_name].tolist()
+                panda_value[field_name.upper()] = value[field_name].tolist()
             return panda_value
         case _:
             raise NotImplementedError(f"Unknown datatype {fastcs_datatype}")
@@ -163,3 +164,47 @@ class ArmIO(AttributeIO[T, ArmIORef]):
         else:
             logging.info("Disarming PandA.")
             await attr.io_ref.disarm()
+
+
+class TimeUnit(enum.Enum):
+    min = 1
+    s = 2
+    ms = 3
+    us = 4
+
+
+SCALE_TO_SECONDS = {
+    TimeUnit.min: Decimal(60.0),
+    TimeUnit.s: Decimal(1.0),
+    TimeUnit.ms: Decimal(1e-3),
+    TimeUnit.us: Decimal(1e-6),
+}
+
+
+@dataclass
+class UnitsIORef(AttributeIORef):
+    attribute_to_scale: AttrRW
+    current_scale: TimeUnit
+    panda_name: PandaName
+    put_value_to_panda: Callable[
+        [PandaName, DataType, Any], Coroutine[None, None, None]
+    ]
+
+
+class UnitsIO(AttributeIO[T, UnitsIORef]):
+    """A sender for arming and disarming the Pcap."""
+
+    async def send(self, attr: AttrW[T, UnitsIORef], value: Any):
+        current_scale = attr.io_ref.current_scale
+
+        await attr.io_ref.put_value_to_panda(
+            attr.io_ref.panda_name,
+            attr.datatype,
+            attribute_value_to_panda_value(attr.datatype, value),
+        )
+        attr.io_ref.current_scale = value
+
+        new_scale = SCALE_TO_SECONDS[value] / SCALE_TO_SECONDS[current_scale]
+
+        scaled_value = attr.io_ref.attribute_to_scale.get() * new_scale
+        await attr.io_ref.attribute_to_scale.put(scaled_value)

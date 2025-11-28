@@ -49,13 +49,13 @@ class CaptureMode(enum.Enum):
 class NumCapturedSetter(Pipeline):
     def __init__(self, number_captured_setter: Callable) -> None:
         self.number_captured_setter = number_captured_setter
-        self.number_captured_setter(0)
         super().__init__()
 
+        # TODO: Sync expected but async passed. Fix.
         self.what_to_do = {int: self.set_record}
 
     def set_record(self, value: int):
-        self.number_captured_setter(value)
+        asyncio.run(self.number_captured_setter(value))
 
 
 class HDF5Buffer:
@@ -96,7 +96,6 @@ class HDF5Buffer:
         self.status_message_setter = status_message_setter
         self.number_received_setter = number_received_setter
         self.number_captured_setter_pipeline = number_captured_setter_pipeline
-        self.number_captured_setter_pipeline.number_captured_setter(0)
 
         self.dataset_name_cache = dataset_name_cache
 
@@ -157,7 +156,7 @@ class HDF5Buffer:
 
             self.start_data = data
 
-    def _capture_first_n(self, data: FrameData):
+    async def _capture_first_n(self, data: FrameData):
         """
         Capture framedata as it comes in. Stop when number of frames exceeds
         number_of_rows_to_capture, and cut off the data so that it's length
@@ -176,7 +175,7 @@ class HDF5Buffer:
             self.number_of_received_rows = self.number_of_rows_to_capture
 
         self.put_data_to_file(data)
-        self.number_received_setter(self.number_of_received_rows)
+        await self.number_received_setter(self.number_of_received_rows)
 
         if (
             self.number_of_rows_to_capture > 0
@@ -191,12 +190,12 @@ class HDF5Buffer:
             self.put_data_to_file(EndData(self.number_of_received_rows, EndReason.OK))
             self.finish_capturing = True
 
-    def _capture_forever(self, data: FrameData):
+    async def _capture_forever(self, data: FrameData):
         self.put_data_to_file(data)
         self.number_of_received_rows += len(data.data)
-        self.number_received_setter(self.number_of_received_rows)
+        await self.number_received_setter(self.number_of_received_rows)
 
-    def _capture_last_n(self, data: FrameData):
+    async def _capture_last_n(self, data: FrameData):
         """
         Append every FrameData to a buffer until the number of rows equals
         `:NumCapture`. Then rewrite the data circularly.
@@ -208,12 +207,12 @@ class HDF5Buffer:
         self.number_of_rows_in_circular_buffer += len(data.data)
 
         if self.number_of_rows_in_circular_buffer > self.number_of_rows_to_capture:
-            self.status_message_setter(
+            await self.status_message_setter(
                 "NumCapture received, rewriting first frames received"
             )
 
         else:
-            self.status_message_setter("Filling buffer to NumReceived")
+            await self.status_message_setter("Filling buffer to NumReceived")
 
         while self.number_of_rows_in_circular_buffer > self.number_of_rows_to_capture:
             first_frame_data = self.circular_buffer.popleft()
@@ -254,7 +253,7 @@ class HDF5Buffer:
                 # be too big, or it will be exactly the number of rows we want
                 self.number_of_rows_in_circular_buffer -= first_frame_data_length
 
-        self.number_received_setter(self.number_of_received_rows)
+        await self.number_received_setter(self.number_of_received_rows)
 
     def _handle_EndData(self, data: EndData):
         match self.capture_mode:
@@ -293,15 +292,15 @@ class HDF5Buffer:
         self.finish_capturing = True
         self.put_data_to_file(data)
 
-    def handle_data(self, data: HDFReceived):
+    async def handle_data(self, data: HDFReceived):
         match data:
             case ReadyData():
                 pass
             case StartData():
-                self.status_message_setter("Starting capture")
+                await self.status_message_setter("Starting capture")
                 self._handle_StartData(data)
             case FrameData():
-                self._handle_FrameData(data)
+                await self._handle_FrameData(data)
             case EndData():
                 self._handle_EndData(data)
             case _:
@@ -324,8 +323,8 @@ class DatasetTableWrapper:
     and updating the HDF5 `DATASETS` table attribute."""
 
     NUMPY_TYPE: list[tuple[str, DTypeLike]] = [
-        ("Name", np.dtype("S1000")),
-        ("DType", np.dtype("S1000")),
+        ("name", np.dtype("S1000")),
+        ("dtype", np.dtype("S1000")),
     ]
 
     def __init__(
@@ -451,6 +450,7 @@ class DataController(Controller):
 
         self._client_data = client_data
         self._dataset_table_wrapper = DatasetTableWrapper(dataset_attributes)
+        self._handle_hdf5_data_task = None
 
         datasets_attribute = AttrR(
             Table(self._dataset_table_wrapper.NUMPY_TYPE),
@@ -537,7 +537,8 @@ class DataController(Controller):
         try:
             # Set up the hdf buffer
 
-            if not self.hdf_directory.get() == 1:
+            # TODO: Check if exists or writeable
+            if self.hdf_directory.get() == "":
                 raise RuntimeError(
                     "Configured HDF directory does not exist or is not writable!"
                 )
@@ -546,11 +547,12 @@ class DataController(Controller):
             capture_mode: CaptureMode = CaptureMode(self.capture_mode.get())
             filepath = self._get_filepath()
 
+            await self.num_captured.update(0)
             number_captured_setter_pipeline = NumCapturedSetter(
                 self.num_captured.update
             )
 
-            await self.attributes["datasets"].set(  # type: ignore
+            await self.attributes["datasets"].update(  # type: ignore
                 self._dataset_table_wrapper.get_numpy_table()
             )
 
@@ -567,7 +569,7 @@ class DataController(Controller):
             async for data in self._client_data(False, flush_period):
                 logging.debug(f"Received data packet: {data}")
 
-                buffer.handle_data(data)  # type: ignore
+                await buffer.handle_data(data)  # type: ignore
                 if buffer.finish_capturing:
                     break
 
@@ -618,6 +620,6 @@ class DataController(Controller):
 
             self._handle_hdf5_data_task = asyncio.create_task(self._handle_hdf5_data())
         else:
-            assert self._handle_hdf5_data_task
-            self._handle_hdf5_data_task.cancel()  # Abort any HDF5 file writing
-            self._handle_hdf5_data_task = None
+            if self._handle_hdf5_data_task is not None:
+                self._handle_hdf5_data_task.cancel()  # Abort any HDF5 file writing
+                self._handle_hdf5_data_task = None

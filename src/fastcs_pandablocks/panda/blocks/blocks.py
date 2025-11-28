@@ -32,6 +32,8 @@ from fastcs_pandablocks.panda.handlers import (
     BitGroupOnUpdate,
     DefaultFieldHandlerIORef,
     TableFieldHandlerIORef,
+    TimeUnit,
+    UnitsIORef,
     panda_value_to_attribute_value,
 )
 from fastcs_pandablocks.types import (
@@ -372,7 +374,7 @@ class Blocks:
         initial_values: RawInitialValuesType,
     ):
         structured_datatype = [
-            (name, self._table_datatypes_from_table_field_details(details))
+            (name.lower(), self._table_datatypes_from_table_field_details(details))
             for name, details in field_info.fields.items()
         ]
 
@@ -408,7 +410,7 @@ class Blocks:
         # PandaName(..., sub_field='UNITS'): 's',
 
         attribute = AttrRW(
-            Float(units="s"),
+            Float(units="s", prec=5),
             io_ref=DefaultFieldHandlerIORef(
                 panda_name, self._raw_panda.put_value_to_panda
             ),
@@ -417,6 +419,19 @@ class Blocks:
             initial_value=float(initial_values[panda_name]),
         )
         parent_block.add_attribute(panda_name, attribute)
+
+        units_enum = Enum(TimeUnit)
+        units_name = panda_name + PandaName(sub_field="UNITS")
+        units_attribute = AttrRW(
+            units_enum,
+            io_ref=UnitsIORef(
+                attribute, TimeUnit.s, units_name, self._raw_panda.put_value_to_panda
+            ),
+            description=field_info.description,
+            group=WidgetGroup.PARAMETERS.value,
+            initial_value=TimeUnit.s,
+        )
+        parent_block.add_attribute(units_name, units_attribute)
 
     def _make_time_read(
         self,

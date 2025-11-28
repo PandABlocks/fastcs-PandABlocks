@@ -55,7 +55,7 @@ class PandaController(Controller):
             # alalphabetically named controllers
             # should be registed to top level Controller
             if str(block_name).isalpha():
-                self.add_sub_controller(block_name.upper(), block)
+                self.add_sub_controller(block_name.lower(), block)
 
     async def update_field_value(self, panda_name: PandaName, value: str | list[str]):
         """Update a panda field with either a single value or a list of words."""

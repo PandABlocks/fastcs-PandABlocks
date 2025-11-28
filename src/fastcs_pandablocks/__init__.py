@@ -10,6 +10,7 @@ from fastcs_pandablocks.panda.handlers import (
     ArmIO,
     DefaultFieldHandlerIO,
     TableFieldHandlerIO,
+    UnitsIO,
 )
 
 from . import panda, types
@@ -40,7 +41,7 @@ def ioc(
     controller = PandaController(
         hostname,
         poll_period,
-        ios=[ArmIO(), DefaultFieldHandlerIO(), TableFieldHandlerIO()],
+        ios=[ArmIO(), DefaultFieldHandlerIO(), TableFieldHandlerIO(), UnitsIO()],
     )
     transport = FastCS(controller, [p4p_ioc_options])
     transport.run()

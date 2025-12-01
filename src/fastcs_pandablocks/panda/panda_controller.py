@@ -1,22 +1,22 @@
 import asyncio
-import logging
 from typing import Any
 
 from fastcs.attributes import Attribute, AttrR
 from fastcs.controllers import Controller
 from fastcs.datatypes import Table
+from fastcs.logging import bind_logger
 from fastcs.methods import Scan
 from pandablocks.utils import words_to_table
 
 from fastcs_pandablocks.panda.blocks import Blocks
 from fastcs_pandablocks.panda.client_wrapper import RawPanda
-from fastcs_pandablocks.panda.handlers import (
-    TableFieldHandlerIORef,
+from fastcs_pandablocks.panda.io import (
+    TableFieldIORef,
     panda_value_to_attribute_value,
 )
 from fastcs_pandablocks.types import PandaName
 
-LOGGER = logging.getLogger(__name__)
+logger = bind_logger(__name__)
 
 
 class PandaController(Controller):
@@ -64,13 +64,13 @@ class PandaController(Controller):
         attribute = self._blocks.get_attribute(panda_name)
         assert isinstance(attribute, AttrR)
         if attribute is None:
-            LOGGER.error(f"Couldn't find panda field for {panda_name}.")
+            logger.error(f"Couldn't find panda field for {panda_name}.")
             return
 
         try:
             attribute_value = self._coerce_value_to_panda_type(attribute, value)
-        except ValueError as e:
-            LOGGER.error(str(e))
+        except ValueError:
+            logger.opt(exception=True).error("Coerce failed")
             return
 
         await self.update_attribute(attribute, attribute_value)
@@ -84,9 +84,9 @@ class PandaController(Controller):
                 if not isinstance(attribute.datatype, Table):
                     raise ValueError(f"{attribute} is not a Table attribute")
                 io_ref = attribute.io_ref
-                if not isinstance(io_ref, TableFieldHandlerIORef):
+                if not isinstance(io_ref, TableFieldIORef):
                     raise ValueError(
-                        f"AttributeIORef for {attribute} is not TableFieldHandlerIORef"
+                        f"AttributeIORef for {attribute} is not TableFieldIORef"
                     )
                 table_values = words_to_table(words, io_ref.field_info)
                 return panda_value_to_attribute_value(attribute.datatype, table_values)
@@ -111,7 +111,7 @@ class PandaController(Controller):
             )
         # TODO: General exception is not ideal; narrow this dowm.
         except Exception as e:
-            LOGGER.error(
+            logger.error(
                 f"Failed to update changes from PandaBlocks client: {e}",
                 stack_info=True,
                 exc_info=True,

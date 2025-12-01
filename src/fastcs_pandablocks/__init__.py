@@ -6,10 +6,10 @@ from fastcs import FastCS
 from fastcs.transports import EpicsGUIOptions, EpicsIOCOptions
 from fastcs.transports.epics.pva.transport import EpicsPVATransport
 
-from fastcs_pandablocks.panda.handlers import (
+from fastcs_pandablocks.panda.io import (
     ArmIO,
-    DefaultFieldHandlerIO,
-    TableFieldHandlerIO,
+    DefaultFieldIO,
+    TableFieldIO,
     UnitsIO,
 )
 
@@ -41,7 +41,7 @@ def ioc(
     controller = PandaController(
         hostname,
         poll_period,
-        ios=[ArmIO(), DefaultFieldHandlerIO(), TableFieldHandlerIO(), UnitsIO()],
+        ios=[ArmIO(), DefaultFieldIO(), TableFieldIO(), UnitsIO()],
     )
     transport = FastCS(controller, [p4p_ioc_options])
     transport.run()

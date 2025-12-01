@@ -3,11 +3,11 @@ This method has a `RawPanda` which handles all the io with the client.
 """
 
 import asyncio
-import logging
 from collections.abc import AsyncGenerator
 from pprint import pformat
 
 from fastcs.datatypes import DataType
+from fastcs.logging import bind_logger
 from pandablocks.asyncio import AsyncioClient
 from pandablocks.commands import (
     Arm,
@@ -28,7 +28,7 @@ from fastcs_pandablocks.types import (
     RawInitialValuesType,
 )
 
-LOGGER = logging.getLogger(__name__)
+logger = bind_logger(__name__)
 
 
 class RawPanda:
@@ -64,7 +64,7 @@ class RawPanda:
             for name, block_info in raw_blocks.items()
         }
         formatted_blocks = pformat(blocks, indent=4).replace("\n", "\n    ")
-        LOGGER.debug(f"BLOCKS RECEIVED:\n    {formatted_blocks}")
+        logger.debug(f"BLOCKS RECEIVED:\n    {formatted_blocks}")
 
         raw_fields = await asyncio.gather(
             *[self._client.send(GetFieldInfo(str(block))) for block in blocks]
@@ -76,7 +76,7 @@ class RawPanda:
             }
             for block_values in raw_fields
         ]
-        LOGGER.debug("FIELDS RECEIVED (TOO VERBOSE TO LOG)")
+        logger.debug("FIELDS RECEIVED (TOO VERBOSE TO LOG)")
 
         field_data = await self.get_changes()
 
@@ -86,7 +86,7 @@ class RawPanda:
                 if field_name_without_prefix == "DESIGN":
                     continue  # TODO: Handle design.
                 elif not field_name_without_prefix.startswith("LABEL_"):
-                    logging.warning(
+                    logger.warning(
                         "Ignoring received metadata not corresponding to a `LABEL_`: "
                         f"{field_name} = {value}."
                     )
@@ -101,20 +101,20 @@ class RawPanda:
         formatted_initial_values = pformat(initial_values, indent=4).replace(
             "\n", "\n    "
         )
-        LOGGER.debug(f"INITIAL VALUES:\n    {formatted_initial_values}")
+        logger.debug(f"INITIAL VALUES:\n    {formatted_initial_values}")
         formatted_labels = pformat(labels, indent=4).replace("\n", "\n    ")
-        logging.debug(f"LABELS:\n    {formatted_labels}")
+        logger.debug(f"LABELS:\n    {formatted_labels}")
 
         return blocks, fields, labels, initial_values
 
     async def send(self, name: str, value: str | list[str]):
-        LOGGER.debug(f"SENDING TO PANDA:\n    {name} = {pformat(value, indent=4)}")
+        logger.debug(f"SENDING TO PANDA:\n    {name} = {pformat(value, indent=4)}")
         await self._client.send(Put(name, value))
 
     async def get(self, name: str) -> str | list[str]:
         received = await self._client.send(Get(name))
         formatted_received = pformat(received, indent=4).replace("\n", "\n    ")
-        LOGGER.debug(f"RECEIVED FROM PANDA:\n    {name} = {formatted_received}")
+        logger.debug(f"RECEIVED FROM PANDA:\n    {name} = {formatted_received}")
         return received
 
     async def get_changes(self) -> dict[str, str | list[str]]:
@@ -126,7 +126,7 @@ class RawPanda:
         formatted_received = pformat(single_and_multiline_changes, indent=4).replace(
             "\n", "\n    "
         )
-        LOGGER.debug(f"RECEIVED CHANGES:\n    {formatted_received}")
+        logger.debug(f"RECEIVED CHANGES:\n    {formatted_received}")
         return single_and_multiline_changes
 
     async def arm(self):

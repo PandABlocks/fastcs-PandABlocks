@@ -68,18 +68,18 @@ def attribute_value_to_panda_value(fastcs_datatype: DataType, value: Any) -> str
 
 
 @dataclass
-class DefaultFieldHandlerIORef(AttributeIORef):
+class DefaultFieldIORef(AttributeIORef):
     panda_name: PandaName
     put_value_to_panda: Callable[
         [PandaName, DataType, Any], Coroutine[None, None, None]
     ]
 
 
-class DefaultFieldHandlerIO(AttributeIO[DType_T, DefaultFieldHandlerIORef]):
-    """Default handler for sending and updating introspected attributes."""
+class DefaultFieldIO(AttributeIO[DType_T, DefaultFieldIORef]):
+    """Default IO for sending and updating introspected attributes."""
 
     async def send(
-        self, attr: AttrW[DType_T, DefaultFieldHandlerIORef], value: DType_T
+        self, attr: AttrW[DType_T, DefaultFieldIORef], value: DType_T
     ) -> None:
         await attr.io_ref.put_value_to_panda(
             attr.io_ref.panda_name,
@@ -89,7 +89,7 @@ class DefaultFieldHandlerIO(AttributeIO[DType_T, DefaultFieldHandlerIORef]):
 
 
 @dataclass
-class TableFieldHandlerIORef(AttributeIORef):
+class TableFieldIORef(AttributeIORef):
     panda_name: PandaName
     field_info: TableFieldInfo
     put_value_to_panda: Callable[
@@ -97,12 +97,10 @@ class TableFieldHandlerIORef(AttributeIORef):
     ]
 
 
-class TableFieldHandlerIO(AttributeIO[DType_T, TableFieldHandlerIORef]):
-    """A handler for updating Table valued attributes."""
+class TableFieldIO(AttributeIO[DType_T, TableFieldIORef]):
+    """An IO for updating Table valued attributes."""
 
-    async def send(
-        self, attr: AttrW[DType_T, TableFieldHandlerIORef], value: DType_T
-    ) -> None:
+    async def send(self, attr: AttrW[DType_T, TableFieldIORef], value: DType_T) -> None:
         attr_value = attribute_value_to_panda_value(attr.datatype, value)
         assert isinstance(attr_value, dict)
         panda_words = table_to_words(attr_value, attr.io_ref.field_info)

@@ -26,12 +26,12 @@ from pandablocks.responses import (
 from pandablocks.utils import words_to_table
 
 from fastcs_pandablocks.panda.client_wrapper import RawPanda
-from fastcs_pandablocks.panda.handlers import (
+from fastcs_pandablocks.panda.io import (
     ArmCommand,
     ArmIORef,
     BitGroupOnUpdate,
-    DefaultFieldHandlerIORef,
-    TableFieldHandlerIORef,
+    DefaultFieldIORef,
+    TableFieldIORef,
     TimeUnit,
     UnitsIORef,
     panda_value_to_attribute_value,
@@ -385,11 +385,11 @@ class Blocks:
             ),
         )
 
-        # TODO: Add units handler to update the units field and value of this one PV
+        # TODO: Add units IO to update the units field and value of this one PV
         # https://github.com/PandABlocks/PandABlocks-ioc/blob/c1e8056abf3f680fa3840493eb4ac6ca2be31313/src/pandablocks_ioc/ioc.py#L750-L769
         attribute = AttrRW(
             Table(structured_datatype),
-            io_ref=TableFieldHandlerIORef(
+            io_ref=TableFieldIORef(
                 panda_name, field_info, self._raw_panda.put_value_to_panda
             ),
             initial_value=initial_value,
@@ -403,7 +403,7 @@ class Blocks:
         field_info: SubtypeTimeFieldInfo | TimeFieldInfo,
         initial_values: RawInitialValuesType,
     ):
-        # TODO: add a handler for units to scale to get seconds
+        # TODO: add an IO for units to scale to get seconds
         # The units come through in the same *CHANGES so there shouldn't
         # be a race condition here.
         # PandaName(block='PULSE', block_number=2, field='WIDTH', sub_field=None): '0',
@@ -411,9 +411,7 @@ class Blocks:
 
         attribute = AttrRW(
             Float(units="s", prec=5),
-            io_ref=DefaultFieldHandlerIORef(
-                panda_name, self._raw_panda.put_value_to_panda
-            ),
+            io_ref=DefaultFieldIORef(panda_name, self._raw_panda.put_value_to_panda),
             description=field_info.description,
             group=WidgetGroup.PARAMETERS.value,
             initial_value=float(initial_values[panda_name]),
@@ -456,9 +454,7 @@ class Blocks:
     ):
         attribute = AttrW(
             Float(units="s"),
-            io_ref=DefaultFieldHandlerIORef(
-                panda_name, self._raw_panda.put_value_to_panda
-            ),
+            io_ref=DefaultFieldIORef(panda_name, self._raw_panda.put_value_to_panda),
             description=field_info.description,
             group=WidgetGroup.OUTPUTS.value,
         )
@@ -510,7 +506,7 @@ class Blocks:
         scale = AttrRW(
             Float(),
             group=WidgetGroup.CAPTURE.value,
-            io_ref=DefaultFieldHandlerIORef(
+            io_ref=DefaultFieldIORef(
                 scale_panda_name, self._raw_panda.put_value_to_panda
             ),
             initial_value=float(initial_values[scale_panda_name]),
@@ -521,7 +517,7 @@ class Blocks:
         offset = AttrRW(
             Float(),
             group=WidgetGroup.CAPTURE.value,
-            io_ref=DefaultFieldHandlerIORef(
+            io_ref=DefaultFieldIORef(
                 offset_panda_name, self._raw_panda.put_value_to_panda
             ),
             initial_value=float(initial_values[offset_panda_name]),
@@ -650,7 +646,7 @@ class Blocks:
             AttrRW(
                 Enum(enum_type),
                 description=bit_mux_field_info.description,
-                io_ref=DefaultFieldHandlerIORef(
+                io_ref=DefaultFieldIORef(
                     panda_name, self._raw_panda.put_value_to_panda
                 ),
                 group=WidgetGroup.INPUTS.value,
@@ -664,7 +660,7 @@ class Blocks:
             AttrRW(
                 Int(min=0, max=bit_mux_field_info.max_delay),
                 description="Clock delay on input.",
-                io_ref=DefaultFieldHandlerIORef(
+                io_ref=DefaultFieldIORef(
                     delay_panda_name, self._raw_panda.put_value_to_panda
                 ),
                 group=WidgetGroup.INPUTS.value,
@@ -685,7 +681,7 @@ class Blocks:
             AttrRW(
                 Enum(enum_type),
                 description=pos_mux_field_info.description,
-                io_ref=DefaultFieldHandlerIORef(
+                io_ref=DefaultFieldIORef(
                     panda_name, self._raw_panda.put_value_to_panda
                 ),
                 group=WidgetGroup.INPUTS.value,
@@ -705,7 +701,7 @@ class Blocks:
             AttrRW(
                 Float(prec=0, min=0, max=uint_param_field_info.max_val),
                 description=uint_param_field_info.description,
-                io_ref=DefaultFieldHandlerIORef(
+                io_ref=DefaultFieldIORef(
                     panda_name, self._raw_panda.put_value_to_panda
                 ),
                 group=WidgetGroup.PARAMETERS.value,
@@ -741,7 +737,7 @@ class Blocks:
             AttrW(
                 Float(prec=0, min=0, max=uint_write_field_info.max_val),
                 description=uint_write_field_info.description,
-                io_ref=DefaultFieldHandlerIORef(
+                io_ref=DefaultFieldIORef(
                     panda_name, self._raw_panda.put_value_to_panda
                 ),
                 group=WidgetGroup.OUTPUTS.value,
@@ -760,7 +756,7 @@ class Blocks:
             AttrRW(
                 Int(),
                 description=int_param_field_info.description,
-                io_ref=DefaultFieldHandlerIORef(
+                io_ref=DefaultFieldIORef(
                     panda_name, self._raw_panda.put_value_to_panda
                 ),
                 group=WidgetGroup.PARAMETERS.value,
@@ -796,7 +792,7 @@ class Blocks:
             AttrW(
                 Int(),
                 description=int_write_field_info.description,
-                io_ref=DefaultFieldHandlerIORef(
+                io_ref=DefaultFieldIORef(
                     panda_name, self._raw_panda.put_value_to_panda
                 ),
                 group=WidgetGroup.PARAMETERS.value,
@@ -815,7 +811,7 @@ class Blocks:
             AttrRW(
                 Float(units=scalar_param_field_info.units),
                 description=scalar_param_field_info.description,
-                io_ref=DefaultFieldHandlerIORef(
+                io_ref=DefaultFieldIORef(
                     panda_name, self._raw_panda.put_value_to_panda
                 ),
                 group=WidgetGroup.PARAMETERS.value,
@@ -867,7 +863,7 @@ class Blocks:
             AttrRW(
                 Bool(),
                 description=bit_param_field_info.description,
-                io_ref=DefaultFieldHandlerIORef(
+                io_ref=DefaultFieldIORef(
                     panda_name, self._raw_panda.put_value_to_panda
                 ),
                 group=WidgetGroup.PARAMETERS.value,
@@ -903,7 +899,7 @@ class Blocks:
             AttrW(
                 Bool(),
                 description=bit_write_field_info.description,
-                io_ref=DefaultFieldHandlerIORef(
+                io_ref=DefaultFieldIORef(
                     panda_name, self._raw_panda.put_value_to_panda
                 ),
                 group=WidgetGroup.OUTPUTS.value,
@@ -921,7 +917,7 @@ class Blocks:
             AttrW(
                 Bool(),
                 description=action_write_field_info.description,
-                io_ref=DefaultFieldHandlerIORef(
+                io_ref=DefaultFieldIORef(
                     panda_name, self._raw_panda.put_value_to_panda
                 ),
                 group=WidgetGroup.OUTPUTS.value,
@@ -940,7 +936,7 @@ class Blocks:
             AttrRW(
                 String(),
                 description=lut_param_field_info.description,
-                io_ref=DefaultFieldHandlerIORef(
+                io_ref=DefaultFieldIORef(
                     panda_name, self._raw_panda.put_value_to_panda
                 ),
                 group=WidgetGroup.PARAMETERS.value,
@@ -993,7 +989,7 @@ class Blocks:
             AttrRW(
                 Enum(enum_type),
                 description=enum_param_field_info.description,
-                io_ref=DefaultFieldHandlerIORef(
+                io_ref=DefaultFieldIORef(
                     panda_name, self._raw_panda.put_value_to_panda
                 ),
                 group=WidgetGroup.PARAMETERS.value,
@@ -1032,7 +1028,7 @@ class Blocks:
             AttrW(
                 Enum(enum_type),
                 description=enum_write_field_info.description,
-                io_ref=DefaultFieldHandlerIORef(
+                io_ref=DefaultFieldIORef(
                     panda_name, self._raw_panda.put_value_to_panda
                 ),
                 group=WidgetGroup.OUTPUTS.value,

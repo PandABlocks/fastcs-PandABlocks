@@ -3,9 +3,9 @@ import logging
 from typing import Any
 
 from fastcs.attributes import Attribute, AttrR
-from fastcs.controller import Controller
-from fastcs.cs_methods import Scan
+from fastcs.controllers import Controller
 from fastcs.datatypes import Table
+from fastcs.methods import Scan
 from pandablocks.utils import words_to_table
 
 from fastcs_pandablocks.panda.blocks import Blocks
@@ -56,6 +56,7 @@ class PandaController(Controller):
             # should be registed to top level Controller
             if str(block_name).isalpha():
                 self.add_sub_controller(block_name.lower(), block)
+                await block.initialise()
 
     async def update_field_value(self, panda_name: PandaName, value: str | list[str]):
         """Update a panda field with either a single value or a list of words."""

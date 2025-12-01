@@ -3,8 +3,8 @@
 from pathlib import Path
 
 from fastcs import FastCS
-from fastcs.transport import EpicsGUIOptions, EpicsIOCOptions
-from fastcs.transport.epics.pva.transport import EpicsPVATransport
+from fastcs.transports import EpicsGUIOptions, EpicsIOCOptions
+from fastcs.transports.epics.pva.transport import EpicsPVATransport
 
 from fastcs_pandablocks.panda.handlers import (
     ArmIO,

@@ -12,7 +12,7 @@ from typing import Union
 
 import numpy as np
 from fastcs.attributes import AttrR, AttrRW
-from fastcs.controller import Controller
+from fastcs.controllers import Controller
 from fastcs.datatypes import Bool, Enum, Float, Int, String, Table
 from numpy.typing import DTypeLike
 from pandablocks.hdf import (

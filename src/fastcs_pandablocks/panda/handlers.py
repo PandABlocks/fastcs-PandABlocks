@@ -3,37 +3,37 @@ import enum
 import logging
 from collections.abc import Callable, Coroutine
 from dataclasses import dataclass
-from decimal import Decimal
 from typing import Any
 
 import numpy as np
-from fastcs.attribute_io import AttributeIO, AttributeIORef
 from fastcs.attributes import (
+    AttributeIO,
+    AttributeIORef,
     AttrRW,
     AttrW,
 )
-from fastcs.datatypes import Bool, DataType, Enum, Float, Int, String, T, Table
+from fastcs.datatypes import Bool, DataType, DType_T, Enum, Float, Int, String, Table
 from pandablocks.responses import TableFieldInfo
 from pandablocks.utils import table_to_words
 
 from fastcs_pandablocks.types import PandaName
 
 
-def panda_value_to_attribute_value(
-    fastcs_datatype: DataType[T], value: str | dict
-) -> T:
+def panda_value_to_attribute_value(fastcs_datatype: DataType, value: str | dict) -> Any:
     """Converts from a value received from the panda to the attribute value."""
 
     match fastcs_datatype:
         case String():
-            return value
+            return fastcs_datatype.validate(value)
         case Bool():
-            return bool(int(value))
+            assert isinstance(value, str)
+            return fastcs_datatype.validate(int(value))
         case Int() | Float():
-            return fastcs_datatype.dtype(value)
+            return fastcs_datatype.validate(value)
         case Enum():
-            return fastcs_datatype.enum_cls[value]
+            return fastcs_datatype.enum_cls[value]  # type: ignore
         case Table():
+            assert isinstance(value, dict)
             num_rows = len(next(iter(value.values())))
             structured_datatype = fastcs_datatype.structured_dtype
             attribute_value = np.zeros(num_rows, fastcs_datatype.structured_dtype)
@@ -45,9 +45,7 @@ def panda_value_to_attribute_value(
             raise NotImplementedError(f"Unknown datatype {fastcs_datatype}")
 
 
-def attribute_value_to_panda_value(
-    fastcs_datatype: DataType[T], value: T
-) -> str | dict:
+def attribute_value_to_panda_value(fastcs_datatype: DataType, value: Any) -> str | dict:
     """Converts from an attribute value to a value that can be sent to the panda."""
 
     match fastcs_datatype:
@@ -77,10 +75,12 @@ class DefaultFieldHandlerIORef(AttributeIORef):
     ]
 
 
-class DefaultFieldHandlerIO(AttributeIO[T, DefaultFieldHandlerIORef]):
+class DefaultFieldHandlerIO(AttributeIO[DType_T, DefaultFieldHandlerIORef]):
     """Default handler for sending and updating introspected attributes."""
 
-    async def send(self, attr: AttrW[T, DefaultFieldHandlerIORef], value: T) -> None:
+    async def send(
+        self, attr: AttrW[DType_T, DefaultFieldHandlerIORef], value: DType_T
+    ) -> None:
         await attr.io_ref.put_value_to_panda(
             attr.io_ref.panda_name,
             attr.datatype,
@@ -97,10 +97,12 @@ class TableFieldHandlerIORef(AttributeIORef):
     ]
 
 
-class TableFieldHandlerIO(AttributeIO[T, TableFieldHandlerIORef]):
+class TableFieldHandlerIO(AttributeIO[DType_T, TableFieldHandlerIORef]):
     """A handler for updating Table valued attributes."""
 
-    async def send(self, attr: AttrW[T, TableFieldHandlerIORef], value: T) -> None:
+    async def send(
+        self, attr: AttrW[DType_T, TableFieldHandlerIORef], value: DType_T
+    ) -> None:
         attr_value = attribute_value_to_panda_value(attr.datatype, value)
         assert isinstance(attr_value, dict)
         panda_words = table_to_words(attr_value, attr.io_ref.field_info)
@@ -109,7 +111,7 @@ class TableFieldHandlerIO(AttributeIO[T, TableFieldHandlerIORef]):
         )
 
 
-async def _set_attr_if_not_already_value(attribute: AttrRW[T], value: T):
+async def _set_attr_if_not_already_value(attribute: AttrRW[DType_T], value: DType_T):
     if attribute.get() != value:
         await attribute.update(value)
 
@@ -154,10 +156,10 @@ class ArmIORef(AttributeIORef):
     disarm: Callable[[], Coroutine[None, None, None]]
 
 
-class ArmIO(AttributeIO[T, ArmIORef]):
+class ArmIO(AttributeIO[DType_T, ArmIORef]):
     """A sender for arming and disarming the Pcap."""
 
-    async def send(self, attr: AttrW[T, ArmIORef], value: Any):
+    async def send(self, attr: AttrW[DType_T, ArmIORef], value: Any):
         if value is ArmCommand.ARM:
             logging.info("Arming PandA.")
             await attr.io_ref.arm()
@@ -173,14 +175,6 @@ class TimeUnit(enum.Enum):
     us = 4
 
 
-SCALE_TO_SECONDS = {
-    TimeUnit.min: Decimal(60.0),
-    TimeUnit.s: Decimal(1.0),
-    TimeUnit.ms: Decimal(1e-3),
-    TimeUnit.us: Decimal(1e-6),
-}
-
-
 @dataclass
 class UnitsIORef(AttributeIORef):
     attribute_to_scale: AttrRW
@@ -191,20 +185,14 @@ class UnitsIORef(AttributeIORef):
     ]
 
 
-class UnitsIO(AttributeIO[T, UnitsIORef]):
+class UnitsIO(AttributeIO[enum.Enum, UnitsIORef]):
     """A sender for arming and disarming the Pcap."""
 
-    async def send(self, attr: AttrW[T, UnitsIORef], value: Any):
-        current_scale = attr.io_ref.current_scale
-
+    async def send(self, attr: AttrW[enum.Enum, UnitsIORef], value: enum.Enum):
         await attr.io_ref.put_value_to_panda(
             attr.io_ref.panda_name,
             attr.datatype,
             attribute_value_to_panda_value(attr.datatype, value),
         )
-        attr.io_ref.current_scale = value
 
-        new_scale = SCALE_TO_SECONDS[value] / SCALE_TO_SECONDS[current_scale]
-
-        scaled_value = attr.io_ref.attribute_to_scale.get() * new_scale
-        await attr.io_ref.attribute_to_scale.put(scaled_value)
+        attr.io_ref.attribute_to_scale.update_datatype(Float(units=value.name, prec=5))

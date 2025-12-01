@@ -7,7 +7,7 @@ import logging
 from collections.abc import AsyncGenerator
 from pprint import pformat
 
-from fastcs.datatypes import DataType, T
+from fastcs.datatypes import DataType
 from pandablocks.asyncio import AsyncioClient
 from pandablocks.commands import (
     Arm,
@@ -46,7 +46,7 @@ class RawPanda:
     async def put_value_to_panda(
         self,
         panda_name: PandaName,
-        fastcs_datatype: DataType[T],
+        fastcs_datatype: DataType,
         value: str | list[str],
     ) -> None:
         await self.send(str(panda_name), value)

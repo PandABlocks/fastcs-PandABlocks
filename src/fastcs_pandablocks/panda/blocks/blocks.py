@@ -4,7 +4,7 @@ from collections.abc import Generator
 
 import numpy as np
 from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
-from fastcs.controller import BaseController
+from fastcs.controllers import BaseController
 from fastcs.datatypes import Bool, Enum, Float, Int, String, Table
 from numpy.typing import DTypeLike
 from pandablocks.commands import TableFieldDetails

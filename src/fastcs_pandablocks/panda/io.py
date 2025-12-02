@@ -144,6 +144,8 @@ class BitGroupOnUpdate:
 
 
 class ArmCommand(enum.Enum):
+    """Enum class for PandA arm fields."""
+
     DISARM = "Disarm"
     ARM = "Arm"
 
@@ -167,6 +169,8 @@ class ArmIO(AttributeIO[DType_T, ArmIORef]):
 
 
 class TimeUnit(enum.Enum):
+    """Enum class for PandA time fields."""
+
     min = 1
     s = 2
     ms = 3

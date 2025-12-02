@@ -193,3 +193,11 @@ html_show_copyright = False
 # Logo
 html_logo = "images/dls-logo.svg"
 html_favicon = html_logo
+
+nitpicky = True
+
+nitpick_ignore = [
+    ("py:class", "pandablocks.responses.TableFieldInfo"),
+]
+
+suppress_warnings = ["docutils"]

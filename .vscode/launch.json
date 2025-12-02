@@ -13,8 +13,7 @@
             "console": "integratedTerminal",
             "args": [
                 "run",
-                "172.23.252.201",
-                "TEST-PANDA"
+                "${workspaceFolder:fastcs-PandABlocks}/src/fastcs_pandablocks/panda/controller.yaml"
             ]
         }
     ]

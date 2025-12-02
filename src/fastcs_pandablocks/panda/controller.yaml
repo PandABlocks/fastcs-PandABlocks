@@ -1,0 +1,13 @@
+## yaml-language-server: $schema=schema.json
+
+controller:
+  ip_settings:
+    ip: "172.23.252.201"
+    port: 8888
+  poll_period: 0.2
+
+transport:
+  - epicspva:
+      pv_prefix: TEST-PANDA
+    gui:
+      output_path: /workspaces/opi/fastcs-Panda.bob

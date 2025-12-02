@@ -1,7 +1,9 @@
 import asyncio
+from dataclasses import dataclass
 from typing import Any
 
 from fastcs.attributes import Attribute, AttrR
+from fastcs.connections import IPConnectionSettings
 from fastcs.controllers import Controller
 from fastcs.datatypes import Table
 from fastcs.logging import bind_logger
@@ -11,12 +13,22 @@ from pandablocks.utils import words_to_table
 from fastcs_pandablocks.panda.blocks import Blocks
 from fastcs_pandablocks.panda.client_wrapper import RawPanda
 from fastcs_pandablocks.panda.io import (
+    ArmIO,
+    DefaultFieldIO,
+    TableFieldIO,
     TableFieldIORef,
+    UnitsIO,
     panda_value_to_attribute_value,
 )
 from fastcs_pandablocks.types import PandaName
 
 logger = bind_logger(__name__)
+
+
+@dataclass
+class PandaControllerSettings:
+    poll_period: float
+    ip_settings: IPConnectionSettings
 
 
 class PandaController(Controller):
@@ -25,16 +37,17 @@ class PandaController(Controller):
     Changes are received at a given poll period and passed to sub-controllers.
     """
 
-    def __init__(self, hostname: str, poll_period: float, ios) -> None:
+    def __init__(self, settings: PandaControllerSettings) -> None:
         # TODO https://github.com/DiamondLightSource/FastCS/issues/62
 
+        hostname = settings.ip_settings.ip
         self._raw_panda = RawPanda(hostname)
-        self._ios = ios
+        self._ios = [ArmIO(), DefaultFieldIO(), TableFieldIO(), UnitsIO()]
         self._blocks: Blocks = Blocks(self._raw_panda, ios=self._ios)
-        self.update = Scan(self._update, poll_period)
+        self.update = Scan(self._update, settings.poll_period)
         self.connected = False
 
-        super().__init__(ios=ios)
+        super().__init__(ios=self._ios)
 
     async def connect(self) -> None:
         if self.connected:

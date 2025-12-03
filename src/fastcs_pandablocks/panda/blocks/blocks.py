@@ -3,7 +3,7 @@ import enum
 from collections.abc import Generator
 
 import numpy as np
-from fastcs.attributes import Attribute, AttrR, AttrRW, AttrW
+from fastcs.attributes import Attribute, AttributeIO, AttrR, AttrRW, AttrW
 from fastcs.controllers import BaseController
 from fastcs.datatypes import Bool, Enum, Float, Int, String, Table
 from numpy.typing import DTypeLike
@@ -26,16 +26,12 @@ from pandablocks.responses import (
 from pandablocks.utils import words_to_table
 
 from fastcs_pandablocks.panda.client_wrapper import RawPanda
-from fastcs_pandablocks.panda.io import (
-    ArmCommand,
-    ArmIORef,
-    BitGroupOnUpdate,
-    DefaultFieldIORef,
-    TableFieldIORef,
-    TimeUnit,
-    UnitsIORef,
-    panda_value_to_attribute_value,
-)
+from fastcs_pandablocks.panda.io.arm import ArmCommand, ArmIORef
+from fastcs_pandablocks.panda.io.bits import BitGroupOnUpdate
+from fastcs_pandablocks.panda.io.default import DefaultFieldIORef
+from fastcs_pandablocks.panda.io.table import TableFieldIORef
+from fastcs_pandablocks.panda.io.units import TimeUnit, UnitsIORef
+from fastcs_pandablocks.panda.utils import panda_value_to_attribute_value
 from fastcs_pandablocks.types import (
     PandaName,
     RawInitialValuesType,
@@ -56,7 +52,7 @@ class Blocks:
     process so having this all in one (huge) file is the nicest way to handle this.
     """
 
-    def __init__(self, raw_panda: RawPanda, ios):
+    def __init__(self, raw_panda: RawPanda, ios: list[AttributeIO]):
         self._raw_panda = raw_panda
         #: The controllers which should be registered by `PandaController` and are
         #: acccessible by panda name.

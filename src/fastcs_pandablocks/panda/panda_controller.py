@@ -12,14 +12,11 @@ from pandablocks.utils import words_to_table
 
 from fastcs_pandablocks.panda.blocks import Blocks
 from fastcs_pandablocks.panda.client_wrapper import RawPanda
-from fastcs_pandablocks.panda.io import (
-    ArmIO,
-    DefaultFieldIO,
-    TableFieldIO,
-    TableFieldIORef,
-    UnitsIO,
-    panda_value_to_attribute_value,
-)
+from fastcs_pandablocks.panda.io.arm import ArmIO
+from fastcs_pandablocks.panda.io.default import DefaultFieldIO
+from fastcs_pandablocks.panda.io.table import TableFieldIO, TableFieldIORef
+from fastcs_pandablocks.panda.io.units import UnitsIO
+from fastcs_pandablocks.panda.utils import panda_value_to_attribute_value
 from fastcs_pandablocks.types import PandaName
 
 logger = bind_logger(__name__)
@@ -65,7 +62,7 @@ class PandaController(Controller):
         for block_name, block in self._blocks.controllers():
             # Numerically named controllers are registered to
             # alphabetically named ControllerVectors, so only
-            # alalphabetically named controllers
+            # alphabetically named controllers
             # should be registed to top level Controller
             if str(block_name).isalpha():
                 self.add_sub_controller(block_name.lower(), block)
@@ -124,8 +121,6 @@ class PandaController(Controller):
             )
         # TODO: General exception is not ideal; narrow this dowm.
         except Exception as e:
-            logger.error(
-                f"Failed to update changes from PandaBlocks client: {e}",
-                stack_info=True,
-                exc_info=True,
-            )
+            raise RuntimeError(
+                "Failed to update changes from PandaBlocks client"
+            ) from e

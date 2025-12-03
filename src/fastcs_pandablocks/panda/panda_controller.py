@@ -1,5 +1,4 @@
 import asyncio
-from dataclasses import dataclass
 from typing import Any
 
 from fastcs.attributes import Attribute, AttrR
@@ -7,7 +6,7 @@ from fastcs.connections import IPConnectionSettings
 from fastcs.controllers import Controller
 from fastcs.datatypes import Table
 from fastcs.logging import bind_logger
-from fastcs.methods import Scan
+from fastcs.methods import scan
 from pandablocks.utils import words_to_table
 
 from fastcs_pandablocks.panda.blocks import Blocks
@@ -22,26 +21,19 @@ from fastcs_pandablocks.types import PandaName
 logger = bind_logger(__name__)
 
 
-@dataclass
-class PandaControllerSettings:
-    poll_period: float
-    ip_settings: IPConnectionSettings
-
-
 class PandaController(Controller):
     """Controller for polling data from the panda through pandablocks-client.
 
     Changes are received at a given poll period and passed to sub-controllers.
     """
 
-    def __init__(self, settings: PandaControllerSettings) -> None:
+    def __init__(self, ip_settings: IPConnectionSettings) -> None:
         # TODO https://github.com/DiamondLightSource/FastCS/issues/62
 
-        hostname = settings.ip_settings.ip
+        hostname = ip_settings.ip
         self._raw_panda = RawPanda(hostname)
         self._ios = [ArmIO(), DefaultFieldIO(), TableFieldIO(), UnitsIO()]
         self._blocks: Blocks = Blocks(self._raw_panda, ios=self._ios)
-        self.update = Scan(self._update, settings.poll_period)
         self.connected = False
 
         super().__init__(ios=self._ios)
@@ -108,7 +100,8 @@ class PandaController(Controller):
         value = attribute.datatype.validate(attribute_value)
         await attribute.update(value)
 
-    async def _update(self):
+    @scan(0.1)
+    async def update(self):
         try:
             changes = await self._raw_panda.get_changes()
             await asyncio.gather(

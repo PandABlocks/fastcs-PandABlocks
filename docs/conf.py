@@ -72,6 +72,7 @@ nitpick_ignore = [
     ("py:class", "'id'"),
     ("py:class", "typing_extensions.Literal"),
     ("py:class", "fastcs.datatypes.T"),
+    ("py:class", "pandablocks.responses.TableFieldInfo"),
 ]
 
 # Both the class’ and the __init__ method’s docstring are concatenated and
@@ -194,10 +195,6 @@ html_show_copyright = False
 html_logo = "images/dls-logo.svg"
 html_favicon = html_logo
 
-nitpicky = True
-
-nitpick_ignore = [
-    ("py:class", "pandablocks.responses.TableFieldInfo"),
-]
-
+# This is to suppress erroneous
+# "WARNING: Inline emphasis start-string without end-string" warnings
 suppress_warnings = ["docutils"]

@@ -1,9 +1,7 @@
 ## yaml-language-server: $schema=schema.json
 
 controller:
-  ip_settings:
-    ip: "172.23.252.201"
-    port: 8888
+  address: "172.23.252.201"
 
 transport:
   - epicspva:

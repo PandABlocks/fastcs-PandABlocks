@@ -94,7 +94,9 @@ class PandaController(Controller):
                     raise ValueError(
                         f"AttributeIORef for {attribute} is not TableFieldIORef"
                     )
-                table_values = words_to_table(words, io_ref.field_info)
+                table_values = words_to_table(
+                    words, io_ref.field_info, convert_enum_indices=True
+                )
                 return panda_value_to_attribute_value(attribute.datatype, table_values)
             case _:
                 return panda_value_to_attribute_value(attribute.datatype, value)

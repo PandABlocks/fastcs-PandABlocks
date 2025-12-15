@@ -358,7 +358,7 @@ class Blocks:
                 # TODO: replace with string once
                 # https://github.com/epics-base/p4p/issues/168
                 # is fixed.
-                return np.uint32
+                return "U16"
             case _:
                 raise RuntimeError("Received unknown datatype for table in panda.")
 
@@ -377,7 +377,9 @@ class Blocks:
         initial_value = panda_value_to_attribute_value(
             fastcs_datatype=Table(structured_datatype),
             value=words_to_table(
-                words=initial_values[panda_name], table_field_info=field_info
+                words=initial_values[panda_name],
+                table_field_info=field_info,
+                convert_enum_indices=True,
             ),
         )
 

@@ -697,13 +697,13 @@ class Blocks:
         parent_block.add_attribute(
             panda_name,
             AttrRW(
-                Float(prec=0, min=0, max=uint_param_field_info.max_val),
+                Int(min=0, max=uint_param_field_info.max_val),
                 description=uint_param_field_info.description,
                 io_ref=DefaultFieldIORef(
                     panda_name, self._raw_panda.put_value_to_panda
                 ),
                 group=WidgetGroup.PARAMETERS.value,
-                initial_value=float(initial_values[panda_name]),
+                initial_value=int(initial_values[panda_name]),
             ),
         )
 
@@ -717,10 +717,10 @@ class Blocks:
         parent_block.add_attribute(
             panda_name,
             AttrR(
-                Float(prec=0, min=0, max=uint_read_field_info.max_val),
+                Int(min=0, max=uint_read_field_info.max_val),
                 description=uint_read_field_info.description,
                 group=WidgetGroup.READBACKS.value,
-                initial_value=float(initial_values[panda_name]),
+                initial_value=int(initial_values[panda_name]),
             ),
         )
 
@@ -733,7 +733,7 @@ class Blocks:
         parent_block.add_attribute(
             panda_name,
             AttrW(
-                Float(prec=0, min=0, max=uint_write_field_info.max_val),
+                Int(min=0, max=uint_write_field_info.max_val),
                 description=uint_write_field_info.description,
                 io_ref=DefaultFieldIORef(
                     panda_name, self._raw_panda.put_value_to_panda

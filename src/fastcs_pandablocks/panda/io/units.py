@@ -20,10 +20,10 @@ from fastcs_pandablocks.types import PandaName
 class TimeUnit(enum.Enum):
     """Enum class for PandA time fields."""
 
-    min = 1
-    s = 2
-    ms = 3
-    us = 4
+    min = "min"
+    s = "s"
+    ms = "ms"
+    us = "us"
 
 
 @dataclass

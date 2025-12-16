@@ -87,8 +87,9 @@ class RawPanda:
                     continue  # TODO: Handle design.
                 elif not field_name_without_prefix.startswith("LABEL_"):
                     logger.warning(
-                        "Ignoring received metadata not corresponding to a `LABEL_`: "
-                        f"{field_name} = {value}."
+                        "Ignoring received metadata not corresponding to a `LABEL_`",
+                        field_name=field_name,
+                        value=value,
                     )
                 labels[
                     PandaName.from_string(

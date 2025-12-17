@@ -338,7 +338,7 @@ class DatasetTableWrapper:
 
         hdf_names: dict[str, dict[str, str]] = {}
         for panda_name, dataset in self._dataset_cache.items():
-            capture_str_value = dataset.capture.get().value
+            capture_str_value = dataset.capture.get().name
             name_str_value = dataset.name.get()
             if not name_str_value or capture_str_value == "No":
                 continue
@@ -354,7 +354,7 @@ class DatasetTableWrapper:
         return hdf_names
 
     def get_numpy_table(self) -> np.ndarray:
-        return np.array(
+        array = np.array(
             [
                 (dataset.name.get(), "float64")
                 for dataset in self._dataset_cache.values()
@@ -362,6 +362,7 @@ class DatasetTableWrapper:
             ],
             dtype=self.NUMPY_TYPE,
         )
+        return array
 
     def set_on_update_callback(self, table_attribute: AttrR):
         async def callback(value):
@@ -552,8 +553,10 @@ class DataController(Controller):
                 self.num_captured.update
             )
 
+            numpy_table = self._dataset_table_wrapper.get_numpy_table()
+
             await self.attributes["datasets"].update(  # type: ignore
-                self._dataset_table_wrapper.get_numpy_table()
+                numpy_table
             )
 
             buffer = HDF5Buffer(

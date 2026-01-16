@@ -1,0 +1,10 @@
+## yaml-language-server: $schema=schema.json
+
+controller:
+  address: "172.23.252.201"
+
+transport:
+  - epicspva:
+      pv_prefix: TEST-PANDA
+    gui:
+      output_path: /workspaces/opi/fastcs-Panda.bob

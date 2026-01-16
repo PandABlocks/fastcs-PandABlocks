@@ -3,11 +3,11 @@ This method has a `RawPanda` which handles all the io with the client.
 """
 
 import asyncio
-import logging
 from collections.abc import AsyncGenerator
 from pprint import pformat
 
-from fastcs.datatypes import DataType, T
+from fastcs.datatypes import DataType
+from fastcs.logging import bind_logger
 from pandablocks.asyncio import AsyncioClient
 from pandablocks.commands import (
     Arm,
@@ -28,7 +28,7 @@ from fastcs_pandablocks.types import (
     RawInitialValuesType,
 )
 
-from .handlers import attribute_value_to_panda_value
+logger = bind_logger(__name__)
 
 
 class RawPanda:
@@ -44,11 +44,12 @@ class RawPanda:
         await self._client.close()
 
     async def put_value_to_panda(
-        self, panda_name: PandaName, fastcs_datatype: DataType[T], value: T
+        self,
+        panda_name: PandaName,
+        fastcs_datatype: DataType,
+        value: str | list[str],
     ) -> None:
-        await self.send(
-            str(panda_name), attribute_value_to_panda_value(fastcs_datatype, value)
-        )
+        await self.send(str(panda_name), value)
 
     async def introspect(
         self,
@@ -63,7 +64,7 @@ class RawPanda:
             for name, block_info in raw_blocks.items()
         }
         formatted_blocks = pformat(blocks, indent=4).replace("\n", "\n    ")
-        logging.debug(f"BLOCKS RECEIVED:\n    {formatted_blocks}")
+        logger.debug(f"BLOCKS RECEIVED:\n    {formatted_blocks}")
 
         raw_fields = await asyncio.gather(
             *[self._client.send(GetFieldInfo(str(block))) for block in blocks]
@@ -75,9 +76,9 @@ class RawPanda:
             }
             for block_values in raw_fields
         ]
-        logging.debug("FIELDS RECEIVED (TOO VERBOSE TO LOG)")
+        logger.debug("FIELDS RECEIVED (TOO VERBOSE TO LOG)")
 
-        field_data = (await self._client.send(GetChanges(ChangeGroup.ALL, True))).values
+        field_data = await self.get_changes()
 
         for field_name, value in field_data.items():
             if field_name.startswith("*METADATA"):
@@ -85,9 +86,10 @@ class RawPanda:
                 if field_name_without_prefix == "DESIGN":
                     continue  # TODO: Handle design.
                 elif not field_name_without_prefix.startswith("LABEL_"):
-                    raise TypeError(
-                        "Received metadata not corresponding to a `LABEL_`: "
-                        f"{field_name} = {value}."
+                    logger.warning(
+                        "Ignoring received metadata not corresponding to a `LABEL_`",
+                        field_name=field_name,
+                        value=value,
                     )
                 labels[
                     PandaName.from_string(
@@ -100,27 +102,33 @@ class RawPanda:
         formatted_initial_values = pformat(initial_values, indent=4).replace(
             "\n", "\n    "
         )
-        logging.debug(f"INITIAL VALUES:\n    {formatted_initial_values}")
+        logger.debug(f"INITIAL VALUES:\n    {formatted_initial_values}")
         formatted_labels = pformat(labels, indent=4).replace("\n", "\n    ")
-        logging.debug(f"LABELS:\n    {formatted_labels}")
+        logger.debug(f"LABELS:\n    {formatted_labels}")
 
         return blocks, fields, labels, initial_values
 
-    async def send(self, name: str, value: str):
-        logging.debug(f"SENDING TO PANDA:\n    {name} = {pformat(value, indent=4)}")
+    async def send(self, name: str, value: str | list[str]):
+        logger.debug(f"SENDING TO PANDA:\n    {name} = {pformat(value, indent=4)}")
         await self._client.send(Put(name, value))
 
     async def get(self, name: str) -> str | list[str]:
         received = await self._client.send(Get(name))
         formatted_received = pformat(received, indent=4).replace("\n", "\n    ")
-        logging.debug(f"RECEIVED FROM PANDA:\n    {name} = {formatted_received}")
+        logger.debug(f"RECEIVED FROM PANDA:\n    {name} = {formatted_received}")
         return received
 
-    async def get_changes(self) -> dict[str, str]:
-        received = (await self._client.send(GetChanges(ChangeGroup.ALL, False))).values
-        formatted_received = pformat(received, indent=4).replace("\n", "\n    ")
-        logging.debug(f"RECEIVED CHANGES:\n    {formatted_received}")
-        return received
+    async def get_changes(self) -> dict[str, str | list[str]]:
+        changes = await self._client.send(GetChanges(ChangeGroup.ALL, True))
+        single_and_multiline_changes = {
+            **changes.values,
+            **changes.multiline_values,
+        }
+        formatted_received = pformat(single_and_multiline_changes, indent=4).replace(
+            "\n", "\n    "
+        )
+        logger.debug(f"RECEIVED CHANGES:\n    {formatted_received}")
+        return single_and_multiline_changes
 
     async def arm(self):
         await self._client.send(Arm())

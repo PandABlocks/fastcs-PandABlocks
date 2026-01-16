@@ -18,6 +18,18 @@
                 // Enable break on exception when debugging tests (see: tests/conftest.py)
                 "PYTEST_RAISE": "1",
             },
-        }
+        },
+        {
+            "name": "panda",
+            "type": "debugpy",
+            "request": "launch",
+            "module": "fastcs_pandablocks",
+            "justMyCode": false,
+            "console": "integratedTerminal",
+            "args": [
+                "run",
+                "${workspaceFolder:fastcs-PandABlocks}/src/fastcs_pandablocks/panda/controller.yaml"
+            ]
+        },
     ]
 }

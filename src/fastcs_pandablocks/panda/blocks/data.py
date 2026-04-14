@@ -124,7 +124,7 @@ class HDF5Buffer:
             self.number_captured_setter_pipeline,
         )
 
-    def _handle_StartData(self, data: StartData):
+    def _handle_start_data(self, data: StartData):
         if self.start_data and data != self.start_data:
             # PandA was disarmed, had config changed, and rearmed.
             # Cannot process to the same file with different start data.
@@ -255,7 +255,7 @@ class HDF5Buffer:
 
         await self.number_received_setter(self.number_of_received_rows)
 
-    def _handle_EndData(self, data: EndData):
+    def _handle_end_data(self, data: EndData):
         match self.capture_mode:
             case CaptureMode.LAST_N:
                 # In LAST_N only write FrameData if the EndReason is OK
@@ -298,11 +298,11 @@ class HDF5Buffer:
                 pass
             case StartData():
                 await self.status_message_setter("Starting capture")
-                self._handle_StartData(data)
+                self._handle_start_data(data)
             case FrameData():
                 await self._handle_FrameData(data)
             case EndData():
-                self._handle_EndData(data)
+                self._handle_end_data(data)
             case _:
                 raise RuntimeError(
                     f"Data was recieved that was of type {type(data)}, not"

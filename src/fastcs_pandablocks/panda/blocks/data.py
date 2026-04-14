@@ -124,7 +124,7 @@ class HDF5Buffer:
             self.number_captured_setter_pipeline,
         )
 
-    def _handle_start_data(self, data: StartData):
+    async def _handle_start_data(self, data: StartData):
         if self.start_data and data != self.start_data:
             # PandA was disarmed, had config changed, and rearmed.
             # Cannot process to the same file with different start data.
@@ -133,7 +133,7 @@ class HDF5Buffer:
                 "data for this file. Aborting HDF5 data capture."
             )
 
-            self.status_message_setter(
+            await self.status_message_setter(
                 "Mismatched StartData packet for file",
             )
             self.put_data_to_file(
@@ -255,19 +255,19 @@ class HDF5Buffer:
 
         await self.number_received_setter(self.number_of_received_rows)
 
-    def _handle_end_data(self, data: EndData):
+    async def _handle_end_data(self, data: EndData):
         match self.capture_mode:
             case CaptureMode.LAST_N:
                 # In LAST_N only write FrameData if the EndReason is OK
                 if data.reason not in (EndReason.OK, EndReason.MANUALLY_STOPPED):
-                    self.status_message_setter(
+                    await self.status_message_setter(
                         f"Stopped capturing with reason {data.reason}, "
                         "skipping writing of buffered frames"
                     )
                     self.finish_capturing = True
                     return
 
-                self.status_message_setter(
+                await self.status_message_setter(
                     "Finishing capture, writing buffered frames to file"
                 )
                 assert self.start_data is not None
@@ -277,7 +277,7 @@ class HDF5Buffer:
 
             case CaptureMode.FOREVER:
                 if data.reason != EndReason.MANUALLY_STOPPED:
-                    self.status_message_setter(
+                    await self.status_message_setter(
                         "Finished capture, waiting for next ReadyData"
                     )
                     return
@@ -288,7 +288,7 @@ class HDF5Buffer:
             case _:
                 raise RuntimeError("Unknown capture mode")
 
-        self.status_message_setter("Finished capture")
+        await self.status_message_setter("Finished capture")
         self.finish_capturing = True
         self.put_data_to_file(data)
 
@@ -298,11 +298,11 @@ class HDF5Buffer:
                 pass
             case StartData():
                 await self.status_message_setter("Starting capture")
-                self._handle_start_data(data)
+                await self._handle_start_data(data)
             case FrameData():
                 await self._handle_FrameData(data)
             case EndData():
-                self._handle_end_data(data)
+                await self._handle_end_data(data)
             case _:
                 raise RuntimeError(
                     f"Data was received that was of type {type(data)}, not"

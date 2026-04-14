@@ -305,7 +305,7 @@ class HDF5Buffer:
                 self._handle_end_data(data)
             case _:
                 raise RuntimeError(
-                    f"Data was recieved that was of type {type(data)}, not"
+                    f"Data was received that was of type {type(data)}, not"
                     "StartData, EndData, ReadyData, or FrameData"
                 )
 

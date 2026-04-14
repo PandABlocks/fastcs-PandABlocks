@@ -7,10 +7,10 @@ assignees: ''
 
 ---
 
-Describe the bug, including a clear and concise description of the expected behaviour, the actual behavior and the context in which you encountered it (ideally include details of your environment).
+Describe the bug, including a clear and concise description of the expected behaviour, the actual behaviour and the context in which you encountered it (ideally include details of your environment).
 
 ## Steps To Reproduce
-Steps to reproduce the behavior:
+Steps to reproduce the behaviour:
 1. Go to '...'
 2. Click on '....'
 3. Scroll down to '....'

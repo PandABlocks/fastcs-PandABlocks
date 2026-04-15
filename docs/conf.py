@@ -113,7 +113,7 @@ pygments_style = "sphinx"
 # docs in the python documentation.
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3/", None),
-    "fastcs": ("https://diamondlightsource.github.io/FastCS/main", None),
+    "fastcs": ("https://diamondlightsource.github.io/fastcs/main", None),
 }
 
 # A dictionary of graphviz graph attributes for inheritance diagrams.

@@ -7,7 +7,7 @@ from collections.abc import AsyncGenerator
 from pprint import pformat
 
 from fastcs.datatypes import DataType
-from fastcs.logging import bind_logger
+from fastcs.logging import logger
 from pandablocks.asyncio import AsyncioClient
 from pandablocks.commands import (
     Arm,
@@ -27,8 +27,6 @@ from fastcs_pandablocks.types import (
     RawFieldsType,
     RawInitialValuesType,
 )
-
-logger = bind_logger(__name__)
 
 
 class RawPanda:

@@ -36,19 +36,19 @@ class PandaController(Controller):
         self._raw_panda = RawPanda(settings.address)
         self._ios = [ArmIO(), DefaultFieldIO(), TableFieldIO(), UnitsIO()]
         self._blocks: Blocks = Blocks(self._raw_panda, ios=self._ios)
-        self.connected = False
+        self._connected = False
 
         super().__init__(ios=self._ios)
 
     async def connect(self) -> None:
-        if self.connected:
+        if self._connected:
             # `connect` needs to be called in `initialise`,
             # then FastCS will attempt to call it again.
             return
         await self._raw_panda.connect()
         await self._blocks.parse_introspected_data()
         await self._blocks.setup_post_introspection()
-        self.connected = True
+        self._connected = True
 
     async def initialise(self) -> None:
         await self.connect()

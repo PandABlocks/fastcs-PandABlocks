@@ -5,7 +5,7 @@ from typing import Any
 from fastcs.attributes import Attribute, AttrR
 from fastcs.controllers import Controller
 from fastcs.datatypes import Table
-from fastcs.logging import bind_logger
+from fastcs.logging import logger
 from fastcs.methods import scan
 from pandablocks.utils import words_to_table
 
@@ -17,8 +17,6 @@ from fastcs_pandablocks.panda.io.table import TableFieldIO, TableFieldIORef
 from fastcs_pandablocks.panda.io.units import UnitsIO
 from fastcs_pandablocks.panda.utils import panda_value_to_attribute_value
 from fastcs_pandablocks.types import PandaName
-
-logger = bind_logger(__name__)
 
 
 @dataclass
@@ -38,19 +36,19 @@ class PandaController(Controller):
         self._raw_panda = RawPanda(settings.address)
         self._ios = [ArmIO(), DefaultFieldIO(), TableFieldIO(), UnitsIO()]
         self._blocks: Blocks = Blocks(self._raw_panda, ios=self._ios)
-        self.connected = False
+        self._connected = False
 
         super().__init__(ios=self._ios)
 
     async def connect(self) -> None:
-        if self.connected:
+        if self._connected:
             # `connect` needs to be called in `initialise`,
             # then FastCS will attempt to call it again.
             return
         await self._raw_panda.connect()
         await self._blocks.parse_introspected_data()
         await self._blocks.setup_post_introspection()
-        self.connected = True
+        self._connected = True
 
     async def initialise(self) -> None:
         await self.connect()

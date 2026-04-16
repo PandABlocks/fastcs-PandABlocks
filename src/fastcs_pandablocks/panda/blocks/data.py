@@ -6,14 +6,16 @@ from asyncio import CancelledError
 from collections import deque
 from collections.abc import AsyncGenerator, Callable
 from dataclasses import dataclass
+from enum import Enum
 from importlib.util import find_spec
 from pathlib import Path
-from typing import Union
+from typing import Generic, TypeVar, Union
 
 import numpy as np
 from fastcs.attributes import AttrR, AttrRW
 from fastcs.controllers import Controller
-from fastcs.datatypes import Bool, Enum, Float, Int, String, Table
+from fastcs.datatypes import Bool, Float, Int, String, Table
+from fastcs.datatypes import Enum as FastCSEnum
 from numpy.typing import DTypeLike
 from pandablocks.hdf import (
     EndData,
@@ -27,6 +29,7 @@ from pandablocks.responses import Data, EndReason, ReadyData
 
 from fastcs_pandablocks.types import PandaName
 
+E = TypeVar("E", bound=Enum)
 HDFReceived = Union[ReadyData, StartData, FrameData, EndData]
 
 
@@ -311,11 +314,11 @@ class HDF5Buffer:
 
 
 @dataclass
-class DatasetAttributes:
+class DatasetAttributes(Generic[E]):
     """A dataset name and capture mode"""
 
     name: AttrRW[str]
-    capture: AttrRW[enum.Enum]
+    capture: AttrRW[E]
 
 
 class DatasetTableWrapper:
@@ -427,7 +430,7 @@ class DataController(Controller):
         Bool(), description="Start/stop HDF5 capture.", initial_value=False
     )
     capture_mode = AttrRW(
-        Enum(CaptureMode),
+        FastCSEnum(CaptureMode),
         description="Choose how to hdf writer flushes",
         initial_value=CaptureMode.FIRST_N,
     )

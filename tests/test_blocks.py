@@ -19,18 +19,10 @@ from fastcs_pandablocks.types import PandaName, WidgetGroup
 class MockRawPanda(RawPanda):
     def __init__(self):
         self._client = AsyncMock()
-
-    async def put_value_to_panda(self, *args, **kwargs):
-        pass
-
-    async def append_to_panda(self, *args, **kwargs):
-        pass
-
-    async def send(self, name, value):
-        pass
-
-    async def get(self, name):
-        return "mock_value"
+        self.put_value_to_panda = AsyncMock()
+        self.append_to_panda = AsyncMock()
+        self.send = AsyncMock()
+        self.get = AsyncMock(return_value="mock_value")
 
 
 @pytest.fixture
@@ -97,15 +89,17 @@ async def test_make_table_field_with_mode(mock_raw_panda_block):
     # Verify that CLEAR command was added to parent
     assert hasattr(parent, "clear")
     assert isinstance(parent.clear, Command)
+    await parent.clear()
+    raw_panda.send.assert_awaited_once_with(str(block_name), [])
 
     # Verify table io_ref has append support and a NEXT_WRITE reference
     table_attr = parent.panda_name_to_attribute[block_name]
     assert isinstance(table_attr.io_ref, TableFieldIORef)
     assert table_attr.io_ref.next_write_attr is not None
     assert table_attr.io_ref.next_write_attr is next_write_attr
-    # Verify append_to_panda is a callable method (can't use `is` for bound methods)
+    # Verify append_to_panda is wired to the raw panda append callable.
     assert callable(table_attr.io_ref.append_to_panda)
-    assert table_attr.io_ref.append_to_panda.__name__ == "append_to_panda"
+    assert table_attr.io_ref.append_to_panda is raw_panda.append_to_panda
 
 
 @pytest.mark.asyncio

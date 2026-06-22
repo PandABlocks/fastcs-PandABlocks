@@ -10,6 +10,7 @@ from fastcs.datatypes import DataType
 from fastcs.logging import bind_logger
 from pandablocks.asyncio import AsyncioClient
 from pandablocks.commands import (
+    Append,
     Arm,
     ChangeGroup,
     Disarm,
@@ -50,6 +51,20 @@ class RawPanda:
         value: str | list[str],
     ) -> None:
         await self.send(str(panda_name), value)
+
+    async def append_to_panda(
+        self,
+        panda_name: PandaName,
+        fastcs_datatype: DataType,
+        value: list[str],
+        last: bool = False,
+    ) -> None:
+        """Append rows to a table on the PandA, optionally marking the final chunk."""
+        formatted_value = pformat(value, indent=4)
+        logger.debug(
+            f"APPENDING TO PANDA:\n    {panda_name} = {formatted_value} (last={last})"
+        )
+        await self._client.send(Append(str(panda_name), value, last=last))
 
     async def introspect(
         self,

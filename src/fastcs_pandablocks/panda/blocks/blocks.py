@@ -6,6 +6,7 @@ import numpy as np
 from fastcs.attributes import Attribute, AttributeIO, AttrR, AttrRW, AttrW
 from fastcs.controllers import BaseController
 from fastcs.datatypes import Bool, Enum, Float, Int, String, Table
+from fastcs.methods import Command
 from numpy.typing import DTypeLike
 from pandablocks.commands import TableFieldDetails
 from pandablocks.responses import (
@@ -29,7 +30,7 @@ from fastcs_pandablocks.panda.client_wrapper import RawPanda
 from fastcs_pandablocks.panda.io.arm import ArmCommand, ArmIORef
 from fastcs_pandablocks.panda.io.bits import BitGroupOnUpdate
 from fastcs_pandablocks.panda.io.default import DefaultFieldIORef
-from fastcs_pandablocks.panda.io.table import TableFieldIORef
+from fastcs_pandablocks.panda.io.table import Mode, NextWrite, TableFieldIORef
 from fastcs_pandablocks.panda.io.units import TimeUnit, UnitsIORef
 from fastcs_pandablocks.panda.utils import panda_value_to_attribute_value
 from fastcs_pandablocks.types import (
@@ -385,14 +386,63 @@ class Blocks:
 
         # TODO: Add units IO to update the units field and value of this one PV
         # https://github.com/PandABlocks/PandABlocks-ioc/blob/c1e8056abf3f680fa3840493eb4ac6ca2be31313/src/pandablocks_ioc/ioc.py#L750-L769
+
+        # NEXT_WRITE attribute for has_mode tables (stored locally, not on PandA)
+        next_write_attr = None
+        if field_info.has_mode:
+            next_write_attr = AttrW(
+                Enum(NextWrite),
+                description="What the next write will do to the table.",
+                group=WidgetGroup.PARAMETERS.value,
+            )
+            parent_block.add_attribute(
+                panda_name + PandaName(sub_field="NEXT_WRITE"), next_write_attr
+            )
+
         attribute = AttrRW(
             Table(structured_datatype),
             io_ref=TableFieldIORef(
-                panda_name, field_info, self._raw_panda.put_value_to_panda
+                panda_name,
+                field_info,
+                self._raw_panda.put_value_to_panda,
+                self._raw_panda.append_to_panda,
+                next_write_attr,
             ),
             initial_value=initial_value,
         )
         parent_block.add_attribute(panda_name, attribute)
+
+        if field_info.has_mode:
+            # CLEAR — a Command that sends an empty table to the PandA
+            async def clear_table() -> None:
+                await self._raw_panda.send(str(panda_name), [])
+
+            clear_attr_name = (panda_name + PandaName(sub_field="CLEAR")).attribute_name
+            setattr(
+                parent_block,
+                clear_attr_name,
+                Command(clear_table, group=WidgetGroup.PARAMETERS.value),
+            )
+
+            # MODE — read-only status attribute
+            parent_block.add_attribute(
+                panda_name + PandaName(sub_field="MODE"),
+                AttrR(
+                    Enum(Mode),
+                    description="Current table mode.",
+                    group=WidgetGroup.PARAMETERS.value,
+                ),
+            )
+
+            # QUEUED_LINES — read-only status attribute
+            parent_block.add_attribute(
+                panda_name + PandaName(sub_field="QUEUED_LINES"),
+                AttrR(
+                    Int(),
+                    description="Number of queued lines not yet processed.",
+                    group=WidgetGroup.PARAMETERS.value,
+                ),
+            )
 
     def _make_time_param(
         self,

@@ -30,7 +30,7 @@ from fastcs_pandablocks.panda.client_wrapper import RawPanda
 from fastcs_pandablocks.panda.io.arm import ArmCommand, ArmIORef
 from fastcs_pandablocks.panda.io.bits import BitGroupOnUpdate
 from fastcs_pandablocks.panda.io.default import DefaultFieldIORef
-from fastcs_pandablocks.panda.io.table import NextWrite, TableFieldIORef
+from fastcs_pandablocks.panda.io.table import Mode, NextWrite, TableFieldIORef
 from fastcs_pandablocks.panda.io.units import TimeUnit, UnitsIORef
 from fastcs_pandablocks.panda.utils import panda_value_to_attribute_value
 from fastcs_pandablocks.types import (
@@ -425,11 +425,7 @@ class Blocks:
             parent_block.add_attribute(
                 panda_name + PandaName(sub_field="MODE"),
                 AttrR(
-                    Enum(
-                        enum.Enum(
-                            "Mode", ["INIT", "FIXED", "STREAMING", "STREAMING_LAST"]
-                        )
-                    ),
+                    Enum(Mode),
                     description="Current table mode.",
                     group=WidgetGroup.PARAMETERS.value,
                 ),

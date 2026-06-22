@@ -19,9 +19,16 @@ from fastcs_pandablocks.types import PandaName
 
 
 class NextWrite(enum.Enum):
-    Replace = "Replace"
-    Append = "Append"
-    Append_Last = "Append Last"
+    REPLACE = "Replace"
+    APPEND = "Append"
+    APPEND_LAST = "Append Last"
+
+
+class Mode(enum.Enum):
+    INIT = "INIT"
+    FIXED = "FIXED"
+    STREAMING = "STREAMING"
+    STREAMING_LAST = "STREAMING_LAST"
 
 
 @dataclass
@@ -53,15 +60,15 @@ class TableFieldIO(AttributeIO[DType_T, TableFieldIORef]):
                 attr.io_ref.next_write_attr.get()
             )  # read the local NEXT_WRITE value
             match next_write:
-                case NextWrite.Replace:
+                case NextWrite.REPLACE:
                     await attr.io_ref.put_value_to_panda(
                         attr.io_ref.panda_name, attr.datatype, panda_words
                     )
-                case NextWrite.Append:
+                case NextWrite.APPEND:
                     await attr.io_ref.append_to_panda(
                         attr.io_ref.panda_name, attr.datatype, panda_words, False
                     )
-                case NextWrite.Append_Last:
+                case NextWrite.APPEND_LAST:
                     await attr.io_ref.append_to_panda(
                         attr.io_ref.panda_name, attr.datatype, panda_words, True
                     )

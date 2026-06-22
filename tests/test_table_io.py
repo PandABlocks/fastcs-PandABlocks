@@ -75,7 +75,7 @@ async def test_table_field_io_send_uses_put_for_non_has_mode():
 @pytest.mark.asyncio
 async def test_table_field_io_send_uses_put_for_replace():
     attr, put_value_to_panda, append_to_panda = _make_attr(
-        next_write_value=NextWrite.Replace
+        next_write_value=NextWrite.REPLACE
     )
 
     with (
@@ -98,7 +98,7 @@ async def test_table_field_io_send_uses_put_for_replace():
 @pytest.mark.asyncio
 async def test_table_field_io_send_uses_append_for_append():
     attr, put_value_to_panda, append_to_panda = _make_attr(
-        next_write_value=NextWrite.Append
+        next_write_value=NextWrite.APPEND
     )
 
     with (
@@ -121,7 +121,7 @@ async def test_table_field_io_send_uses_append_for_append():
 @pytest.mark.asyncio
 async def test_table_field_io_send_uses_append_last_for_append_last():
     attr, put_value_to_panda, append_to_panda = _make_attr(
-        next_write_value=NextWrite.Append_Last
+        next_write_value=NextWrite.APPEND_LAST
     )
 
     with (

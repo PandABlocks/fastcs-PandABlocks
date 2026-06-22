@@ -72,6 +72,11 @@ class TableFieldIO(AttributeIO[DType_T, TableFieldIORef]):
                     await attr.io_ref.append_to_panda(
                         attr.io_ref.panda_name, attr.datatype, panda_words, True
                     )
+                case _:
+                    # Avoid dropped writes: unknown/unset values default to replace.
+                    await attr.io_ref.put_value_to_panda(
+                        attr.io_ref.panda_name, attr.datatype, panda_words
+                    )
         else:
             # Non-has_mode tables always use Put (replace)
             await attr.io_ref.put_value_to_panda(

@@ -69,10 +69,12 @@ async def test_make_table_field_with_mode(mock_raw_panda_block):
     assert isinstance(queued_lines_attr, AttrR)
     assert queued_lines_attr.group == WidgetGroup.PARAMETERS.value
 
-    # Verify that CLEAR command was added to parent
-    assert hasattr(parent, "clear")
-    assert isinstance(parent.clear, Command)
-    await parent.clear()
+    # Verify that CLEAR command was added to parent with qualified name
+    clear_attr_name = (block_name + PandaName(sub_field="CLEAR")).attribute_name
+    assert hasattr(parent, clear_attr_name)
+    clear_cmd = getattr(parent, clear_attr_name)
+    assert isinstance(clear_cmd, Command)
+    await clear_cmd()
     raw_panda._client.send.assert_awaited_once()
     command = raw_panda._client.send.await_args.args[0]
     assert isinstance(command, Put)
@@ -119,9 +121,80 @@ async def test_make_table_field_without_mode(mock_raw_panda_block):
     assert queued_lines_name not in parent.panda_name_to_attribute
 
     # Verify that no clear command was added
-    assert not hasattr(parent, "clear")
+    clear_attr_name = (block_name + PandaName(sub_field="CLEAR")).attribute_name
+    assert not hasattr(parent, clear_attr_name)
 
     # Verify that the table attribute's io_ref has next_write_attr = None
     table_attr = parent.panda_name_to_attribute[block_name]
     assert isinstance(table_attr.io_ref, TableFieldIORef)
     assert table_attr.io_ref.next_write_attr is None
+
+
+@pytest.mark.asyncio
+async def test_make_table_field_multiple_has_mode_tables(mock_raw_panda_block):
+    """Test that multiple has_mode tables on same block have independent CLEARs."""
+    block, parent, raw_panda = mock_raw_panda_block
+    table_field_details = TableFieldDetails("int", 0, 1)
+
+    # Create two has_mode tables under the same block
+    # Use field-level names to create unique attribute names
+    table1_field = PandaName(field="TABLE1")
+    table1_info = TableFieldInfo(
+        type="int",
+        subtype=None,
+        description="First table",
+        max_length=10,
+        fields={"FIELD": table_field_details},
+        row_words=1,
+        has_mode=True,
+    )
+    initial_values = {table1_field: ["0"]}
+    block._make_table_field(parent, table1_field, table1_info, initial_values)
+
+    table2_field = PandaName(field="TABLE2")
+    table2_info = TableFieldInfo(
+        type="int",
+        subtype=None,
+        description="Second table",
+        max_length=10,
+        fields={"FIELD": table_field_details},
+        row_words=1,
+        has_mode=True,
+    )
+    initial_values = {table2_field: ["0"]}
+    block._make_table_field(parent, table2_field, table2_info, initial_values)
+
+    # Verify both CLEAR commands exist with qualified names
+    table1_clear_attr_name = (
+        table1_field + PandaName(sub_field="CLEAR")
+    ).attribute_name
+    table2_clear_attr_name = (
+        table2_field + PandaName(sub_field="CLEAR")
+    ).attribute_name
+
+    assert hasattr(parent, table1_clear_attr_name)
+    assert hasattr(parent, table2_clear_attr_name)
+
+    table1_clear = getattr(parent, table1_clear_attr_name)
+    table2_clear = getattr(parent, table2_clear_attr_name)
+
+    assert isinstance(table1_clear, Command)
+    assert isinstance(table2_clear, Command)
+
+    # Verify they are independent commands (calling table1's clear sends for table1)
+    raw_panda._client.reset_mock()
+    await table1_clear()
+    raw_panda._client.send.assert_awaited_once()
+    command = raw_panda._client.send.await_args.args[0]
+    assert isinstance(command, Put)
+    assert command.field == str(table1_field)
+    assert command.value == []
+
+    # Verify table2's clear is independent (calling table2's clear sends for table2)
+    raw_panda._client.reset_mock()
+    await table2_clear()
+    raw_panda._client.send.assert_awaited_once()
+    command = raw_panda._client.send.await_args.args[0]
+    assert isinstance(command, Put)
+    assert command.field == str(table2_field)
+    assert command.value == []

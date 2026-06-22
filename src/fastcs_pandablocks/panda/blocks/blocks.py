@@ -417,8 +417,11 @@ class Blocks:
             async def clear_table() -> None:
                 await self._raw_panda.send(str(panda_name), [])
 
-            parent_block.clear = Command(
-                clear_table, group=WidgetGroup.PARAMETERS.value
+            clear_attr_name = (panda_name + PandaName(sub_field="CLEAR")).attribute_name
+            setattr(
+                parent_block,
+                clear_attr_name,
+                Command(clear_table, group=WidgetGroup.PARAMETERS.value),
             )
 
             # MODE — read-only status attribute

@@ -4,11 +4,11 @@ import logging
 import os
 from asyncio import CancelledError
 from collections import deque
-from collections.abc import AsyncGenerator, Callable
+from collections.abc import AsyncGenerator, Callable, Coroutine
 from dataclasses import dataclass
 from importlib.util import find_spec
 from pathlib import Path
-from typing import Union
+from typing import Any, Union
 
 import numpy as np
 from fastcs.attributes import AttrR, AttrRW
@@ -70,8 +70,8 @@ class HDF5Buffer:
         capture_mode: CaptureMode,
         filepath: Path,
         number_of_rows_to_capture: int,
-        status_message_setter: Callable,
-        number_received_setter: Callable,
+        status_message_setter: Callable[[Any], Coroutine[Any, Any, None]],
+        number_received_setter: Callable[[Any], Coroutine[Any, Any, None]],
         number_captured_setter_pipeline: NumCapturedSetter,
         dataset_name_cache: dict[str, dict[str, str]],
     ):
@@ -186,7 +186,7 @@ class HDF5Buffer:
                 f"Requested number of frames ({self.number_of_rows_to_capture}) "
                 "captured, disabling Capture."
             )
-            self.status_message_setter("Requested number of frames captured")
+            await self.status_message_setter("Requested number of frames captured")
             self.put_data_to_file(EndData(self.number_of_received_rows, EndReason.OK))
             self.finish_capturing = True
 

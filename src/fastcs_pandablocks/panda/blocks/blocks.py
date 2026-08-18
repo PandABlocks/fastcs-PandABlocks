@@ -390,7 +390,7 @@ class Blocks:
         # NEXT_WRITE attribute for has_mode tables (stored locally, not on PandA)
         next_write_attr = None
         if field_info.has_mode:
-            next_write_attr = AttrW(
+            next_write_attr = AttrRW(
                 Enum(NextWrite),
                 description="What the next write will do to the table.",
                 group=WidgetGroup.PARAMETERS.value,

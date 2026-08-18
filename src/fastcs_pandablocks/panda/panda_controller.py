@@ -56,11 +56,11 @@ class PandaController(Controller):
         await self.connect()
 
         for block_name, block in self._blocks.controllers():
-            # Numerically named controllers are registered to
-            # alphabetically named ControllerVectors, so only
-            # alphabetically named controllers
-            # should be registed to top level Controller
-            if str(block_name).isalpha():
+            # Numerically indexed controllers (e.g. "counter1") are registered to
+            # their non-indexed ControllerVector (e.g. "counter"), so only
+            # non-indexed controller names should be registered to the top level
+            # Controller.
+            if not str(block_name)[-1].isdigit():
                 self.add_sub_controller(block_name.lower(), block)
                 await block.initialise()
 

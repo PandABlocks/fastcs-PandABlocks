@@ -6,6 +6,7 @@ from typing import Any
 from fastcs.attributes import (
     AttributeIO,
     AttributeIORef,
+    AttrRW,
     AttrW,
 )
 from fastcs.datatypes import DataType, DType_T
@@ -41,9 +42,9 @@ class TableFieldIORef(AttributeIORef):
     append_to_panda: Callable[
         [PandaName, DataType, Any, bool], Coroutine[None, None, None]
     ]
-    # Local NEXT_WRITE state carrier created in _make_table_field.
-    # Typed as Any so tests can use a simple stub and runtime code can call .get().
-    next_write_attr: Any | None
+    # Local NEXT_WRITE state carrier created in _make_table_field. Must be an
+    # AttrRW (not a plain AttrW) so its last-written value is readable via .get().
+    next_write_attr: AttrRW[Any, Any] | None
 
 
 class TableFieldIO(AttributeIO[DType_T, TableFieldIORef]):

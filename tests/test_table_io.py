@@ -4,19 +4,20 @@ from unittest.mock import AsyncMock, patch
 
 import numpy as np
 import pytest
-from fastcs.datatypes import Table
+from fastcs.attributes import AttrRW
+from fastcs.datatypes import Enum, Table
 from pandablocks.responses import TableFieldDetails, TableFieldInfo
 
 from fastcs_pandablocks.panda.io.table import NextWrite, TableFieldIO, TableFieldIORef
 from fastcs_pandablocks.types import PandaName
 
 
-class _DummyNextWriteAttr:
-    def __init__(self, value: Any):
-        self._value = value
-
-    def get(self):
-        return self._value
+def _make_next_write_attr(value: Any) -> AttrRW[Any, Any]:
+    # Real AttrRW, wired the same way _make_table_field wires it up: no
+    # io_ref, so it's a local cache read back via .get(). initial_value is
+    # stored unvalidated, so this also covers "value doesn't match any
+    # NextWrite member" without needing a separate stub.
+    return AttrRW(Enum(NextWrite), initial_value=value)
 
 
 def _make_attr(next_write_value: NextWrite | None):
@@ -34,7 +35,9 @@ def _make_attr(next_write_value: NextWrite | None):
     )
 
     next_write_attr = (
-        _DummyNextWriteAttr(next_write_value) if next_write_value is not None else None
+        _make_next_write_attr(next_write_value)
+        if next_write_value is not None
+        else None
     )
 
     io_ref = TableFieldIORef(
@@ -70,7 +73,7 @@ def _make_attr_with_custom_next_write(next_write_value: Any):
         field_info=field_info,
         put_value_to_panda=put_value_to_panda,
         append_to_panda=append_to_panda,
-        next_write_attr=_DummyNextWriteAttr(next_write_value),
+        next_write_attr=_make_next_write_attr(next_write_value),
     )
 
     attr = SimpleNamespace(datatype=Table([("field", np.int32)]), io_ref=io_ref)

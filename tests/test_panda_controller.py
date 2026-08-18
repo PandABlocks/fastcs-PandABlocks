@@ -123,6 +123,7 @@ async def test_update_raises_runtime_error_when_get_changes_fails(controller):
         await controller.update()
 
 
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "block_name, should_register",
     [

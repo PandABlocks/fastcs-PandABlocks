@@ -71,10 +71,11 @@ class Blocks:
 
         self._ios = ios
 
-    def get_attribute(self, panda_name: PandaName) -> Attribute:
-        return self._introspected_controllers[
-            panda_name.up_to_block()
-        ].panda_name_to_attribute[panda_name]
+    def get_attribute(self, panda_name: PandaName) -> Attribute | None:
+        controller = self._introspected_controllers.get(panda_name.up_to_block())
+        if controller is None:
+            return None
+        return controller.panda_name_to_attribute.get(panda_name)
 
     def controllers(self) -> Generator[tuple[str, BaseController], None, None]:
         for (

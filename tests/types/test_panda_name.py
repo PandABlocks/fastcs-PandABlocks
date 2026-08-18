@@ -1,7 +1,7 @@
 from fastcs_pandablocks.types import PandaName
 
 
-def test_name():
+def test_panda_name():
     name = PandaName.from_string("test1")
     assert name == PandaName(block="test", block_number=1)
     assert name.attribute_name == "test1"
@@ -18,7 +18,7 @@ def test_name():
     assert name.up_to_field() == PandaName.from_string("a1.b")
 
 
-def test_add():
+def test_panda_name_addition():
     block_only_name = PandaName.from_string("a1")
     field_only_name = PandaName(field="b")
     sub_field_only_name = PandaName(sub_field="c")
@@ -28,7 +28,7 @@ def test_add():
     assert str(block_field_name + sub_field_only_name) == "a1.b.c"
 
 
-def test_contains():
+def test_panda_name_contains():
     name1 = PandaName.from_string("a1.b.c")
     name2 = PandaName.from_string("a1.b")
     name3 = PandaName.from_string("a1")

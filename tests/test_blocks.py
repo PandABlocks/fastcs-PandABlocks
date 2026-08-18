@@ -1,7 +1,8 @@
 from unittest.mock import AsyncMock
 
+import numpy as np
 import pytest
-from fastcs.attributes import AttrR, AttrW
+from fastcs.attributes import AttrR, AttrRW
 from fastcs.methods import Command
 from pandablocks.commands import Put
 from pandablocks.responses import TableFieldDetails, TableFieldInfo
@@ -11,7 +12,12 @@ from fastcs_pandablocks.panda.blocks.block_controller import BlockController
 from fastcs_pandablocks.panda.client_wrapper import RawPanda
 from fastcs_pandablocks.panda.io.arm import ArmIO
 from fastcs_pandablocks.panda.io.default import DefaultFieldIO
-from fastcs_pandablocks.panda.io.table import Mode, TableFieldIO, TableFieldIORef
+from fastcs_pandablocks.panda.io.table import (
+    Mode,
+    NextWrite,
+    TableFieldIO,
+    TableFieldIORef,
+)
 from fastcs_pandablocks.panda.io.units import UnitsIO
 from fastcs_pandablocks.types import PandaName, WidgetGroup
 
@@ -46,11 +52,12 @@ async def test_make_table_field_with_mode(mock_raw_panda_block):
     initial_values = {block_name: ["0"]}
     block._make_table_field(parent, block_name, table_field_info, initial_values)
 
-    # Verify that NEXT_WRITE was created (should be AttrW without io_ref)
+    # Verify that NEXT_WRITE was created as a local-only AttrRW (must be
+    # AttrRW, not a plain AttrW, so TableFieldIO.send can read it via .get()).
     next_write_name = block_name + PandaName(sub_field="NEXT_WRITE")
     assert next_write_name in parent.panda_name_to_attribute
     next_write_attr = parent.panda_name_to_attribute[next_write_name]
-    assert isinstance(next_write_attr, AttrW)
+    assert isinstance(next_write_attr, AttrRW)
     # Verify it's a local-only attribute (no io_ref) by checking internal state
     assert not hasattr(next_write_attr, "_io_ref") or next_write_attr._io_ref is None
 
@@ -89,6 +96,44 @@ async def test_make_table_field_with_mode(mock_raw_panda_block):
     # Verify append_to_panda is wired to the raw panda append callable.
     assert callable(table_attr.io_ref.append_to_panda)
     assert table_attr.io_ref.append_to_panda.__name__ == "append_to_panda"
+
+
+@pytest.mark.asyncio
+async def test_table_field_send_reads_real_next_write_attr(mock_raw_panda_block):
+    """Regression test for a production crash: TableFieldIO.send() must be able
+    to read the NEXT_WRITE attribute exactly as _make_table_field wires it up
+    (a local AttrRW), not just a test stub with a `.get()` method. Previously
+    NEXT_WRITE was a plain AttrW, which has no `.get()`, so every write to a
+    has_mode table crashed with AttributeError: 'AttrW' object has no
+    attribute 'get'.
+    """
+    block, parent, raw_panda = mock_raw_panda_block
+    table_field_info = TableFieldInfo(
+        type="int",
+        subtype=None,
+        description="",
+        max_length=10,
+        fields={"FIELD": TableFieldDetails("int", 0, 1)},
+        row_words=1,
+        has_mode=True,
+    )
+
+    block_name = PandaName("test_block")
+    initial_values = {block_name: ["0"]}
+    block._make_table_field(parent, block_name, table_field_info, initial_values)
+
+    next_write_name = block_name + PandaName(sub_field="NEXT_WRITE")
+    next_write_attr = parent.panda_name_to_attribute[next_write_name]
+    await next_write_attr.put(NextWrite.APPEND)
+
+    table_attr = parent.panda_name_to_attribute[block_name]
+    raw_panda._client.reset_mock()
+    await TableFieldIO().send(table_attr, np.array([(1,)], dtype=[("field", np.int32)]))
+
+    raw_panda._client.send.assert_awaited_once()
+    command = raw_panda._client.send.await_args.args[0]
+    assert command.field == str(block_name)
+    assert command.last is False
 
 
 @pytest.mark.asyncio

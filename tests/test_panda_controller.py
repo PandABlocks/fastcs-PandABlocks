@@ -3,12 +3,6 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from fastcs_pandablocks.panda.panda_controller import PandaController
-from fastcs_pandablocks.types import PandaName
-
-
-@pytest.fixture
-def panda_name():
-    return PandaName.from_string("PULSE1.WIDTH")
 
 
 @pytest.fixture

@@ -68,10 +68,12 @@ class PandaController(Controller):
         """Update a panda field with either a single value or a list of words."""
 
         attribute = self._blocks.get_attribute(panda_name)
-        assert isinstance(attribute, AttrR)
         if attribute is None:
-            logger.error(f"Couldn't find panda field for {panda_name}.")
+            logger.opt(exception=True).error(
+                f"Couldn't find panda field for {panda_name}."
+            )
             return
+        assert isinstance(attribute, AttrR)
 
         try:
             attribute_value = self._coerce_value_to_panda_type(attribute, value)
@@ -110,14 +112,25 @@ class PandaController(Controller):
     async def update(self):
         try:
             changes = await self._raw_panda.get_changes()
-            await asyncio.gather(
+            results = await asyncio.gather(
                 *[
-                    self.update_field_value(
-                        PandaName.from_string(raw_panda_name), value
-                    )
-                    for raw_panda_name, value in changes.items()
-                ]
+                    self.update_field_value(PandaName.from_string(n), v)
+                    for n, v in changes.items()
+                ],
+                return_exceptions=True,
             )
+            failures = [
+                (raw_panda_name, result)
+                for (raw_panda_name, _), result in zip(
+                    changes.items(), results, strict=False
+                )
+                if isinstance(result, Exception)
+            ]
+            if failures:
+                for raw_panda_name, exc in failures:
+                    logger.opt(exception=exc).error(
+                        f"Failed to update field {raw_panda_name}"
+                    )
         # TODO: General exception is not ideal; narrow this dowm.
         except Exception as e:
             raise RuntimeError(

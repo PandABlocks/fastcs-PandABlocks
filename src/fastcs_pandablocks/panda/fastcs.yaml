@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=schema.json
+controllers:
+  - id: TEST-PANDA
+    type: fastcs_pandablocks.PandaController
+    address: "172.23.252.201"
+transport:
+  - epicspva: {}
+    gui:
+      title: "Test"
+      output_dir: ./opi/

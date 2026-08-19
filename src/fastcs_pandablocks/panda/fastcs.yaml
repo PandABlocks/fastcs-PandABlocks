@@ -1,0 +1,12 @@
+# yaml-language-server: $schema=schema.json
+
+controllers:
+  - id: PANDA_TEST
+    type: PandaController
+    address: "172.23.252.201"
+
+transport:
+  - epicsca: {}
+    gui:
+      title: "PandA Demo"
+      output_dir: ./screens

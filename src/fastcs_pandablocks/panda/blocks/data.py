@@ -315,7 +315,9 @@ class DatasetAttributes:
     """A dataset name and capture mode"""
 
     name: AttrRW[str]
-    capture: AttrRW[enum.Enum]
+    capture: AttrRW[
+        Any
+    ]  # enum class is constructed dynamically from PandA introspection
 
 
 class DatasetTableWrapper:

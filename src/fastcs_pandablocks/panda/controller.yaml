@@ -1,8 +1,7 @@
 ## yaml-language-server: $schema=schema.json
 
 controller:
-  address: "172.23.252.201"
-
+  address: bl01c-ea-panda-01
 transport:
   - epicspva:
       pv_prefix: TEST-PANDA

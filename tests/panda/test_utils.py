@@ -11,7 +11,7 @@ from fastcs_pandablocks.panda.utils import (
 )
 
 
-class TestEnum(Enum):
+class MockEnum(Enum):
     A = "First"
     B = "Second"
 
@@ -25,8 +25,8 @@ class TestEnum(Enum):
         (Bool(), "0", False),
         (Float(), "1", 1.0),
         (Float(), "1.5", 1.5),
-        (FastcsEnum(enum_cls=TestEnum), "B", TestEnum.B),
-        (FastcsEnum(enum_cls=TestEnum), "A", TestEnum.A),
+        (FastcsEnum(enum_cls=MockEnum), "B", MockEnum.B),
+        (FastcsEnum(enum_cls=MockEnum), "A", MockEnum.A),
         (
             Table(structured_dtype=[("val1", np.int32), ("val2", np.int32)]),
             {"VAL1": [1, 2, 3], "VAL2": [4, 5, 6]},
@@ -54,8 +54,8 @@ def test_panda_value_to_attribute_value(datatype, panda_value, expected_value):
         (Bool(), False, "0"),
         (Float(), 1.0, "1.0"),
         (Float(), 1.5, "1.5"),
-        (FastcsEnum(enum_cls=TestEnum), TestEnum.B, "B"),
-        (FastcsEnum(enum_cls=TestEnum), TestEnum.A, "A"),
+        (FastcsEnum(enum_cls=MockEnum), MockEnum.B, "B"),
+        (FastcsEnum(enum_cls=MockEnum), MockEnum.A, "A"),
         (
             Table(structured_dtype=[("val1", np.int32), ("val2", np.int32)]),
             np.array(

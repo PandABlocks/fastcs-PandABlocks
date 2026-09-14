@@ -1,8 +1,10 @@
-from unittest.mock import AsyncMock
+from dataclasses import dataclass, field
+from unittest.mock import AsyncMock, MagicMock
 
 import numpy as np
 import pytest
 from fastcs.attributes import AttrR, AttrRW
+from fastcs.datatypes import Bool
 from fastcs.methods import Command
 from pandablocks.commands import Put
 from pandablocks.responses import TableFieldDetails, TableFieldInfo
@@ -243,3 +245,48 @@ async def test_make_table_field_multiple_has_mode_tables(mock_raw_panda_block):
     assert isinstance(command, Put)
     assert command.field == str(table2_field)
     assert command.value == []
+
+
+@dataclass
+class FakeController(BlockController):
+    """A minimal stand-in for the real introspected-controller type"""
+
+    panda_name_to_attribute: dict = field(default_factory=dict)
+
+
+def test_get_attribute_returns_known_block():
+    """A known block should be returned"""
+    blocks = Blocks(MagicMock(), [])
+
+    known_block_attribute = AttrRW(Bool())
+
+    known_block_name = PandaName.from_string("SEQ1.ENABLE").up_to_block()
+    mock_controller = FakeController({known_block_name: known_block_attribute})
+
+    blocks._introspected_controllers = {known_block_name: mock_controller}
+
+    assert blocks.get_attribute(known_block_name) is known_block_attribute
+
+
+def test_get_attribute_returns_none_for_unknown_block():
+    """Pseudo-fields (like *METADATA) have no introspected
+    controller, so get_attribute should return None."""
+    blocks = Blocks(MagicMock(), [])
+    panda_name = PandaName.from_string("*METADATA.LAYOUT")
+
+    assert blocks.get_attribute(panda_name) is None
+
+
+def test_get_attribute_returns_none_for_unknown_field_on_known_block():
+    """A known block but an unrecognised field on it should also
+    return None."""
+    blocks = Blocks(MagicMock(), [])
+
+    known_block_name = PandaName.from_string("PULSE1.WIDTH").up_to_block()
+    mock_controller = FakeController()
+
+    blocks._introspected_controllers = {known_block_name: mock_controller}
+
+    panda_name = PandaName.from_string("PULSE1.UNKNOWN_FIELD")
+
+    assert blocks.get_attribute(panda_name) is None

@@ -28,7 +28,7 @@
             "console": "integratedTerminal",
             "args": [
                 "run",
-                "${workspaceFolder:fastcs-PandABlocks}/src/fastcs_pandablocks/panda/controller.yaml"
+                "${workspaceFolder:fastcs-PandABlocks}/src/fastcs_pandablocks/panda/fastcs.yaml"
             ]
         },
     ]

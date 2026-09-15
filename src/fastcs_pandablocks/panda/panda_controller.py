@@ -5,7 +5,7 @@ from typing import Any
 from fastcs.attributes import Attribute, AttrR
 from fastcs.controllers import Controller
 from fastcs.datatypes import Table
-from fastcs.logging import bind_logger
+from fastcs.logging import logger as _logger
 from fastcs.methods import scan
 from pandablocks.utils import words_to_table
 
@@ -18,7 +18,7 @@ from fastcs_pandablocks.panda.io.units import UnitsIO
 from fastcs_pandablocks.panda.utils import panda_value_to_attribute_value
 from fastcs_pandablocks.types import PandaName
 
-logger = bind_logger(__name__)
+logger = _logger.bind(logger_name=__name__)
 
 
 @dataclass

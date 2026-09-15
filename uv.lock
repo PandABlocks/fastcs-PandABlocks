@@ -632,7 +632,7 @@ wheels = [
 
 [[package]]
 name = "fastcs"
-version = "0.11.3"
+version = "0.14.2"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "aioserial" },
@@ -646,9 +646,9 @@ dependencies = [
     { name = "ruamel-yaml" },
     { name = "stdio-socket" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/7b/6c/9f8d07f392397fab736567e76ccf4c3e122dceae9c18c645277f4a65a03d/fastcs-0.11.3.tar.gz", hash = "sha256:d7dbbfd13a4a2effdfb0ea520f45427dee52e7559ec98347d07541d2e1925dc3", size = 115972, upload-time = "2025-12-02T10:43:16.659Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d7/45/ad46b1498722ead381f6cb144d0e1e9f186adb051808f7e5dd5bfe40f550/fastcs-0.14.2.tar.gz", hash = "sha256:32477a7336a7c918c778b6547241fb8db7cab0983eb78951e3b16065babf0c0d", size = 420139, upload-time = "2026-08-18T11:34:26.958Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ab/e7/75898a502fca2020a5ed4411f2e4cb3f1a05ea5dc37267fd9ad934208949/fastcs-0.11.3-py3-none-any.whl", hash = "sha256:58880f15cb596cd0d861c55f7167514a024bb9b53b90569950974fbacbe1b714", size = 79217, upload-time = "2025-12-02T10:43:15.293Z" },
+    { url = "https://files.pythonhosted.org/packages/d3/e4/250e4e17625c865c978ef80115c4f02569f99aa9a84e4447947a300ce467/fastcs-0.14.2-py3-none-any.whl", hash = "sha256:d2785bc21aa154cdce6c3c86a7ff5fef408c8655b951aa3ad46aef4dc3b41f4d", size = 95794, upload-time = "2026-08-18T11:34:25.526Z" },
 ]
 
 [package.optional-dependencies]
@@ -690,7 +690,7 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "fastcs", extras = ["epicspva"], specifier = "~=0.11.1" },
+    { name = "fastcs", extras = ["epicspva"], specifier = "~=0.14.2" },
     { name = "h5py" },
     { name = "numpy", specifier = "<2" },
     { name = "pandablocks", specifier = "~=0.10.0" },
@@ -1478,7 +1478,7 @@ wheels = [
 
 [[package]]
 name = "pvi"
-version = "0.11.0"
+version = "0.12.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "jinja2" },
@@ -1488,9 +1488,9 @@ dependencies = [
     { name = "ruamel-yaml" },
     { name = "typer" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/c9/f3/414540ef3d3316c719ef7070097a214bc43138e45693e4ffce65b3713d53/pvi-0.11.0.tar.gz", hash = "sha256:b03f4058d3154156713f646cdc62edbb9a4754845c9371d5aa9a098eff7ab5ad", size = 186086, upload-time = "2025-09-03T15:56:51.957Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/fc/91/3808872d96de8dac33069bf97f94f6ff430841ceaa8398db122ffe9d4244/pvi-0.12.0.tar.gz", hash = "sha256:1fb288dd863f31c276c0e119b57a36788f2b6c2e1324f88f1fac2c8ae1a8bb03", size = 189219, upload-time = "2025-12-22T14:11:02.545Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/a3/e1/37685abf895c0dfad9d9f1dba6152e10cc9f7729a7117e29c1586a1ccc43/pvi-0.11.0-py3-none-any.whl", hash = "sha256:970d69b36e250fc6bd023c1602a94c1391b3fdd762096fc5afacd60db55856fb", size = 55903, upload-time = "2025-09-03T15:56:50.848Z" },
+    { url = "https://files.pythonhosted.org/packages/5e/b9/ffdd156df74460300c7e0483662670ed2826b7c09c59ba6a3a1b8c83b05d/pvi-0.12.0-py3-none-any.whl", hash = "sha256:b578a513fbbfe2368623eb6a75d84daf8b3176d4e46d3bc506f0ee3a1dbbfd80", size = 57072, upload-time = "2025-12-22T14:11:01.254Z" },
 ]
 
 [[package]]

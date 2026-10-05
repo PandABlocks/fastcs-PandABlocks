@@ -159,3 +159,20 @@ async def test_initialise_registers_correct_blocks(
     else:
         controller.add_sub_controller.assert_not_called()
         mock_block.initialise.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_connect_enables_scan_tasks(controller):
+    """fastcs only runs scan tasks once _connected is True."""
+    controller._raw_panda.connect = AsyncMock()
+    controller._blocks.parse_introspected_data = AsyncMock()
+    controller._blocks.setup_post_introspection = AsyncMock()
+
+    await controller.connect()
+    assert controller._connected
+
+    # FastCS calls connect() a second time; it must not reconnect,
+    # and scanning must still be enabled.
+    await controller.connect()
+    controller._raw_panda.connect.assert_awaited_once()
+    assert controller._connected

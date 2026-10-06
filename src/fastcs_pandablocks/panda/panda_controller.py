@@ -43,14 +43,12 @@ class PandaController(Controller):
         super().__init__(ios=self._ios)
 
     async def connect(self) -> None:
-        if self.connected:
-            # `connect` needs to be called in `initialise`,
-            # then FastCS will attempt to call it again.
-            return
-        await self._raw_panda.connect()
-        await self._blocks.parse_introspected_data()
-        await self._blocks.setup_post_introspection()
-        self.connected = True
+        if not self.connected:
+            await self._raw_panda.connect()
+            await self._blocks.parse_introspected_data()
+            await self._blocks.setup_post_introspection()
+            self.connected = True
+        await super().connect()  # sets self._connected = True, enabling scan tasks
 
     async def initialise(self) -> None:
         await self.connect()
